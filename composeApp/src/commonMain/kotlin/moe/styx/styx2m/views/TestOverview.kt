@@ -17,14 +17,17 @@ import moe.styx.common.compose.components.anime.AnimeCard
 import moe.styx.common.compose.components.layout.MainScaffold
 import moe.styx.common.compose.files.Storage
 import moe.styx.common.compose.files.getCurrentAndCollectFlow
+import moe.styx.common.compose.utils.LocalGlobalNavigator
+import moe.styx.styx2m.views.anime.AnimeDetailView
 
 class TestOverview : Screen {
 
     @OptIn(ExperimentalFoundationApi::class)
     @Composable
     override fun Content() {
+        val nav = LocalGlobalNavigator.current
         val media by Storage.stores.mediaStore.getCurrentAndCollectFlow()
-        MainScaffold(title = "Test") {
+        MainScaffold(title = "Test", addPopButton = false) {
             Column(Modifier.fillMaxSize()) {
                 LazyVerticalGrid(
                     columns = GridCells.Fixed(3),
@@ -35,7 +38,7 @@ class TestOverview : Screen {
                     ) { _, item ->
                         Row(modifier = Modifier.animateItemPlacement()) {
                             AnimeCard(item, false) {
-                                
+                                nav.push(AnimeDetailView(item.GUID))
                             }
                         }
                     }

@@ -10,17 +10,23 @@ import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.IntOffset
 import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.transitions.SlideTransition
+import com.multiplatform.lifecycle.LifecycleEvent
+import com.multiplatform.lifecycle.LifecycleListener
+import com.multiplatform.lifecycle.LifecycleTracker
 import com.seiko.imageloader.LocalImageLoader
 import io.kamel.image.config.LocalKamelConfig
 import moe.styx.common.compose.extensions.getImageLoader
 import moe.styx.common.compose.extensions.kamelConfig
 import moe.styx.common.compose.http.isLoggedIn
 import moe.styx.common.compose.http.login
+import moe.styx.common.compose.threads.Heartbeats
+import moe.styx.common.compose.threads.RequestQueue
 import moe.styx.common.compose.utils.LocalGlobalNavigator
 import moe.styx.common.compose.utils.Log
 import moe.styx.common.compose.utils.ServerStatus
@@ -50,6 +56,7 @@ internal fun App() = AppTheme {
         else
             LoginView()
     }
+    InitLifeCycleListener()
     Surface(modifier = Modifier.fillMaxSize().windowInsetsPadding(WindowInsets.safeDrawing)) {
         Navigator(view) { navigator ->
             CompositionLocalProvider(
@@ -63,6 +70,24 @@ internal fun App() = AppTheme {
                     )
                 )
             }
+        }
+    }
+}
+
+@Composable
+fun InitLifeCycleListener() {
+    DisposableEffect(Unit) {
+        val listener = object : LifecycleListener {
+            override fun onEvent(event: LifecycleEvent) {
+                Log.d { "Lifecycle Event: $event" }
+                Heartbeats.onLifecycleEvent(event)
+                RequestQueue.onLifecycleEvent(event)
+            }
+        }
+        LifecycleTracker.addListener(listener)
+        LifecycleTracker.notifyListeners(LifecycleEvent.OnResumeEvent)
+        onDispose {
+            LifecycleTracker.removeListener(listener)
         }
     }
 }
