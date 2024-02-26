@@ -1,0 +1,31 @@
+[versions]
+kotlin = "1.9.22"
+compose = "1.5.12"
+agp = "8.2.2"
+androidx-appcompat = "1.6.1"
+androidx-activityCompose = "1.8.2"
+compose-uitooling = "1.6.2"
+buildConfig = "5.3.5"
+kotlinx-coroutines = "1.8.0"
+styx-common = "0.0.2"
+styx-common-compose = "e6e4b23a"
+moko-permissions = "0.17.0"
+kstore = "0.7.1"
+
+[libraries]
+androidx-appcompat = { module = "androidx.appcompat:appcompat", version.ref = "androidx-appcompat" }
+androidx-activityCompose = { module = "androidx.activity:activity-compose", version.ref = "androidx-activityCompose" }
+compose-uitooling = { module = "androidx.compose.ui:ui-tooling", version.ref = "compose-uitooling" }
+kotlinx-coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "kotlinx-coroutines" }
+styx-common = { module = "moe.styx:styx-common", version.ref = "styx-common" }
+styx-common-compose = { module = "moe.styx:styx-common-compose", version.ref = "styx-common-compose" }
+moko-permissions = { module = "dev.icerock.moko:permissions-compose", version.ref = "moko-permissions" }
+kstore = { module = "io.github.xxfast:kstore", version.ref = "kstore" }
+kstore-file = { module = "io.github.xxfast:kstore-file", version.ref = "kstore" }
+
+[plugins]
+multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
+compose = { id = "org.jetbrains.compose", version.ref = "compose" }
+android-application = { id = "com.android.application", version.ref = "agp" }
+buildConfig = { id = "com.github.gmazzo.buildconfig", version.ref = "buildConfig" }
+kotlinx-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
