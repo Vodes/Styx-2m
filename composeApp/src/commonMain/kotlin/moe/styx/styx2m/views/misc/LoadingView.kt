@@ -20,7 +20,7 @@ import kotlinx.coroutines.runBlocking
 import moe.styx.common.compose.components.layout.MainScaffold
 import moe.styx.common.compose.files.Storage
 import moe.styx.common.compose.utils.LocalGlobalNavigator
-import moe.styx.styx2m.views.TestOverview
+import moe.styx.styx2m.views.MainOverview
 
 class LoadingView : Screen {
     @Composable
@@ -35,7 +35,7 @@ class LoadingView : Screen {
                 Storage.stores.favouriteStore.get()
             }
             delay(1000)
-            nav.replaceAll(TestOverview())
+            nav.replaceAll(MainOverview())
         }
 
         MainScaffold(title = "Loading", addPopButton = false) {

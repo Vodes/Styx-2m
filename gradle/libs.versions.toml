@@ -8,7 +8,7 @@ compose-uitooling = "1.6.2"
 buildConfig = "5.3.5"
 kotlinx-coroutines = "1.8.0"
 styx-common = "0.0.2"
-styx-common-compose = "85ea79ce"
+styx-common-compose = "f668e30c"
 moko-permissions = "0.17.0"
 kstore = "0.7.1"
 

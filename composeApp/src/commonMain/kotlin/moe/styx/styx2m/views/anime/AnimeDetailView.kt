@@ -44,6 +44,7 @@ import moe.styx.common.compose.utils.Log
 import moe.styx.common.data.Media
 import moe.styx.common.data.MediaEntry
 import moe.styx.common.extension.eqI
+import moe.styx.styx2m.misc.fetchSizes
 
 class AnimeDetailView(private val mediaID: String) : Screen {
 
@@ -67,8 +68,9 @@ class AnimeDetailView(private val mediaID: String) : Screen {
         }) {
             val showSelection = remember { mutableStateOf(false) }
             BoxWithConstraints(Modifier.fillMaxSize()) {
+                val sizes = fetchSizes()
                 ElevatedCard(Modifier.padding(2.dp).fillMaxSize()) {
-                    if (this@BoxWithConstraints.maxWidth < 550.dp) {
+                    if (!sizes.isWide) {
                         Column {
                             EpisodeList(entries, showSelection, null, { "" }) {
                                 MetadataArea(media, nav, mediaList)
