@@ -35,10 +35,7 @@ import moe.styx.common.compose.components.anime.MediaNameListing
 import moe.styx.common.compose.components.anime.MediaRelations
 import moe.styx.common.compose.components.buttons.FavouriteIconButton
 import moe.styx.common.compose.components.layout.MainScaffold
-import moe.styx.common.compose.extensions.getPath
-import moe.styx.common.compose.extensions.getThumb
-import moe.styx.common.compose.extensions.getURL
-import moe.styx.common.compose.extensions.isCached
+import moe.styx.common.compose.extensions.*
 import moe.styx.common.compose.files.Storage
 import moe.styx.common.compose.files.getCurrentAndCollectFlow
 import moe.styx.common.compose.settings
@@ -73,9 +70,10 @@ class AnimeDetailView(private val mediaID: String) : Screen {
                 ElevatedCard(Modifier.padding(2.dp).fillMaxSize()) {
                     if (this@BoxWithConstraints.maxWidth < 550.dp) {
                         Column {
-                            MetadataArea(media, nav, mediaList)
-                            Divider(Modifier.fillMaxWidth().padding(10.dp, 8.dp), thickness = 3.dp)
-                            EpisodeList(entries, showSelection, null) { "" }
+                            EpisodeList(entries, showSelection, null, { "" }) {
+                                MetadataArea(media, nav, mediaList)
+                                Divider(Modifier.fillMaxWidth().padding(10.dp, 8.dp), thickness = 3.dp)
+                            }
                         }
                     } else {
                         val scrollState = rememberScrollState()
@@ -85,7 +83,7 @@ class AnimeDetailView(private val mediaID: String) : Screen {
                             }
                             Divider(Modifier.padding(2.dp, 8.dp).fillMaxHeight().width(3.dp))
                             Column(Modifier.weight(0.5F)) {
-                                EpisodeList(entries, showSelection, null) { "" }
+                                EpisodeList(entries, showSelection, null, { "" })
                             }
                         }
                     }
@@ -98,7 +96,9 @@ class AnimeDetailView(private val mediaID: String) : Screen {
     fun fetchEntries(): List<MediaEntry> {
         val flow by Storage.stores.entryStore.getCurrentAndCollectFlow()
         val filtered = flow.filter { it.mediaID eqI mediaID }
-        return filtered
+        return if (settings["episode-asc", false]) filtered.sortedBy {
+            it.entryNumber.toDoubleOrNull() ?: 0.0
+        } else filtered.sortedByDescending { it.entryNumber.toDoubleOrNull() ?: 0.0 }
     }
 }
 
@@ -107,7 +107,7 @@ fun MetadataArea(media: Media, nav: Navigator, mediaList: List<Media>, nameImage
     StupidImageNameArea(media, nameImageModifier)
     AboutView(media)
     if (!media.sequel.isNullOrBlank() || !media.prequel.isNullOrBlank()) {
-        Divider(Modifier.fillMaxWidth().padding(10.dp, 4.dp, 10.dp, 2.dp), thickness = 2.dp)
+        Divider(Modifier.fillMaxWidth().padding(10.dp, 4.dp, 10.dp, 5.dp), thickness = 2.dp)
         MediaRelations(media, mediaList) { nav.replace(AnimeDetailView(it.GUID)) }
     }
 }
@@ -120,7 +120,7 @@ fun AboutView(media: Media) {
     MediaGenreListing(media)
     if (!synopsis.isNullOrBlank()) {
         SelectionContainer {
-            Text(synopsis, Modifier.padding(6.dp), style = MaterialTheme.typography.bodyMedium)
+            Text(synopsis.removeSomeHTMLTags(), Modifier.padding(6.dp), style = MaterialTheme.typography.bodyMedium)
         }
     }
 }
