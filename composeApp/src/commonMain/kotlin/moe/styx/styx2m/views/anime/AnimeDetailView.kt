@@ -35,6 +35,7 @@ import moe.styx.common.compose.components.anime.MediaNameListing
 import moe.styx.common.compose.components.anime.MediaRelations
 import moe.styx.common.compose.components.buttons.FavouriteIconButton
 import moe.styx.common.compose.components.layout.MainScaffold
+import moe.styx.common.compose.components.misc.ExpandableText
 import moe.styx.common.compose.extensions.*
 import moe.styx.common.compose.files.Storage
 import moe.styx.common.compose.files.getCurrentAndCollectFlow
@@ -44,6 +45,7 @@ import moe.styx.common.compose.utils.Log
 import moe.styx.common.data.Media
 import moe.styx.common.data.MediaEntry
 import moe.styx.common.extension.eqI
+import moe.styx.styx2m.misc.LayoutSizes
 import moe.styx.styx2m.misc.fetchSizes
 
 class AnimeDetailView(private val mediaID: String) : Screen {
@@ -73,7 +75,7 @@ class AnimeDetailView(private val mediaID: String) : Screen {
                     if (!sizes.isWide) {
                         Column {
                             EpisodeList(entries, showSelection, null, { "" }) {
-                                MetadataArea(media, nav, mediaList)
+                                MetadataArea(media, nav, mediaList, layoutSizes = sizes)
                                 Divider(Modifier.fillMaxWidth().padding(10.dp, 8.dp), thickness = 3.dp)
                             }
                         }
@@ -81,7 +83,7 @@ class AnimeDetailView(private val mediaID: String) : Screen {
                         val scrollState = rememberScrollState()
                         Row {
                             Column(Modifier.weight(0.5F).verticalScroll(scrollState)) {
-                                MetadataArea(media, nav, mediaList, Modifier.fillMaxHeight(0.6F).heightIn(0.dp, 500.dp))
+                                MetadataArea(media, nav, mediaList, Modifier.fillMaxHeight(0.6F).heightIn(0.dp, 500.dp), layoutSizes = sizes)
                             }
                             Divider(Modifier.padding(2.dp, 8.dp).fillMaxHeight().width(3.dp))
                             Column(Modifier.weight(0.5F)) {
@@ -105,9 +107,9 @@ class AnimeDetailView(private val mediaID: String) : Screen {
 }
 
 @Composable
-fun MetadataArea(media: Media, nav: Navigator, mediaList: List<Media>, nameImageModifier: Modifier = Modifier) = Column {
+fun MetadataArea(media: Media, nav: Navigator, mediaList: List<Media>, nameImageModifier: Modifier = Modifier, layoutSizes: LayoutSizes) = Column {
     StupidImageNameArea(media, nameImageModifier)
-    AboutView(media)
+    AboutView(media, layoutSizes)
     if (!media.sequel.isNullOrBlank() || !media.prequel.isNullOrBlank()) {
         Divider(Modifier.fillMaxWidth().padding(10.dp, 4.dp, 10.dp, 5.dp), thickness = 2.dp)
         MediaRelations(media, mediaList) { nav.replace(AnimeDetailView(it.GUID)) }
@@ -115,14 +117,17 @@ fun MetadataArea(media: Media, nav: Navigator, mediaList: List<Media>, nameImage
 }
 
 @Composable
-fun AboutView(media: Media) {
+fun AboutView(media: Media, layoutSizes: LayoutSizes) {
     val preferGerman = settings["prefer-german-metadata", false]
     val synopsis = if (!media.synopsisDE.isNullOrBlank() && preferGerman) media.synopsisDE else media.synopsisEN
     Text("About", Modifier.padding(6.dp, 2.dp), style = MaterialTheme.typography.titleLarge)
     MediaGenreListing(media)
     if (!synopsis.isNullOrBlank()) {
         SelectionContainer {
-            Text(synopsis.removeSomeHTMLTags(), Modifier.padding(6.dp), style = MaterialTheme.typography.bodyMedium)
+            if (!layoutSizes.isLandScape && !layoutSizes.isMedium)
+                ExpandableText(synopsis.removeSomeHTMLTags(), Modifier.padding(6.dp), 4, MaterialTheme.typography.bodyMedium, false)
+            else
+                Text(synopsis.removeSomeHTMLTags(), Modifier.padding(6.dp), style = MaterialTheme.typography.bodyMedium)
         }
     }
 }
