@@ -3,10 +3,7 @@ package moe.styx.styx2m
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.VisibilityThreshold
 import androidx.compose.animation.core.spring
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.safeDrawing
-import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -63,7 +60,7 @@ internal fun App() = AppTheme {
             LoginView()
     }
     InitLifeCycleListener()
-    Surface(modifier = Modifier.fillMaxSize().windowInsetsPadding(WindowInsets.safeDrawing)) {
+    Surface(modifier = Modifier.fillMaxSize()) {
         Navigator(view) { navigator ->
             CompositionLocalProvider(
                 LocalGlobalNavigator provides navigator,

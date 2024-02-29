@@ -17,9 +17,6 @@ data class LayoutSizes(val width: Int, val height: Int) {
         }
 }
 
-//@Composable
-//fun BoxWithConstraintsScope.fetchSizes() = LayoutSizes(maxWidth, maxHeight)
-
 @Composable
 expect fun fetchWindowSize(): LayoutSizes
 

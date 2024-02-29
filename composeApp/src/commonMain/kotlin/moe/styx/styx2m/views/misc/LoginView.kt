@@ -13,6 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.screen.Screen
+import com.moriatsushi.insetsx.safeAreaPadding
 import kotlinx.coroutines.delay
 import moe.styx.common.compose.http.checkLogin
 import moe.styx.common.compose.http.generateCode
@@ -51,7 +52,7 @@ class LoginView : Screen {
             countdown / 30F,
             animationSpec = ProgressIndicatorDefaults.ProgressAnimationSpec
         )
-        Column(Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
+        Column(Modifier.fillMaxSize().safeAreaPadding(), horizontalAlignment = Alignment.CenterHorizontally) {
             Column(Modifier.fillMaxWidth().weight(1f, true)) {
                 Text(
                     "Registration Code",

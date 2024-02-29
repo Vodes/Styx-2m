@@ -15,6 +15,7 @@ import cafe.adriel.voyager.navigator.tab.CurrentTab
 import cafe.adriel.voyager.navigator.tab.LocalTabNavigator
 import cafe.adriel.voyager.navigator.tab.Tab
 import cafe.adriel.voyager.navigator.tab.TabNavigator
+import com.moriatsushi.insetsx.safeAreaPadding
 import com.russhwolf.settings.get
 import moe.styx.common.compose.components.buttons.IconButtonWithTooltip
 import moe.styx.common.compose.components.layout.MainScaffold
@@ -32,7 +33,7 @@ class MainOverview : Screen {
         val useRail = sizes.isWide
         val defaultTab = if (settings["favs-startup", false]) Tabs.favsTab else Tabs.seriesTab
         TabNavigator(defaultTab) {
-            MainScaffold(Modifier.fillMaxSize(),
+            MainScaffold(Modifier.fillMaxSize().safeAreaPadding(),
                 title = "${BuildConfig.APP_NAME} — Beta", addPopButton = false, actions = {
                     if (!useRail)
                         IconButtonWithTooltip(Icons.Filled.Settings, "Settings") { nav.push(SettingsView()) }
@@ -91,14 +92,17 @@ class MainOverview : Screen {
             label = { Text(tab.options.title) },
             alwaysShowLabel = false,
             colors = NavigationBarItemDefaults.colors(
+                unselectedIconColor = MaterialTheme.colorScheme.onSurface,
+                unselectedTextColor = MaterialTheme.colorScheme.onSurface,
                 selectedIconColor = MaterialTheme.colorScheme.onPrimary,
+                selectedTextColor = MaterialTheme.colorScheme.primary,
                 indicatorColor = MaterialTheme.colorScheme.primary
             )
         )
     }
 
     @Composable
-    private fun ColumnScope.RailNavItem(tab: Tab) {
+    private fun RailNavItem(tab: Tab) {
         val tabNavigator = LocalTabNavigator.current
 
         NavigationRailItem(
@@ -108,7 +112,10 @@ class MainOverview : Screen {
             label = { Text(tab.options.title) },
             alwaysShowLabel = true,
             colors = NavigationRailItemDefaults.colors(
+                unselectedIconColor = MaterialTheme.colorScheme.onSurface,
+                unselectedTextColor = MaterialTheme.colorScheme.onSurface,
                 selectedIconColor = MaterialTheme.colorScheme.onPrimary,
+                selectedTextColor = MaterialTheme.colorScheme.primary,
                 indicatorColor = MaterialTheme.colorScheme.primary
             )
         )

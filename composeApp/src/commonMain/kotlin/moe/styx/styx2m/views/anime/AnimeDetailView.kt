@@ -20,6 +20,7 @@ import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.core.screen.ScreenKey
 import cafe.adriel.voyager.navigator.Navigator
+import com.moriatsushi.insetsx.safeAreaPadding
 import com.russhwolf.settings.get
 import io.kamel.core.Resource
 import io.kamel.image.KamelImage
@@ -44,6 +45,7 @@ import moe.styx.common.data.MediaEntry
 import moe.styx.common.extension.eqI
 import moe.styx.styx2m.misc.LayoutSizes
 import moe.styx.styx2m.misc.LocalLayoutSize
+import moe.styx.styx2m.player.PlayerView
 
 class AnimeDetailView(private val mediaID: String) : Screen {
 
@@ -62,7 +64,7 @@ class AnimeDetailView(private val mediaID: String) : Screen {
         val entries = fetchEntries()
         Log.d { entries.size.toString() }
 
-        MainScaffold(title = media.name, actions = {
+        MainScaffold(Modifier.safeAreaPadding(), title = media.name, actions = {
             FavouriteIconButton(media)
         }) {
             val showSelection = remember { mutableStateOf(false) }
@@ -70,7 +72,7 @@ class AnimeDetailView(private val mediaID: String) : Screen {
             ElevatedCard(Modifier.padding(2.dp).fillMaxSize()) {
                 if (!sizes.isWide) {
                     Column {
-                        EpisodeList(entries, showSelection, null, { "" }) {
+                        EpisodeList(entries, showSelection, null, { nav.push(PlayerView()); "" }) {
                             MetadataArea(media, nav, mediaList, layoutSizes = sizes)
                             HorizontalDivider(Modifier.fillMaxWidth().padding(10.dp, 8.dp), thickness = 3.dp)
                         }
@@ -83,7 +85,10 @@ class AnimeDetailView(private val mediaID: String) : Screen {
                         }
                         VerticalDivider(Modifier.padding(2.dp, 8.dp).fillMaxHeight().width(3.dp))
                         Column(Modifier.weight(0.5F)) {
-                            EpisodeList(entries, showSelection, null, { "" })
+                            EpisodeList(entries, showSelection, null, {
+                                nav.push(PlayerView())
+                                ""
+                            })
                         }
                     }
                 }

@@ -14,6 +14,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.screen.Screen
+import com.moriatsushi.insetsx.safeAreaPadding
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -38,7 +39,7 @@ class LoadingView : Screen {
             nav.replaceAll(MainOverview())
         }
 
-        MainScaffold(title = "Loading", addPopButton = false) {
+        MainScaffold(Modifier.safeAreaPadding(), title = "Loading", addPopButton = false) {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 Column(modifier = Modifier.padding(10.dp).align(Alignment.TopCenter)) {
                     Text(

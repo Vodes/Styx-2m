@@ -11,6 +11,8 @@ styx-common = "0.0.2"
 styx-common-compose = "6e0af359"
 moko-permissions = "0.17.0"
 kstore = "0.7.1"
+insetsx = "0.1.0-alpha10"
+libmpv = "0.2.0"
 
 [libraries]
 androidx-appcompat = { module = "androidx.appcompat:appcompat", version.ref = "androidx-appcompat" }
@@ -22,6 +24,8 @@ styx-common-compose = { module = "moe.styx:styx-common-compose", version.ref = "
 moko-permissions = { module = "dev.icerock.moko:permissions-compose", version.ref = "moko-permissions" }
 kstore = { module = "io.github.xxfast:kstore", version.ref = "kstore" }
 kstore-file = { module = "io.github.xxfast:kstore-file", version.ref = "kstore" }
+multiplatform-insets = { module = "com.moriatsushi.insetsx:insetsx", version.ref = "insetsx" }
+android-libmpv = { module = "dev.jdtech.mpv:libmpv", version.ref = "libmpv" }
 
 [plugins]
 multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }

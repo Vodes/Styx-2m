@@ -51,6 +51,7 @@ kotlin {
             implementation(libs.moko.permissions)
             implementation(libs.kstore)
             implementation(libs.kstore.file)
+            implementation(libs.multiplatform.insets)
             implementation(libs.styx.common)
             implementation(libs.styx.common.compose)
         }
@@ -60,9 +61,7 @@ kotlin {
             implementation(libs.androidx.activityCompose)
             implementation(libs.compose.uitooling)
             implementation(libs.kotlinx.coroutines.android)
-//            implementation("moe.styx:styx-common-compose:0.0.6-SNAPSHOT")
-
-//            implementation(libs.styx.common.compose)
+            implementation(libs.android.libmpv)
         }
 
         iosMain.dependencies {

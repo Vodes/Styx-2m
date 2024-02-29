@@ -11,6 +11,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.screen.Screen
+import com.moriatsushi.insetsx.safeAreaPadding
 import com.russhwolf.settings.get
 import com.russhwolf.settings.set
 import moe.styx.common.compose.components.layout.MainScaffold
@@ -24,7 +25,7 @@ class SettingsView : Screen {
 
     @Composable
     override fun Content() {
-        MainScaffold(title = "Settings") {
+        MainScaffold(Modifier.safeAreaPadding(), title = "Settings") {
             val scrollState = rememberScrollState()
             Column(Modifier.padding(8.dp).verticalScroll(scrollState, true)) {
                 Text("Layout Options", modifier = Modifier.padding(5.dp), style = MaterialTheme.typography.titleLarge)
