@@ -28,17 +28,42 @@ actual class MediaPlayer actual constructor(initialEntryID: String, startAt: Lon
             override fun eventProperty(p0: String) {}
 
             override fun eventProperty(property: String, value: Long) {
+                val scope = CoroutineScope(Dispatchers.Main)
+                when (property) {
+                    "time-pos" -> scope.launch { progress.emit(value) }
+                    "duration" -> scope.launch { fileLength.emit(value) }
+                    "demuxer-cache-time" -> scope.launch { cacheEnd.emit(value) }
+
+                    else -> Log.d("MPV") { "Long property changed - $property: $value" }
+                }
             }
 
             override fun eventProperty(property: String, value: Double) {
-                Log.d("MPV") { "Double property changed - $property: $value" }
+                when (property) {
+                    "percent-pos" -> {
+                        playbackPercent = value
+                    }
+
+                    else -> Log.d("MPV") { "Double property changed - $property: $value" }
+                }
             }
 
             override fun eventProperty(property: String, value: Boolean) {
+                val scope = CoroutineScope(Dispatchers.Main)
                 when (property) {
-                    in arrayOf("pause", "paused-for-cache") -> {
-                        CoroutineScope(Dispatchers.Main).launch {
-                            isPlaying.emit(!value)
+                    "pause" -> {
+                        if (playbackStatus.value !is PlaybackStatus.Buffering) {
+                            scope.launch { if (value) playbackStatus.emit(PlaybackStatus.Paused) else playbackStatus.emit(PlaybackStatus.Playing) }
+                        }
+                    }
+
+                    "paused-for-cache" -> {
+                        scope.launch { if (value) playbackStatus.emit(PlaybackStatus.Buffering) else playbackStatus.emit(PlaybackStatus.Playing) }
+                    }
+
+                    "seeking" -> {
+                        if (playbackStatus.value !is PlaybackStatus.Buffering) {
+                            scope.launch { if (value) playbackStatus.emit(PlaybackStatus.Seeking) else playbackStatus.emit(PlaybackStatus.Playing) }
                         }
                     }
 
@@ -53,26 +78,15 @@ actual class MediaPlayer actual constructor(initialEntryID: String, startAt: Lon
     }
     private var playerInitialized = false
 
-    private fun initObservers() {
-        MPVLib.addObserver(observer)
-        arrayOf(
-            Property("track-list", MPVLib.MPV_FORMAT_STRING),
-            Property("paused-for-cache", MPVLib.MPV_FORMAT_FLAG),
-            Property("eof-reached", MPVLib.MPV_FORMAT_FLAG),
-            Property("seekable", MPVLib.MPV_FORMAT_FLAG),
-            Property("time-pos", MPVLib.MPV_FORMAT_INT64),
-            Property("duration", MPVLib.MPV_FORMAT_INT64),
-            Property("pause", MPVLib.MPV_FORMAT_FLAG),
-            Property("demuxer-cache-time", MPVLib.MPV_FORMAT_INT64),
-            Property("speed", MPVLib.MPV_FORMAT_DOUBLE),
-        ).forEach { (name, format) ->
-            MPVLib.observeProperty(name, format)
-        }
-    }
-
     override fun setPlaying(playing: Boolean) {
         if (playerInitialized) {
             MPVLib.command(arrayOf("set", "pause", if (playing) "no" else "yes"))
+        }
+    }
+
+    override fun seek(position: Long) {
+        if (playerInitialized) {
+            MPVLib.command(arrayOf("set", "time-pos", "$position"))
         }
     }
 
@@ -133,7 +147,26 @@ actual class MediaPlayer actual constructor(initialEntryID: String, startAt: Lon
     }
 }
 
-private fun setMPVOptions() {
+private fun MediaPlayer.initObservers() {
+    MPVLib.addObserver(observer)
+    arrayOf(
+        Property("track-list", MPVLib.MPV_FORMAT_STRING),
+        Property("paused-for-cache", MPVLib.MPV_FORMAT_FLAG),
+        Property("eof-reached", MPVLib.MPV_FORMAT_FLAG),
+        Property("seekable", MPVLib.MPV_FORMAT_FLAG),
+        Property("time-pos", MPVLib.MPV_FORMAT_INT64),
+        Property("percent-pos", MPVLib.MPV_FORMAT_DOUBLE),
+        Property("duration", MPVLib.MPV_FORMAT_INT64),
+        Property("pause", MPVLib.MPV_FORMAT_FLAG),
+        Property("seeking", MPVLib.MPV_FORMAT_FLAG),
+        Property("demuxer-cache-time", MPVLib.MPV_FORMAT_INT64),
+        Property("media-title", MPVLib.MPV_FORMAT_STRING)
+    ).forEach { (name, format) ->
+        MPVLib.observeProperty(name, format)
+    }
+}
+
+private fun MediaPlayer.setMPVOptions() {
     MPVLib.setOptionString("config", "no")
     MPVLib.setOptionString("profile", "fast")
     MPVLib.setOptionString("gpu-context", "android")
@@ -146,6 +179,9 @@ private fun setMPVOptions() {
     MPVLib.setOptionString("keep-open", "always")
     MPVLib.setOptionString("save-position-on-quit", "no")
     MPVLib.setOptionString("sub-font-provider", "none")
+    if (this.startAt != 0L) {
+        MPVLib.setOptionString("start", "$startAt")
+    }
 }
 
 data class Property(val name: String, @MPVLib.Format val format: Int)
