@@ -15,7 +15,6 @@ import cafe.adriel.voyager.navigator.tab.CurrentTab
 import cafe.adriel.voyager.navigator.tab.LocalTabNavigator
 import cafe.adriel.voyager.navigator.tab.Tab
 import cafe.adriel.voyager.navigator.tab.TabNavigator
-import com.moriatsushi.insetsx.safeAreaPadding
 import com.russhwolf.settings.get
 import moe.styx.common.compose.components.buttons.IconButtonWithTooltip
 import moe.styx.common.compose.components.layout.MainScaffold
@@ -33,7 +32,7 @@ class MainOverview : Screen {
         val useRail = sizes.isWide
         val defaultTab = if (settings["favs-startup", false]) Tabs.favsTab else Tabs.seriesTab
         TabNavigator(defaultTab) {
-            MainScaffold(Modifier.fillMaxSize().safeAreaPadding(),
+            MainScaffold(Modifier.fillMaxSize(),
                 title = "${BuildConfig.APP_NAME} — Beta", addPopButton = false, actions = {
                     if (!useRail)
                         IconButtonWithTooltip(Icons.Filled.Settings, "Settings") { nav.push(SettingsView()) }

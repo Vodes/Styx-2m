@@ -20,6 +20,8 @@ import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.core.screen.ScreenKey
 import cafe.adriel.voyager.navigator.Navigator
+import com.moriatsushi.insetsx.SystemBarsBehavior
+import com.moriatsushi.insetsx.rememberWindowInsetsController
 import com.moriatsushi.insetsx.safeAreaPadding
 import com.russhwolf.settings.get
 import io.kamel.core.Resource
@@ -39,7 +41,6 @@ import moe.styx.common.compose.files.Storage
 import moe.styx.common.compose.files.getCurrentAndCollectFlow
 import moe.styx.common.compose.settings
 import moe.styx.common.compose.utils.LocalGlobalNavigator
-import moe.styx.common.compose.utils.Log
 import moe.styx.common.data.Media
 import moe.styx.common.data.MediaEntry
 import moe.styx.common.extension.eqI
@@ -55,6 +56,10 @@ class AnimeDetailView(private val mediaID: String) : Screen {
     @Composable
     override fun Content() {
         val nav = LocalGlobalNavigator.current
+        val insets = rememberWindowInsetsController()
+        insets?.setIsNavigationBarsVisible(true)
+        insets?.setIsStatusBarsVisible(true)
+        insets?.setSystemBarsBehavior(SystemBarsBehavior.Default)
         val mediaList by Storage.stores.mediaStore.getCurrentAndCollectFlow()
         val media = remember { mediaList.find { it.GUID eqI mediaID } }
         if (media == null) {
@@ -62,7 +67,6 @@ class AnimeDetailView(private val mediaID: String) : Screen {
             return
         }
         val entries = fetchEntries()
-        Log.d { entries.size.toString() }
 
         MainScaffold(Modifier.safeAreaPadding(), title = media.name, actions = {
             FavouriteIconButton(media)
@@ -72,7 +76,7 @@ class AnimeDetailView(private val mediaID: String) : Screen {
             ElevatedCard(Modifier.padding(2.dp).fillMaxSize()) {
                 if (!sizes.isWide) {
                     Column {
-                        EpisodeList(entries, showSelection, null, { nav.push(PlayerView()); "" }) {
+                        EpisodeList(entries, showSelection, null, { nav.push(PlayerView(it.GUID)); "" }) {
                             MetadataArea(media, nav, mediaList, layoutSizes = sizes)
                             HorizontalDivider(Modifier.fillMaxWidth().padding(10.dp, 8.dp), thickness = 3.dp)
                         }
@@ -86,7 +90,7 @@ class AnimeDetailView(private val mediaID: String) : Screen {
                         VerticalDivider(Modifier.padding(2.dp, 8.dp).fillMaxHeight().width(3.dp))
                         Column(Modifier.weight(0.5F)) {
                             EpisodeList(entries, showSelection, null, {
-                                nav.push(PlayerView())
+                                nav.push(PlayerView(it.GUID))
                                 ""
                             })
                         }

@@ -3,7 +3,10 @@ package moe.styx.styx2m
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.VisibilityThreshold
 import androidx.compose.animation.core.spring
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -31,6 +34,7 @@ import moe.styx.common.compose.utils.Log
 import moe.styx.common.compose.utils.ServerStatus
 import moe.styx.styx2m.misc.LocalLayoutSize
 import moe.styx.styx2m.misc.fetchWindowSize
+import moe.styx.styx2m.player.PlayerView
 import moe.styx.styx2m.theme.AppTheme
 import moe.styx.styx2m.views.misc.LoadingView
 import moe.styx.styx2m.views.misc.LoginView
@@ -72,7 +76,14 @@ internal fun App() = AppTheme {
                     navigator, animationSpec = spring(
                         stiffness = Spring.StiffnessMedium,
                         visibilityThreshold = IntOffset.VisibilityThreshold
-                    )
+                    ),
+                    content = {
+                        val mod = if (it is PlayerView) Modifier.fillMaxSize()
+                        else Modifier.fillMaxSize().windowInsetsPadding(WindowInsets.safeDrawing)
+                        Surface(mod) {
+                            it.Content()
+                        }
+                    }
                 )
             }
         }
