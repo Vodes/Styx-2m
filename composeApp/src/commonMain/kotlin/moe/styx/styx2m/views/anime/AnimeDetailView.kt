@@ -4,10 +4,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Divider
-import androidx.compose.material3.ElevatedCard
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -46,7 +43,7 @@ import moe.styx.common.data.Media
 import moe.styx.common.data.MediaEntry
 import moe.styx.common.extension.eqI
 import moe.styx.styx2m.misc.LayoutSizes
-import moe.styx.styx2m.misc.fetchSizes
+import moe.styx.styx2m.misc.LocalLayoutSize
 
 class AnimeDetailView(private val mediaID: String) : Screen {
 
@@ -69,26 +66,24 @@ class AnimeDetailView(private val mediaID: String) : Screen {
             FavouriteIconButton(media)
         }) {
             val showSelection = remember { mutableStateOf(false) }
-            BoxWithConstraints(Modifier.fillMaxSize()) {
-                val sizes = fetchSizes()
-                ElevatedCard(Modifier.padding(2.dp).fillMaxSize()) {
-                    if (!sizes.isWide) {
-                        Column {
-                            EpisodeList(entries, showSelection, null, { "" }) {
-                                MetadataArea(media, nav, mediaList, layoutSizes = sizes)
-                                Divider(Modifier.fillMaxWidth().padding(10.dp, 8.dp), thickness = 3.dp)
-                            }
+            val sizes = LocalLayoutSize.current
+            ElevatedCard(Modifier.padding(2.dp).fillMaxSize()) {
+                if (!sizes.isWide) {
+                    Column {
+                        EpisodeList(entries, showSelection, null, { "" }) {
+                            MetadataArea(media, nav, mediaList, layoutSizes = sizes)
+                            HorizontalDivider(Modifier.fillMaxWidth().padding(10.dp, 8.dp), thickness = 3.dp)
                         }
-                    } else {
-                        val scrollState = rememberScrollState()
-                        Row {
-                            Column(Modifier.weight(0.5F).verticalScroll(scrollState)) {
-                                MetadataArea(media, nav, mediaList, Modifier.fillMaxHeight(0.6F).heightIn(0.dp, 500.dp), layoutSizes = sizes)
-                            }
-                            Divider(Modifier.padding(2.dp, 8.dp).fillMaxHeight().width(3.dp))
-                            Column(Modifier.weight(0.5F)) {
-                                EpisodeList(entries, showSelection, null, { "" })
-                            }
+                    }
+                } else {
+                    val scrollState = rememberScrollState()
+                    Row {
+                        Column(Modifier.weight(0.5F).verticalScroll(scrollState)) {
+                            MetadataArea(media, nav, mediaList, Modifier.fillMaxHeight(0.6F).heightIn(0.dp, 500.dp), layoutSizes = sizes)
+                        }
+                        VerticalDivider(Modifier.padding(2.dp, 8.dp).fillMaxHeight().width(3.dp))
+                        Column(Modifier.weight(0.5F)) {
+                            EpisodeList(entries, showSelection, null, { "" })
                         }
                     }
                 }
@@ -111,7 +106,7 @@ fun MetadataArea(media: Media, nav: Navigator, mediaList: List<Media>, nameImage
     StupidImageNameArea(media, nameImageModifier)
     AboutView(media, layoutSizes)
     if (!media.sequel.isNullOrBlank() || !media.prequel.isNullOrBlank()) {
-        Divider(Modifier.fillMaxWidth().padding(10.dp, 4.dp, 10.dp, 5.dp), thickness = 2.dp)
+        HorizontalDivider(Modifier.fillMaxWidth().padding(10.dp, 4.dp, 10.dp, 5.dp), thickness = 2.dp)
         MediaRelations(media, mediaList) { nav.replace(AnimeDetailView(it.GUID)) }
     }
 }

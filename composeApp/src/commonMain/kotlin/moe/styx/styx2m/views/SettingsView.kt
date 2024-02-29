@@ -4,7 +4,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Divider
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
@@ -31,11 +31,11 @@ class SettingsView : Screen {
                 SettingsCheckbox("Show Names on cards", "display-names", false)
                 SettingsCheckbox("Show episode summaries", "display-ep-synopsis", false)
                 SettingsCheckbox("Prefer german titles and summaries", "prefer-german-metadata", false)
-                Divider(Modifier.padding(5.dp), thickness = 2.dp)
+                HorizontalDivider(Modifier.padding(5.dp), thickness = 2.dp)
                 SettingsCheckbox("Use list for shows", "shows-list", false)
                 SettingsCheckbox("Use list for movies", "movies-list", false)
                 SettingsCheckbox("Sort episodes ascendingly", "episode-asc", false)
-                Divider(Modifier.padding(5.dp), thickness = 2.dp)
+                HorizontalDivider(Modifier.padding(5.dp), thickness = 2.dp)
                 Column {
                     var porNumCards by remember { mutableStateOf(settings["portrait-cards", "3"]) }
                     StringChoices("Number of cards to show in portrait", portraitCardChoices, value = porNumCards) {

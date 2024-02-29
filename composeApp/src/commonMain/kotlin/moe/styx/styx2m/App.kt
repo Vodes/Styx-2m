@@ -19,17 +19,21 @@ import cafe.adriel.voyager.transitions.SlideTransition
 import com.multiplatform.lifecycle.LifecycleEvent
 import com.multiplatform.lifecycle.LifecycleListener
 import com.multiplatform.lifecycle.LifecycleTracker
+import com.russhwolf.settings.set
 import com.seiko.imageloader.LocalImageLoader
 import io.kamel.image.config.LocalKamelConfig
 import moe.styx.common.compose.extensions.getImageLoader
 import moe.styx.common.compose.extensions.kamelConfig
 import moe.styx.common.compose.http.isLoggedIn
 import moe.styx.common.compose.http.login
+import moe.styx.common.compose.settings
 import moe.styx.common.compose.threads.Heartbeats
 import moe.styx.common.compose.threads.RequestQueue
 import moe.styx.common.compose.utils.LocalGlobalNavigator
 import moe.styx.common.compose.utils.Log
 import moe.styx.common.compose.utils.ServerStatus
+import moe.styx.styx2m.misc.LocalLayoutSize
+import moe.styx.styx2m.misc.fetchWindowSize
 import moe.styx.styx2m.theme.AppTheme
 import moe.styx.styx2m.views.misc.LoadingView
 import moe.styx.styx2m.views.misc.LoginView
@@ -47,6 +51,8 @@ internal fun App() = AppTheme {
     //                    contentDescription = null
     //                )
     //            }
+    val currentSizes = fetchWindowSize()
+    settings["is-tablet"] = currentSizes.isProbablyTablet
     val view = if (isLoggedIn()) {
         Log.i { "Logged in as: ${login?.name}" }
         LoadingView()
@@ -62,7 +68,9 @@ internal fun App() = AppTheme {
             CompositionLocalProvider(
                 LocalGlobalNavigator provides navigator,
                 LocalKamelConfig provides kamelConfig,
-                LocalImageLoader provides remember { getImageLoader() }) {
+                LocalImageLoader provides remember { getImageLoader() },
+                LocalLayoutSize provides currentSizes
+            ) {
                 SlideTransition(
                     navigator, animationSpec = spring(
                         stiffness = Spring.StiffnessMedium,

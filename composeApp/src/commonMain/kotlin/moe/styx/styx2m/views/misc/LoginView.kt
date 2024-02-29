@@ -66,8 +66,8 @@ class LoginView : Screen {
                 )
 
                 CircularProgressIndicator(
-                    progressAnimation,
-                    Modifier.align(Alignment.CenterHorizontally).padding(0.dp, 15.dp).fillMaxSize(.3F).weight(0.5F)
+                    progress = { progressAnimation },
+                    modifier = Modifier.align(Alignment.CenterHorizontally).padding(0.dp, 15.dp).fillMaxSize(.3F).weight(0.5F),
                 )
             }
             Button(onClick = {

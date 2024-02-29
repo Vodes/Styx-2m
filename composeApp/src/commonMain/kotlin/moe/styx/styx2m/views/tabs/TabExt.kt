@@ -25,7 +25,7 @@ import moe.styx.common.compose.utils.LocalGlobalNavigator
 import moe.styx.common.compose.utils.SearchState
 import moe.styx.common.data.Media
 import moe.styx.styx2m.misc.LayoutSizes
-import moe.styx.styx2m.misc.fetchSizes
+import moe.styx.styx2m.misc.LocalLayoutSize
 import moe.styx.styx2m.views.anime.AnimeDetailView
 
 object Tabs {
@@ -44,18 +44,16 @@ internal fun Tab.barWithListComp(
     showUnseen: Boolean = false
 ) {
     val nav = LocalGlobalNavigator.current
-    BoxWithConstraints(Modifier.fillMaxSize()) {
-        val sizes = fetchSizes()
+    val sizes = LocalLayoutSize.current
+    Column(Modifier.fillMaxSize()) {
+        mediaSearch.Component(Modifier.fillMaxWidth().padding(10.dp))
         Column(Modifier.fillMaxSize()) {
-            mediaSearch.Component(Modifier.fillMaxWidth().padding(10.dp))
-            Column(Modifier.fillMaxSize()) {
-                val flow by mediaSearch.stateEmitter.debounce(150L).collectAsState(initialState)
-                val processedMedia = flow.filterMedia(filtered)
-                if (!useList)
-                    MediaGrid(processedMedia, nav, showUnseen, sizes)
-                else
-                    MediaList(processedMedia, nav)
-            }
+            val flow by mediaSearch.stateEmitter.debounce(150L).collectAsState(initialState)
+            val processedMedia = flow.filterMedia(filtered)
+            if (!useList)
+                MediaGrid(processedMedia, nav, showUnseen, sizes)
+            else
+                MediaList(processedMedia, nav)
         }
     }
 }
@@ -63,7 +61,7 @@ internal fun Tab.barWithListComp(
 private fun getGridCells(sizes: LayoutSizes): GridCells {
     return if (sizes.isLandScape) {
         when (val value = settings["landscape-cards", "7"]) {
-            "Adaptive" -> GridCells.Adaptive(sizes.height / 3.3F)
+            "Adaptive" -> GridCells.Adaptive(sizes.height.dp / 3.3F)
             else -> {
                 val number = value.toIntOrNull() ?: 7
                 GridCells.Fixed(number)

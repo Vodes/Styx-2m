@@ -20,7 +20,7 @@ import moe.styx.common.compose.components.buttons.IconButtonWithTooltip
 import moe.styx.common.compose.components.layout.MainScaffold
 import moe.styx.common.compose.settings
 import moe.styx.common.compose.utils.LocalGlobalNavigator
-import moe.styx.styx2m.misc.fetchSizes
+import moe.styx.styx2m.misc.LocalLayoutSize
 import moe.styx.styx2m.views.tabs.Tabs
 
 class MainOverview : Screen {
@@ -28,29 +28,26 @@ class MainOverview : Screen {
     @Composable
     override fun Content() {
         val nav = LocalGlobalNavigator.current
-
-        BoxWithConstraints(Modifier.fillMaxSize()) {
-            val sizes = fetchSizes()
-            val useRail = sizes.isWide
-            val defaultTab = if (settings["favs-startup", false]) Tabs.favsTab else Tabs.seriesTab
-            TabNavigator(defaultTab) {
-                MainScaffold(
-                    title = "${BuildConfig.APP_NAME} — Beta", addPopButton = false, actions = {
-                        if (!useRail)
-                            IconButtonWithTooltip(Icons.Filled.Settings, "Settings") { nav.push(SettingsView()) }
-                    }, bottomBarContent = {
-                        if (!useRail)
-                            BottomNavBar()
-                    }
-                ) {
-                    if (useRail) {
-                        Row(Modifier.fillMaxSize(), verticalAlignment = Alignment.Top) {
-                            SideNavRail(nav, sizes.isLandScape)
-                            CurrentTab()
-                        }
-                    } else {
+        val sizes = LocalLayoutSize.current
+        val useRail = sizes.isWide
+        val defaultTab = if (settings["favs-startup", false]) Tabs.favsTab else Tabs.seriesTab
+        TabNavigator(defaultTab) {
+            MainScaffold(Modifier.fillMaxSize(),
+                title = "${BuildConfig.APP_NAME} — Beta", addPopButton = false, actions = {
+                    if (!useRail)
+                        IconButtonWithTooltip(Icons.Filled.Settings, "Settings") { nav.push(SettingsView()) }
+                }, bottomBarContent = {
+                    if (!useRail)
+                        BottomNavBar()
+                }
+            ) {
+                if (useRail) {
+                    Row(Modifier.fillMaxSize(), verticalAlignment = Alignment.Top) {
+                        SideNavRail(nav, sizes.isLandScape)
                         CurrentTab()
                     }
+                } else {
+                    CurrentTab()
                 }
             }
         }
@@ -79,10 +76,6 @@ class MainOverview : Screen {
                 selected = false, onClick = { parentNav.push(SettingsView()) },
                 icon = { Icon(Icons.Filled.Settings, "Settings") },
                 label = { Text("Settings") }, alwaysShowLabel = true,
-                colors = NavigationRailItemDefaults.colors(
-                    selectedIconColor = MaterialTheme.colorScheme.onSecondary,
-                    indicatorColor = MaterialTheme.colorScheme.secondary
-                )
             )
         }
     }
