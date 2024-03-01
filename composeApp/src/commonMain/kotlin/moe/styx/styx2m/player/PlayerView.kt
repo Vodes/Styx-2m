@@ -98,7 +98,7 @@ class PlayerView(val entryID: String) : Screen {
 
                 Column(Modifier.zIndex(1F).fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
                     NameRow(mediaTitle, media, currentEntry, nav)
-                    ControlsRow(mediaPlayer, playbackStatus, currentTime) { controlsTimeout = 4 }
+                    ControlsRow(mediaPlayer, playbackStatus, currentTime, chapters) { controlsTimeout = 4 }
                     TimelineControls(mediaPlayer, currentTime, cacheTime, duration, chapters) { controlsTimeout = 4 }
                 }
             }

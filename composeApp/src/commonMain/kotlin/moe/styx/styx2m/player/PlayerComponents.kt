@@ -24,6 +24,7 @@ import moe.styx.common.compose.components.AppShapes
 import moe.styx.common.compose.components.buttons.IconButtonWithTooltip
 import moe.styx.common.data.Media
 import moe.styx.common.data.MediaEntry
+import moe.styx.styx2m.components.PlayerIconButton
 import moe.styx.styx2m.misc.Chapter
 import moe.styx.styx2m.misc.ifInvalid
 import moe.styx.styx2m.misc.secondsDurationString
@@ -54,36 +55,37 @@ fun NameRow(title: String, media: Media?, entry: MediaEntry?, nav: Navigator) {
 }
 
 @Composable
-fun ColumnScope.ControlsRow(mediaPlayer: MediaPlayer, playbackStatus: PlaybackStatus, currentTime: Long, onTap: () -> Unit) {
+fun ColumnScope.ControlsRow(mediaPlayer: MediaPlayer, playbackStatus: PlaybackStatus, currentTime: Long, chapters: List<Chapter>, onTap: () -> Unit) {
     val iconsEnabled = playbackStatus !in arrayOf(PlaybackStatus.Idle, PlaybackStatus.EOF, PlaybackStatus.Buffering)
     Row(
         Modifier.fillMaxWidth().weight(1f),
         horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        IconButtonWithTooltip(
-            Icons.Default.KeyboardDoubleArrowLeft,
-            "Backwards 10sec",
-            Modifier.padding(12.dp).requiredSize(60.dp),
-            colors = IconButtonDefaults.iconButtonColors(
+        PlayerIconButton(
+            Icons.Default.KeyboardDoubleArrowLeft, Modifier.padding(14.dp).requiredSize(50.dp), colors = IconButtonDefaults.iconButtonColors(
                 contentColor = DarkColorScheme.onSurface,
                 containerColor = DarkColorScheme.background.copy(0.5F),
                 disabledContentColor = DarkColorScheme.inverseOnSurface
-            ),
-            enabled = iconsEnabled
+            ), onLongPress = {
+                onTap()
+                val validChapter = chapters.sortedBy { it.time }.findLast { it.time < currentTime }
+                if (chapters.isEmpty() || validChapter == null)
+                    return@PlayerIconButton
+                mediaPlayer.seek(validChapter.time.toLong())
+            }
         ) {
             onTap()
-            if (currentTime - 10 < 0)
-                return@IconButtonWithTooltip
-            mediaPlayer.seek(currentTime - 10)
+            if (currentTime - 5 < 0)
+                return@PlayerIconButton
+            mediaPlayer.seek(currentTime - 5)
         }
         if (playbackStatus in arrayOf(PlaybackStatus.Buffering, PlaybackStatus.Seeking)) {
-            CircularProgressIndicator(modifier = Modifier.requiredSize(60.dp).padding(12.dp), color = MaterialTheme.colorScheme.secondary)
+            CircularProgressIndicator(modifier = Modifier.padding(14.dp).requiredSize(60.dp), color = MaterialTheme.colorScheme.secondary)
         } else {
-            IconButtonWithTooltip(
+            PlayerIconButton(
                 if (playbackStatus is PlaybackStatus.Paused) Icons.Default.PlayArrow else Icons.Default.Pause,
-                "Play/Pause",
-                Modifier.padding(12.dp).requiredSize(60.dp),
+                Modifier.padding(14.dp).requiredSize(50.dp),
                 colors = IconButtonDefaults.iconButtonColors(
                     contentColor = DarkColorScheme.onSurface,
                     containerColor = DarkColorScheme.background.copy(0.5F),
@@ -95,16 +97,18 @@ fun ColumnScope.ControlsRow(mediaPlayer: MediaPlayer, playbackStatus: PlaybackSt
                 mediaPlayer.setPlaying(playbackStatus is PlaybackStatus.Paused)
             }
         }
-        IconButtonWithTooltip(
-            Icons.Default.KeyboardDoubleArrowRight,
-            "Forwards 10sec",
-            Modifier.padding(12.dp).requiredSize(60.dp),
-            colors = IconButtonDefaults.iconButtonColors(
+        PlayerIconButton(
+            Icons.Default.KeyboardDoubleArrowRight, Modifier.padding(14.dp).requiredSize(50.dp), colors = IconButtonDefaults.iconButtonColors(
                 contentColor = DarkColorScheme.onSurface,
                 containerColor = DarkColorScheme.background.copy(0.5F),
                 disabledContentColor = DarkColorScheme.inverseOnSurface
-            ),
-            enabled = iconsEnabled
+            ), onLongPress = {
+                onTap()
+                val validChapter = chapters.sortedBy { it.time }.find { it.time > currentTime }
+                if (chapters.isEmpty() || validChapter == null)
+                    return@PlayerIconButton
+                mediaPlayer.seek(validChapter.time.toLong())
+            }
         ) {
             onTap()
             mediaPlayer.seek(currentTime + 10)
