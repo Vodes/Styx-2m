@@ -6,6 +6,7 @@ import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ListAlt
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -26,6 +27,7 @@ import moe.styx.common.data.Media
 import moe.styx.common.data.MediaEntry
 import moe.styx.styx2m.components.PlayerIconButton
 import moe.styx.styx2m.misc.Chapter
+import moe.styx.styx2m.misc.Track
 import moe.styx.styx2m.misc.ifInvalid
 import moe.styx.styx2m.misc.secondsDurationString
 import moe.styx.styx2m.theme.DarkColorScheme
@@ -33,7 +35,7 @@ import kotlin.math.max
 import kotlin.math.min
 
 @Composable
-fun NameRow(title: String, media: Media?, entry: MediaEntry?, nav: Navigator) {
+fun NameRow(title: String, media: Media?, entry: MediaEntry?, nav: Navigator, trackList: List<Track>, onClickTracklist: () -> Unit) {
     val renderedTitle = if (title.isBlank() || title.contains("?token")) {
         "${media?.name ?: "Unknown"} - ${entry?.entryNumber}"
     } else title
@@ -50,7 +52,14 @@ fun NameRow(title: String, media: Media?, entry: MediaEntry?, nav: Navigator) {
                 disabledContentColor = DarkColorScheme.inverseOnSurface
             )
         ) { nav.pop() }
-        Text(renderedTitle, style = MaterialTheme.typography.bodyLarge, color = DarkColorScheme.onSurface)
+        Text(renderedTitle, style = MaterialTheme.typography.bodyLarge, color = DarkColorScheme.onSurface, modifier = Modifier.weight(1f))
+        if (trackList.isNotEmpty()) {
+            IconButtonWithTooltip(
+                Icons.AutoMirrored.Filled.ListAlt,
+                "Track Selection",
+                Modifier.padding(10.dp, 0.dp).size(70.dp)
+            ) { onClickTracklist() }
+        }
     }
 }
 

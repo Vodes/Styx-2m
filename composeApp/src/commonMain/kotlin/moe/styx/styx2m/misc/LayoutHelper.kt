@@ -18,6 +18,9 @@ data class LayoutSizes(val width: Int, val height: Int) {
 }
 
 @Composable
+expect fun KeepScreenOn()
+
+@Composable
 expect fun fetchWindowSize(): LayoutSizes
 
 val LocalLayoutSize: ProvidableCompositionLocal<LayoutSizes> =

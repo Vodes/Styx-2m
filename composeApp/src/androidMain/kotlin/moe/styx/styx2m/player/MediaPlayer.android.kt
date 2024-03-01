@@ -111,6 +111,8 @@ actual class MediaPlayer actual constructor(initialEntryID: String, startAt: Lon
                         scope.launch {
                             runCatching {
                                 trackList.emit(json.decodeFromString(value))
+                            }.onFailure {
+                                Log.e("MPV", it) { "Failed to parse track-list!" }
                             }
                         }
                     }
@@ -141,6 +143,18 @@ actual class MediaPlayer actual constructor(initialEntryID: String, startAt: Lon
     override fun seek(position: Long) {
         if (playerInitialized) {
             MPVLib.command(arrayOf("set", "time-pos", "$position"))
+        }
+    }
+
+    override fun setSubtitleTrack(id: Int) {
+        if (playerInitialized && (playbackStatus.value in arrayOf(PlaybackStatus.Playing, PlaybackStatus.Paused))) {
+            MPVLib.command(arrayOf("set", "sub", "$id"))
+        }
+    }
+
+    override fun setAudioTrack(id: Int) {
+        if (playerInitialized && (playbackStatus.value in arrayOf(PlaybackStatus.Playing, PlaybackStatus.Paused))) {
+            MPVLib.command(arrayOf("set", "audio", "$id"))
         }
     }
 

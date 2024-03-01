@@ -10,6 +10,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.screen.Screen
+import cafe.adriel.voyager.core.screen.ScreenKey
 import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.tab.CurrentTab
 import cafe.adriel.voyager.navigator.tab.LocalTabNavigator
@@ -24,6 +25,9 @@ import moe.styx.styx2m.misc.LocalLayoutSize
 import moe.styx.styx2m.views.tabs.Tabs
 
 class MainOverview : Screen {
+
+    override val key: ScreenKey
+        get() = "MainOverview"
 
     @Composable
     override fun Content() {

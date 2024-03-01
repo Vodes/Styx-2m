@@ -9,8 +9,8 @@ data class Track(
     @SerialName("src-id")
     val absoluteId: Int,
     val type: String,
-    val title: String,
-    val lang: String,
+    val title: String? = null,
+    val lang: String? = null,
     val default: Boolean,
     val forced: Boolean,
     val selected: Boolean,

@@ -10,3 +10,9 @@ actual fun fetchWindowSize(): LayoutSizes {
     val windowInfo = LocalWindowInfo.current
     return LayoutSizes(windowInfo.containerSize.width, windowInfo.containerSize.height)
 }
+
+
+@Composable
+actual fun KeepScreenOn() {
+    // TODO: Figure out how to handle this on iOS
+}

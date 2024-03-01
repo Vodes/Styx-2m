@@ -19,6 +19,8 @@ abstract class AMediaPlayer(val initialEntryID: String, val startAt: Long = 0L) 
 
     abstract fun setPlaying(playing: Boolean)
     abstract fun seek(position: Long)
+    abstract fun setSubtitleTrack(id: Int)
+    abstract fun setAudioTrack(id: Int)
 
     @Composable
     abstract fun PlayerComponent()

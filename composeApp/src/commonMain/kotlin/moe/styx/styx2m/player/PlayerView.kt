@@ -25,6 +25,7 @@ import moe.styx.common.compose.files.Storage
 import moe.styx.common.compose.files.getCurrentAndCollectFlow
 import moe.styx.common.compose.utils.LocalGlobalNavigator
 import moe.styx.common.extension.eqI
+import moe.styx.styx2m.misc.KeepScreenOn
 import kotlin.jvm.Transient
 
 class PlayerView(val entryID: String) : Screen {
@@ -52,6 +53,7 @@ class PlayerView(val entryID: String) : Screen {
         insets?.setIsNavigationBarsVisible(false)
         insets?.setIsStatusBarsVisible(false)
         insets?.setSystemBarsBehavior(SystemBarsBehavior.Immersive)
+        KeepScreenOn()
 
         LaunchedEffect(Unit) {
             LifecycleTracker.addListener(listener)
@@ -77,12 +79,13 @@ class PlayerView(val entryID: String) : Screen {
         val duration by mediaPlayer.fileLength.collectAsState()
         val trackList by mediaPlayer.trackList.collectAsState()
         val chapters by mediaPlayer.chapters.collectAsState()
+        var showTrackSelection by remember { mutableStateOf(false) }
 
         Box(Modifier.fillMaxSize().clickable(interactionSource, indication = null) { controlsTimeout = if (controlsTimeout > 0) 0 else 3 }) {
             Row(Modifier.zIndex(0F).fillMaxSize()) {
                 mediaPlayer.PlayerComponent()
             }
-            AnimatedVisibility(controlsTimeout != 0, enter = fadeIn(), exit = fadeOut()) {
+            AnimatedVisibility(controlsTimeout != 0 || showTrackSelection, enter = fadeIn(), exit = fadeOut()) {
                 LaunchedEffect(key1 = "") {
                     while (controlsTimeout != 0) {
                         controlsTimeout--
@@ -97,7 +100,13 @@ class PlayerView(val entryID: String) : Screen {
                 val mediaTitle by mediaPlayer.mediaTitle.collectAsState()
 
                 Column(Modifier.zIndex(1F).fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
-                    NameRow(mediaTitle, media, currentEntry, nav)
+                    println(trackList)
+                    NameRow(mediaTitle, media, currentEntry, nav, trackList) { showTrackSelection = true }
+                    AnimatedVisibility(showTrackSelection) {
+                        Column(Modifier.fillMaxSize()) {
+                            TracklistDialog(mediaPlayer, trackList) { showTrackSelection = false; controlsTimeout = 4 }
+                        }
+                    }
                     ControlsRow(mediaPlayer, playbackStatus, currentTime, chapters) { controlsTimeout = 4 }
                     TimelineControls(mediaPlayer, currentTime, cacheTime, duration, chapters) { controlsTimeout = 4 }
                 }
