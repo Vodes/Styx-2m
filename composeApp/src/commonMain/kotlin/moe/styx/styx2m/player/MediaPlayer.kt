@@ -5,11 +5,13 @@ import kotlinx.coroutines.flow.MutableStateFlow
 
 abstract class AMediaPlayer(val initialEntryID: String, val startAt: Long = 0L) {
     val currentEntry = MutableStateFlow(initialEntryID)
+    val mediaTitle = MutableStateFlow("")
     val cacheEnd = MutableStateFlow(0L)
     val progress = MutableStateFlow(0L)
     val fileLength = MutableStateFlow(0L)
     val playbackStatus = MutableStateFlow<PlaybackStatus>(PlaybackStatus.Idle)
     var playbackPercent = 0.0
+    var isPaused = false
 
     abstract fun setPlaying(playing: Boolean)
     abstract fun seek(position: Long)

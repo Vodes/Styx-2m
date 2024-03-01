@@ -52,6 +52,7 @@ actual class MediaPlayer actual constructor(initialEntryID: String, startAt: Lon
                 val scope = CoroutineScope(Dispatchers.Main)
                 when (property) {
                     "pause" -> {
+                        isPaused = value
                         if (playbackStatus.value !is PlaybackStatus.Buffering) {
                             scope.launch { if (value) playbackStatus.emit(PlaybackStatus.Paused) else playbackStatus.emit(PlaybackStatus.Playing) }
                         }
@@ -63,7 +64,10 @@ actual class MediaPlayer actual constructor(initialEntryID: String, startAt: Lon
 
                     "seeking" -> {
                         if (playbackStatus.value !is PlaybackStatus.Buffering) {
-                            scope.launch { if (value) playbackStatus.emit(PlaybackStatus.Seeking) else playbackStatus.emit(PlaybackStatus.Playing) }
+                            scope.launch {
+                                if (value) playbackStatus.emit(PlaybackStatus.Seeking)
+                                else playbackStatus.emit(if (isPaused) PlaybackStatus.Paused else PlaybackStatus.Playing)
+                            }
                         }
                     }
 
@@ -72,7 +76,11 @@ actual class MediaPlayer actual constructor(initialEntryID: String, startAt: Lon
             }
 
             override fun eventProperty(property: String, value: String) {
-                Log.d("MPV") { "String property changed - $property: $value" }
+                val scope = CoroutineScope(Dispatchers.Main)
+                when (property) {
+                    "media-title" -> scope.launch { mediaTitle.emit(value) }
+                    else -> Log.d("MPV") { "String property changed - $property: $value" }
+                }
             }
         }
     }
