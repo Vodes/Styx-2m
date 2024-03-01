@@ -19,6 +19,7 @@ import moe.styx.common.compose.files.Storage
 import moe.styx.common.compose.files.getCurrentAndCollectFlow
 import moe.styx.common.compose.http.login
 import moe.styx.common.compose.utils.Log
+import moe.styx.common.compose.utils.MpvPreferences
 import moe.styx.common.extension.eqI
 import moe.styx.common.json
 
@@ -184,7 +185,7 @@ actual class MediaPlayer actual constructor(initialEntryID: String, startAt: Lon
         override fun surfaceCreated(holder: SurfaceHolder) {
             MPVLib.attachSurface(holder.surface)
             MPVLib.setOptionString("force-window", "yes")
-            MPVLib.setOptionString("vo", "gpu-next")
+            MPVLib.setOptionString("vo", MpvPreferences.getOrDefault().videoOutputDriver)
         }
 
         override fun surfaceChanged(
@@ -225,22 +226,34 @@ private fun MediaPlayer.initObservers() {
 }
 
 private fun MediaPlayer.setMPVOptions() {
+    val pref = MpvPreferences.getOrDefault()
     MPVLib.setOptionString("config", "no")
-    MPVLib.setOptionString("profile", "default")
-    MPVLib.setOptionString("gpu-api", "vulkan")
+    MPVLib.setOptionString("profile", pref.getPlatformProfile())
+    if (pref.profile == "normal") {
+        MPVLib.setOptionString("scale", "catmull_rom")
+        MPVLib.setOptionString("cscale", "bilinear")
+        MPVLib.setOptionString("dscale", "bilinear")
+    }
+
+    MPVLib.setOptionString("gpu-api", pref.gpuAPI)
     MPVLib.setOptionString("gpu-context", "android")
     MPVLib.setOptionString("opengl-es", "yes")
     MPVLib.setOptionString("tls-verify", "no")
     MPVLib.setOptionString("cache", "yes")
-    MPVLib.setOptionString("demuxer-max-bytes", "32MiB")
+    MPVLib.setOptionString("demuxer-max-bytes", "50MiB")
     MPVLib.setOptionString("demuxer-max-back-bytes", "32MiB")
     MPVLib.setOptionString("force-window", "no")
     MPVLib.setOptionString("keep-open", "always")
     MPVLib.setOptionString("ytdl", "no")
     MPVLib.setOptionString("save-position-on-quit", "no")
     MPVLib.setOptionString("sub-font-provider", "none")
-    MPVLib.setOptionString("hwdec", "mediacodec")
+    MPVLib.setOptionString("hwdec", if (pref.hwDecoding) (if (pref.alternativeHwDecode) "mediacodec-copy" else "mediacodec") else "no")
     MPVLib.setOptionString("hwdec-codecs", "h264,hevc,mpeg4,mpeg2video,vp8,vp9,av1")
+    MPVLib.setOptionString("deband", if (pref.deband) "yes" else "no")
+    MPVLib.setOptionString("deband-iterations", pref.debandIterations)
+    MPVLib.setOptionString("dither-depth", if (pref.dither10bit) "10" else "8")
+    MPVLib.setOptionString("slang", pref.getSlangArg())
+    MPVLib.setOptionString("alang", pref.getAlangArg())
     if (this.startAt != 0L) {
         MPVLib.setOptionString("start", "$startAt")
     }

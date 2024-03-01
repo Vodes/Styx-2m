@@ -32,6 +32,7 @@ object Tabs {
     val seriesTab = SeriesTab()
     val moviesTab by lazy { MoviesTab() }
     val favsTab = FavsTab()
+    val scheduleTab by lazy { ScheduleTab() }
 }
 
 @OptIn(FlowPreview::class)

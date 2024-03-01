@@ -59,6 +59,7 @@ class MainOverview : Screen {
             TabNavItem(Tabs.seriesTab)
             TabNavItem(Tabs.moviesTab)
             TabNavItem(Tabs.favsTab)
+            TabNavItem(Tabs.scheduleTab)
         }
     }
 
@@ -68,6 +69,7 @@ class MainOverview : Screen {
             RailNavItem(Tabs.seriesTab)
             RailNavItem(Tabs.moviesTab)
             RailNavItem(Tabs.favsTab)
+            RailNavItem(Tabs.scheduleTab)
             if (isLandscape)
                 Spacer(Modifier.weight(1f))
             else
