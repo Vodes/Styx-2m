@@ -73,6 +73,8 @@ class PlayerView(val entryID: String) : Screen {
         val currentTime by mediaPlayer.progress.collectAsState()
         val cacheTime by mediaPlayer.cacheEnd.collectAsState()
         val duration by mediaPlayer.fileLength.collectAsState()
+        val trackList by mediaPlayer.trackList.collectAsState()
+        val chapters by mediaPlayer.chapters.collectAsState()
 
         Box(Modifier.fillMaxSize().clickable(interactionSource, indication = null) { controlsTimeout = if (controlsTimeout > 0) 0 else 3 }) {
             Row(Modifier.zIndex(0F).fillMaxSize()) {
@@ -95,7 +97,7 @@ class PlayerView(val entryID: String) : Screen {
                 Column(Modifier.zIndex(1F).fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
                     NameRow(mediaTitle, media, currentEntry, nav)
                     ControlsRow(mediaPlayer, playbackStatus, currentTime) { controlsTimeout = 4 }
-                    TimelineControls(mediaPlayer, currentTime, cacheTime, duration) { controlsTimeout = 4 }
+                    TimelineControls(mediaPlayer, currentTime, cacheTime, duration, chapters) { controlsTimeout = 4 }
                 }
             }
         }

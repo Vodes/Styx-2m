@@ -1,7 +1,7 @@
 package moe.styx.styx2m.player
 
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
@@ -10,6 +10,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
@@ -18,6 +19,7 @@ import moe.styx.common.compose.components.AppShapes
 import moe.styx.common.compose.components.buttons.IconButtonWithTooltip
 import moe.styx.common.data.Media
 import moe.styx.common.data.MediaEntry
+import moe.styx.styx2m.misc.Chapter
 import moe.styx.styx2m.misc.secondsDurationString
 import moe.styx.styx2m.theme.DarkColorScheme
 
@@ -104,14 +106,13 @@ fun ColumnScope.ControlsRow(mediaPlayer: MediaPlayer, playbackStatus: PlaybackSt
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TimelineControls(mediaPlayer: MediaPlayer, currentTime: Long, cacheTime: Long, duration: Long, onTap: () -> Unit) {
+fun TimelineControls(mediaPlayer: MediaPlayer, currentTime: Long, cacheTime: Long, duration: Long, chapters: List<Chapter>, onTap: () -> Unit) {
     Row(
         Modifier.padding(25.dp, 20.dp).clip(AppShapes.extraLarge).background(DarkColorScheme.background.copy(0.5F)).fillMaxWidth(0.88F),
         horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically
     ) {
         var selectedSliderVal by remember { mutableStateOf(0F) }
-        val thumbInteractionSource = remember { MutableInteractionSource() }
         Text(currentTime.secondsDurationString(), Modifier.padding(15.dp, 10.dp))
         Box(Modifier.weight(1f, true)) {
             Slider(
@@ -139,14 +140,22 @@ fun TimelineControls(mediaPlayer: MediaPlayer, currentTime: Long, cacheTime: Lon
                     inactiveTrackColor = Color.Transparent,
                     thumbColor = DarkColorScheme.primary
                 ),
-//                thumb = {
-//                    SliderDefaults.Thumb(
-//                        thumbInteractionSource,
-//                        modifier = Modifier.scale(0.8F, 0.8F),
-//                        colors = SliderDefaults.colors(thumbColor = DarkColorScheme.primary),
-//                    )
-//                }
             )
+            if (chapters.isNotEmpty()) {
+                Canvas(Modifier.fillMaxWidth().height(25.dp).zIndex(3F).padding(10.dp, 5.dp).clip(AppShapes.medium)) {
+                    val width = size.width
+                    val height = size.height
+                    for (chapter in chapters) {
+                        val offX = width * (chapter.time / duration.toFloat())
+                        drawLine(
+                            start = Offset(offX - 1F, height / 7),
+                            end = Offset(offX - 1F, (height / 7) * 6),
+                            strokeWidth = 5F,
+                            color = DarkColorScheme.secondary.copy(.95F)
+                        )
+                    }
+                }
+            }
         }
         Text(duration.secondsDurationString(), Modifier.padding(15.dp, 10.dp))
     }

@@ -20,11 +20,37 @@ import moe.styx.common.compose.files.getCurrentAndCollectFlow
 import moe.styx.common.compose.http.login
 import moe.styx.common.compose.utils.Log
 import moe.styx.common.extension.eqI
+import moe.styx.common.json
 
 actual class MediaPlayer actual constructor(initialEntryID: String, startAt: Long) : AMediaPlayer(initialEntryID, startAt) {
     val observer by lazy {
         object : MPVLib.EventObserver {
-            override fun event(p0: Int) {}
+            override fun event(@MPVLib.Event eventID: Int) {
+                val scope = CoroutineScope(Dispatchers.Main)
+                when (eventID) {
+                    MPVLib.MPV_EVENT_SEEK -> {
+                        scope.launch { playbackStatus.emit(PlaybackStatus.Seeking) }
+                    }
+
+                    MPVLib.MPV_EVENT_START_FILE -> {
+                        if (!playerInitialized) {
+                            initialCommands.forEach {
+                                MPVLib.command(it)
+                            }
+                        }
+                    }
+
+                    MPVLib.MPV_EVENT_PLAYBACK_RESTART -> {
+                        if (!playerInitialized) {
+                            playerInitialized = true
+                            MPVLib.setPropertyBoolean("pause", false)
+                        }
+                    }
+
+                    else -> Unit
+                }
+            }
+
             override fun eventProperty(p0: String) {}
 
             override fun eventProperty(property: String, value: Long) {
@@ -59,7 +85,8 @@ actual class MediaPlayer actual constructor(initialEntryID: String, startAt: Lon
                     }
 
                     "paused-for-cache" -> {
-                        scope.launch { if (value) playbackStatus.emit(PlaybackStatus.Buffering) else playbackStatus.emit(PlaybackStatus.Playing) }
+                        if (playerInitialized)
+                            scope.launch { if (value) playbackStatus.emit(PlaybackStatus.Buffering) else playbackStatus.emit(PlaybackStatus.Playing) }
                     }
 
                     "seeking" -> {
@@ -79,16 +106,34 @@ actual class MediaPlayer actual constructor(initialEntryID: String, startAt: Lon
                 val scope = CoroutineScope(Dispatchers.Main)
                 when (property) {
                     "media-title" -> scope.launch { mediaTitle.emit(value) }
+                    "track-list" -> {
+                        scope.launch {
+                            runCatching {
+                                trackList.emit(json.decodeFromString(value))
+                            }
+                        }
+                    }
+
+                    "chapter-list" -> {
+                        scope.launch {
+                            runCatching {
+                                chapters.emit(json.decodeFromString(value))
+                            }
+                        }
+                    }
+
                     else -> Log.d("MPV") { "String property changed - $property: $value" }
                 }
             }
         }
     }
-    private var playerInitialized = false
+    var playerInitialized = false
+    var libWasLoaded = false
+    var initialCommands: List<Array<String>> = emptyList()
 
     override fun setPlaying(playing: Boolean) {
         if (playerInitialized) {
-            MPVLib.command(arrayOf("set", "pause", if (playing) "no" else "yes"))
+            MPVLib.setPropertyBoolean("pause", !playing)
         }
     }
 
@@ -104,12 +149,16 @@ actual class MediaPlayer actual constructor(initialEntryID: String, startAt: Lon
         val entryList by Storage.stores.entryStore.getCurrentAndCollectFlow()
         val curEntryID by this.currentEntry.collectAsState()
         val currentEntry = entryList.find { it.GUID eqI curEntryID }
-        if (!playerInitialized) {
+        initialCommands = listOf(
+            arrayOf("set", "start", "$startAt"),
+//            arrayOf("loadfile", "${BuildConfig.BASE_URL}/watch/${currentEntry?.GUID}?token=${login?.watchToken}", "append")
+        )
+        if (!playerInitialized && !libWasLoaded) {
             MPVLib.create(context)
             setMPVOptions()
             MPVLib.init()
             initObservers()
-            playerInitialized = true
+            libWasLoaded = true
         }
         AndroidView(factory = { ctx ->
             val view = SurfaceView(ctx)
@@ -135,7 +184,7 @@ actual class MediaPlayer actual constructor(initialEntryID: String, startAt: Lon
         override fun surfaceCreated(holder: SurfaceHolder) {
             MPVLib.attachSurface(holder.surface)
             MPVLib.setOptionString("force-window", "yes")
-            MPVLib.setOptionString("vo", "gpu")
+            MPVLib.setOptionString("vo", "gpu-next")
         }
 
         override fun surfaceChanged(
@@ -159,6 +208,7 @@ private fun MediaPlayer.initObservers() {
     MPVLib.addObserver(observer)
     arrayOf(
         Property("track-list", MPVLib.MPV_FORMAT_STRING),
+        Property("chapter-list", MPVLib.MPV_FORMAT_STRING),
         Property("paused-for-cache", MPVLib.MPV_FORMAT_FLAG),
         Property("eof-reached", MPVLib.MPV_FORMAT_FLAG),
         Property("seekable", MPVLib.MPV_FORMAT_FLAG),
@@ -176,7 +226,8 @@ private fun MediaPlayer.initObservers() {
 
 private fun MediaPlayer.setMPVOptions() {
     MPVLib.setOptionString("config", "no")
-    MPVLib.setOptionString("profile", "fast")
+    MPVLib.setOptionString("profile", "default")
+    MPVLib.setOptionString("gpu-api", "vulkan")
     MPVLib.setOptionString("gpu-context", "android")
     MPVLib.setOptionString("opengl-es", "yes")
     MPVLib.setOptionString("tls-verify", "no")
@@ -185,6 +236,7 @@ private fun MediaPlayer.setMPVOptions() {
     MPVLib.setOptionString("demuxer-max-back-bytes", "32MiB")
     MPVLib.setOptionString("force-window", "no")
     MPVLib.setOptionString("keep-open", "always")
+    MPVLib.setOptionString("ytdl", "no")
     MPVLib.setOptionString("save-position-on-quit", "no")
     MPVLib.setOptionString("sub-font-provider", "none")
     if (this.startAt != 0L) {
