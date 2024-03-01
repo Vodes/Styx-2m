@@ -22,7 +22,6 @@ import androidx.compose.ui.zIndex
 import cafe.adriel.voyager.navigator.Navigator
 import moe.styx.common.compose.components.AppShapes
 import moe.styx.common.compose.components.buttons.IconButtonWithTooltip
-import moe.styx.common.compose.utils.Log
 import moe.styx.common.data.Media
 import moe.styx.common.data.MediaEntry
 import moe.styx.styx2m.misc.Chapter
@@ -120,7 +119,6 @@ fun TimelineControls(
     cacheTime: Long,
     duration: Long,
     chapters: List<Chapter>,
-    onDrag: ((Long) -> Unit)? = null,
     onTap: () -> Unit
 ) {
     Row(
@@ -132,7 +130,7 @@ fun TimelineControls(
         var size by remember { mutableStateOf(IntSize.Zero) }
         var currentDragOffset by remember { mutableStateOf(0f) }
         var startingOffset by remember { mutableStateOf(0f) }
-        Text(currentTime.secondsDurationString(), Modifier.padding(12.dp, 0.dp, 10.dp, 0.dp))
+        Text(currentTime.secondsDurationString(), Modifier.padding(10.dp, 0.dp, 7.dp, 0.dp))
         BoxWithConstraints(Modifier.padding(20.dp).weight(1f).onGloballyPositioned {
             size = it.size
         }.pointerInput(Unit) {
@@ -147,7 +145,6 @@ fun TimelineControls(
                 onTap()
                 currentDragOffset = 0f
                 startingOffset = 0f
-                onDrag?.let { it(0L) }
             }, onDragEnd = {
                 val sizeRatio = currentDragOffset / size.width
                 mediaPlayer.seek(max(min((duration * sizeRatio).toLong(), duration - 1), 0))
@@ -157,42 +154,38 @@ fun TimelineControls(
                     val cur = if (currentDragOffset == 0F) {
                         startingOffset
                     } else currentDragOffset
-                    val sizeRatio = (cur + amount) / size.width
-                    val pos = (duration * sizeRatio).toLong()
-                    onDrag?.let { it(pos) }
-                    Log.i("DRAG") { "Drag emitted: $pos" }
                     currentDragOffset = cur + amount
                 }
             }
         }) {
             LinearProgressIndicator(
                 { (cacheTime.toFloat() / duration).ifInvalid(0F) },
-                Modifier.fillMaxWidth().height(17.dp).zIndex(1F).clip(AppShapes.small),
+                Modifier.fillMaxWidth().height(18.dp).zIndex(1F).clip(AppShapes.small),
                 color = DarkColorScheme.onSurface.copy(0.3F),
                 trackColor = DarkColorScheme.surface.copy(0.8F)
             )
             LinearProgressIndicator(
                 { (currentTime.toFloat() / duration).ifInvalid(0F) },
-                Modifier.fillMaxWidth().height(17.dp).zIndex(2F).clip(AppShapes.small),
+                Modifier.fillMaxWidth().height(18.dp).zIndex(2F).clip(AppShapes.small),
                 color = DarkColorScheme.primary,
                 trackColor = Color.Transparent
             )
             if (chapters.isNotEmpty()) {
-                Canvas(Modifier.fillMaxWidth().height(19.dp).zIndex(3F).padding(0.dp, 1.dp).clip(AppShapes.small)) {
+                Canvas(Modifier.fillMaxWidth().height(20.dp).zIndex(3F).padding(0.dp, 1.dp).clip(AppShapes.small)) {
                     val width = size.width
                     val height = size.height
                     for (chapter in chapters.filter { it.time > 1F }) {
                         val offX = width * (chapter.time / duration.toFloat())
                         drawLine(
-                            start = Offset(offX - 1F, (height / 7).toFloat()),
-                            end = Offset(offX - 1F, ((height / 7) * 6).toFloat()),
+                            start = Offset(offX - 1F, 0F),
+                            end = Offset(offX - 1F, height.toFloat() - 9F),
                             strokeWidth = 5F,
-                            color = DarkColorScheme.secondary.copy(.95F)
+                            color = DarkColorScheme.secondary
                         )
                     }
                 }
             }
         }
-        Text(duration.secondsDurationString(), Modifier.padding(10.dp, 0.dp, 12.dp, 0.dp))
+        Text(duration.secondsDurationString(), Modifier.padding(7.dp, 0.dp, 10.dp, 0.dp))
     }
 }

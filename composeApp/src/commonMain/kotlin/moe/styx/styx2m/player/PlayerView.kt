@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -25,9 +24,7 @@ import kotlinx.coroutines.delay
 import moe.styx.common.compose.files.Storage
 import moe.styx.common.compose.files.getCurrentAndCollectFlow
 import moe.styx.common.compose.utils.LocalGlobalNavigator
-import moe.styx.common.compose.utils.Log
 import moe.styx.common.extension.eqI
-import moe.styx.styx2m.misc.secondsDurationString
 import kotlin.jvm.Transient
 
 class PlayerView(val entryID: String) : Screen {
@@ -98,17 +95,11 @@ class PlayerView(val entryID: String) : Screen {
                 val currentEntry = entryList.find { it.GUID eqI currentEntryState }
                 val media = currentEntry?.let { mediaList.find { it.GUID eqI currentEntry.mediaID } }
                 val mediaTitle by mediaPlayer.mediaTitle.collectAsState()
-                var dragProg by remember { mutableStateOf(0L) }
 
                 Column(Modifier.zIndex(1F).fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
                     NameRow(mediaTitle, media, currentEntry, nav)
                     ControlsRow(mediaPlayer, playbackStatus, currentTime) { controlsTimeout = 4 }
-                    AnimatedVisibility(dragProg != 0L) {
-                        Log.d("DRAG") { "Drag received: $dragProg" }
-                        Text(dragProg.secondsDurationString())
-                    }
-                    //TimelineControls(mediaPlayer, currentTime, cacheTime, duration, chapters) { controlsTimeout = 4 }
-                    TimelineControls(mediaPlayer, currentTime, cacheTime, duration, chapters, { dragProg = it }) { controlsTimeout = 4 }
+                    TimelineControls(mediaPlayer, currentTime, cacheTime, duration, chapters) { controlsTimeout = 4 }
                 }
             }
         }

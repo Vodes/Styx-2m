@@ -16,10 +16,10 @@ import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.screen.Screen
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import moe.styx.common.compose.components.layout.MainScaffold
 import moe.styx.common.compose.files.Storage
 import moe.styx.common.compose.utils.LocalGlobalNavigator
+import moe.styx.common.util.launchGlobal
 import moe.styx.styx2m.views.MainOverview
 
 class LoadingView : Screen {
@@ -27,18 +27,19 @@ class LoadingView : Screen {
     override fun Content() {
         val nav = LocalGlobalNavigator.current
         val coroutineScope = rememberCoroutineScope()
-        val progress by Storage.loadingProgress.collectAsState()
 
         coroutineScope.launch {
-            runBlocking {
+            delay(1000)
+            launchGlobal {
                 Storage.stores.mediaStore.get()
                 Storage.stores.favouriteStore.get()
-            }
+            }.join()
             delay(1000)
             nav.replaceAll(MainOverview())
         }
 
         MainScaffold(title = "Loading", addPopButton = false) {
+            val progress by Storage.loadingProgress.collectAsState()
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 Column(modifier = Modifier.padding(10.dp).align(Alignment.TopCenter)) {
                     Text(
