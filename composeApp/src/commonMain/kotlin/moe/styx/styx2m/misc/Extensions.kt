@@ -1,5 +1,7 @@
 package moe.styx.styx2m.misc
 
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.unit.dp
 import io.islandtime.measures.hours
 import io.islandtime.measures.seconds
 import moe.styx.common.extension.padString
@@ -19,3 +21,6 @@ fun Long.secondsDurationString(): String {
             "${hours.value.toInt().padString(2)}${minutes.value.toInt().padString(2)}:${sec.value.toInt().padString(2)}"
     }
 }
+
+val otherAppShape
+    get() = RoundedCornerShape(6.dp)

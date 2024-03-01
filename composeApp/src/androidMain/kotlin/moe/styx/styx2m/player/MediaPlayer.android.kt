@@ -239,6 +239,8 @@ private fun MediaPlayer.setMPVOptions() {
     MPVLib.setOptionString("ytdl", "no")
     MPVLib.setOptionString("save-position-on-quit", "no")
     MPVLib.setOptionString("sub-font-provider", "none")
+    MPVLib.setOptionString("hwdec", "mediacodec")
+    MPVLib.setOptionString("hwdec-codecs", "h264,hevc,mpeg4,mpeg2video,vp8,vp9,av1")
     if (this.startAt != 0L) {
         MPVLib.setOptionString("start", "$startAt")
     }

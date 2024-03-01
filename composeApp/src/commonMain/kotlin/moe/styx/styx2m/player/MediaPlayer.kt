@@ -28,6 +28,7 @@ abstract class AMediaPlayer(val initialEntryID: String, val startAt: Long = 0L) 
 
 sealed class PlaybackStatus {
     data object Idle : PlaybackStatus()
+    data object Ready : PlaybackStatus()
     data object Playing : PlaybackStatus()
     data object Paused : PlaybackStatus()
     data object EOF : PlaybackStatus()
