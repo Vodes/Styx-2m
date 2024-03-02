@@ -17,6 +17,7 @@ import cafe.adriel.voyager.navigator.tab.LocalTabNavigator
 import cafe.adriel.voyager.navigator.tab.Tab
 import cafe.adriel.voyager.navigator.tab.TabNavigator
 import com.russhwolf.settings.get
+import com.russhwolf.settings.set
 import moe.styx.common.compose.components.buttons.IconButtonWithTooltip
 import moe.styx.common.compose.components.layout.MainScaffold
 import moe.styx.common.compose.settings
@@ -35,6 +36,7 @@ class MainOverview : Screen {
         val sizes = LocalLayoutSize.current
         val useRail = sizes.isWide
         val defaultTab = if (settings["favs-startup", false]) Tabs.favsTab else Tabs.seriesTab
+        settings["episode-list-index"] = 0
         TabNavigator(defaultTab) {
             MainScaffold(Modifier.fillMaxSize(),
                 title = "${BuildConfig.APP_NAME} — Beta", addPopButton = false, actions = {
