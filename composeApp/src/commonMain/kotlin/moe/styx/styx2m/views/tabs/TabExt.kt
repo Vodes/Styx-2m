@@ -24,9 +24,11 @@ import moe.styx.common.compose.settings
 import moe.styx.common.compose.utils.LocalGlobalNavigator
 import moe.styx.common.compose.utils.SearchState
 import moe.styx.common.data.Media
+import moe.styx.common.extension.toBoolean
 import moe.styx.styx2m.misc.LayoutSizes
 import moe.styx.styx2m.misc.LocalLayoutSize
 import moe.styx.styx2m.views.anime.AnimeDetailView
+import moe.styx.styx2m.views.anime.MovieDetailView
 
 object Tabs {
     val seriesTab = SeriesTab()
@@ -86,7 +88,10 @@ private fun MediaGrid(list: List<Media>, nav: Navigator, showUnseen: Boolean = f
         items(list, key = { it.GUID }) {
             Row(modifier = Modifier.animateItemPlacement()) {
                 AnimeCard(it, showUnseen) {
-                    nav.push(AnimeDetailView(it.GUID))
+                    if (it.isSeries.toBoolean()) {
+                        nav.push(AnimeDetailView(it.GUID))
+                    } else
+                        nav.push(MovieDetailView(it.GUID))
                 }
             }
         }
@@ -100,7 +105,10 @@ private fun MediaList(list: List<Media>, nav: Navigator) {
         items(list, key = { it.GUID }) {
             Row(Modifier.animateItemPlacement().padding(3.dp)) {
                 AnimeListItem(it) {
-                    nav.push(AnimeDetailView(it.GUID))
+                    if (it.isSeries.toBoolean()) {
+                        nav.push(AnimeDetailView(it.GUID))
+                    } else
+                        nav.push(MovieDetailView(it.GUID))
                 }
             }
         }
