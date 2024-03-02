@@ -7,7 +7,7 @@
 
     <application
             android:name=".AndroidApp"
-            android:icon="@android:drawable/ic_menu_compass"
+            android:icon="@mipmap/ic_launcher"
             android:label="Styx2m"
             android:windowLayoutInDisplayCutoutMode="shortEdges"
             android:windowTranslucentStatus="true"
