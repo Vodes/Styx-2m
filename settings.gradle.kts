@@ -1,5 +1,5 @@
 rootProject.name = "Styx2m"
-include(":composeApp")
+include(":styx2m")
 
 pluginManagement {
     repositories {
