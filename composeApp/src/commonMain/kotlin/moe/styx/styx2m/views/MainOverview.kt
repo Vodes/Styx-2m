@@ -20,9 +20,11 @@ import com.russhwolf.settings.get
 import com.russhwolf.settings.set
 import moe.styx.common.compose.components.buttons.IconButtonWithTooltip
 import moe.styx.common.compose.components.layout.MainScaffold
+import moe.styx.common.compose.components.misc.OnlineUsersIcon
 import moe.styx.common.compose.settings
 import moe.styx.common.compose.utils.LocalGlobalNavigator
 import moe.styx.styx2m.misc.LocalLayoutSize
+import moe.styx.styx2m.views.anime.AnimeDetailView
 import moe.styx.styx2m.views.tabs.Tabs
 
 class MainOverview : Screen {
@@ -40,6 +42,7 @@ class MainOverview : Screen {
         TabNavigator(defaultTab) {
             MainScaffold(Modifier.fillMaxSize(),
                 title = "${BuildConfig.APP_NAME} — Beta", addPopButton = false, actions = {
+                    OnlineUsersIcon { nav.push(AnimeDetailView(it.GUID)) }
                     if (!useRail)
                         IconButtonWithTooltip(Icons.Filled.Settings, "Settings") { nav.push(SettingsView()) }
                 }, bottomBarContent = {
