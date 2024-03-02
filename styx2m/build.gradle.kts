@@ -138,6 +138,7 @@ buildConfig {
     buildConfigField("IMAGE_URL", System.getenv("STYX_IMAGEURL")) // Example: https://images.company.com
     buildConfigField("SITE", siteURL.split("https://").getOrElse(1) { siteURL })
     buildConfigField("BUILD_TIME", (System.currentTimeMillis() / 1000))
+    buildConfigField("VERSION_CHECK_URL", "https://raw.githubusercontent.com/Vodes/Styx-2m/master/styx2m/build.gradle.kts")
 }
 
 //buildConfig {
