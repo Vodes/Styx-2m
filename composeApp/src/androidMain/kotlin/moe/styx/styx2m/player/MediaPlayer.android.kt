@@ -20,6 +20,7 @@ import moe.styx.common.compose.files.getCurrentAndCollectFlow
 import moe.styx.common.compose.http.login
 import moe.styx.common.compose.utils.Log
 import moe.styx.common.compose.utils.MpvPreferences
+import moe.styx.common.data.MediaEntry
 import moe.styx.common.extension.eqI
 import moe.styx.common.json
 
@@ -68,7 +69,7 @@ actual class MediaPlayer actual constructor(initialEntryID: String, startAt: Lon
             override fun eventProperty(property: String, value: Double) {
                 when (property) {
                     "percent-pos" -> {
-                        playbackPercent = value
+                        playbackPercent = value.toFloat()
                     }
 
                     else -> Log.d("MPV") { "Double property changed - $property: $value" }
@@ -158,15 +159,21 @@ actual class MediaPlayer actual constructor(initialEntryID: String, startAt: Lon
         }
     }
 
+    override fun internalPlayEntry(mediaEntry: MediaEntry, scope: CoroutineScope) {
+        if (!playerInitialized)
+            return
+        MPVLib.command(arrayOf("set", "start", "0"))
+        initialCommands = emptyList()
+        scope.launch { currentEntry.emit(mediaEntry.GUID) }
+    }
+
     @Composable
     override fun PlayerComponent() {
         val context = LocalContext.current
         val entryList by Storage.stores.entryStore.getCurrentAndCollectFlow()
         val curEntryID by this.currentEntry.collectAsState()
-        val currentEntry = entryList.find { it.GUID eqI curEntryID }
         initialCommands = listOf(
             arrayOf("set", "start", "$startAt"),
-//            arrayOf("loadfile", "${BuildConfig.BASE_URL}/watch/${currentEntry?.GUID}?token=${login?.watchToken}", "append")
         )
         if (!playerInitialized && !libWasLoaded) {
             MPVLib.create(context)
@@ -181,9 +188,10 @@ actual class MediaPlayer actual constructor(initialEntryID: String, startAt: Lon
             view
         }, Modifier.fillMaxSize())
 
-        LaunchedEffect(currentEntry) {
+        LaunchedEffect(curEntryID) {
+            val currentEntry = entryList.find { it.GUID eqI curEntryID }
             if (currentEntry != null && login != null) {
-                MPVLib.command(arrayOf("loadfile", "${BuildConfig.BASE_URL}/watch/${currentEntry.GUID}?token=${login?.watchToken}", "append-play"))
+                MPVLib.command(arrayOf("loadfile", "${BuildConfig.BASE_URL}/watch/${currentEntry.GUID}?token=${login?.watchToken}", "replace"))
             }
         }
     }

@@ -23,6 +23,7 @@ import moe.styx.common.compose.components.anime.WatchedIndicator
 import moe.styx.common.compose.components.layout.MainScaffold
 import moe.styx.common.compose.extensions.readableSize
 import moe.styx.common.compose.files.Storage
+import moe.styx.common.compose.files.collectWithEmptyInitial
 import moe.styx.common.compose.files.getCurrentAndCollectFlow
 import moe.styx.common.compose.http.login
 import moe.styx.common.compose.settings
@@ -38,6 +39,7 @@ import moe.styx.styx2m.components.AboutView
 import moe.styx.styx2m.components.StupidImageNameArea
 import moe.styx.styx2m.misc.LayoutSizes
 import moe.styx.styx2m.misc.LocalLayoutSize
+import moe.styx.styx2m.misc.getProgress
 import moe.styx.styx2m.player.PlayerView
 
 class MovieDetailView(private val mediaID: String) : Screen {
@@ -56,7 +58,7 @@ class MovieDetailView(private val mediaID: String) : Screen {
             return
         }
         val sizes = LocalLayoutSize.current
-        val watchedList by Storage.stores.watchedStore.getCurrentAndCollectFlow()
+        val watchedList by Storage.stores.watchedStore.collectWithEmptyInitial()
         val watched = movieEntry?.let { watchedList.find { it.entryID eqI movieEntry.GUID } }
         var showMediaInfoDialog by remember { mutableStateOf(false) }
         if (showMediaInfoDialog && movieEntry != null) {
@@ -119,7 +121,7 @@ class MovieDetailView(private val mediaID: String) : Screen {
                 IconButton({
                     if (movieEntry == null)
                         return@IconButton
-                    nav.push(PlayerView(movieEntry.GUID))
+                    nav.push(PlayerView(movieEntry.GUID, watched.getProgress()))
                 }) { Icon(Icons.Filled.PlayArrow, "Play this movie") }
                 IconButton({
                     onClickMediaInfo()

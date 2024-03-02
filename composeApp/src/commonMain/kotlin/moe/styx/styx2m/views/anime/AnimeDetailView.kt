@@ -24,13 +24,16 @@ import moe.styx.common.compose.components.anime.EpisodeList
 import moe.styx.common.compose.components.buttons.FavouriteIconButton
 import moe.styx.common.compose.components.layout.MainScaffold
 import moe.styx.common.compose.files.Storage
+import moe.styx.common.compose.files.collectWithEmptyInitial
 import moe.styx.common.compose.files.getCurrentAndCollectFlow
 import moe.styx.common.compose.settings
+import moe.styx.common.compose.threads.Heartbeats
 import moe.styx.common.compose.utils.LocalGlobalNavigator
 import moe.styx.common.data.MediaEntry
 import moe.styx.common.extension.eqI
 import moe.styx.styx2m.components.MetadataArea
 import moe.styx.styx2m.misc.LocalLayoutSize
+import moe.styx.styx2m.misc.getProgress
 import moe.styx.styx2m.player.PlayerView
 
 class AnimeDetailView(private val mediaID: String) : Screen {
@@ -53,6 +56,7 @@ class AnimeDetailView(private val mediaID: String) : Screen {
             return
         }
         val entries = fetchEntries(mediaID)
+        val watched by Storage.stores.watchedStore.collectWithEmptyInitial()
 
         MainScaffold(Modifier.safeAreaPadding(), title = media.name, actions = {
             FavouriteIconButton(media)
@@ -67,7 +71,15 @@ class AnimeDetailView(private val mediaID: String) : Screen {
             ElevatedCard(Modifier.padding(2.dp).fillMaxSize()) {
                 if (!sizes.isWide) {
                     Column {
-                        EpisodeList(entries, showSelection, null, listState, onPlay = { nav.push(PlayerView(it.GUID)); "" }) {
+                        EpisodeList(
+                            entries,
+                            showSelection,
+                            null,
+                            listState,
+                            onPlay = {
+                                nav.push(PlayerView(it.GUID, watched.find { w -> w.entryID eqI it.GUID }.getProgress()))
+                                ""
+                            }) {
                             MetadataArea(media, nav, mediaList, layoutSizes = sizes)
                             HorizontalDivider(Modifier.fillMaxWidth().padding(10.dp, 8.dp), thickness = 3.dp)
                         }
@@ -81,7 +93,7 @@ class AnimeDetailView(private val mediaID: String) : Screen {
                         VerticalDivider(Modifier.padding(2.dp, 8.dp).fillMaxHeight().width(3.dp))
                         Column(Modifier.weight(0.5F)) {
                             EpisodeList(entries, showSelection, null, listState, onPlay = {
-                                nav.push(PlayerView(it.GUID))
+                                nav.push(PlayerView(it.GUID, watched.find { w -> w.entryID eqI it.GUID }.getProgress()))
                                 ""
                             })
                         }
@@ -94,6 +106,7 @@ class AnimeDetailView(private val mediaID: String) : Screen {
 
 @Composable
 fun fetchEntries(mediaID: String): List<MediaEntry> {
+    Heartbeats.mediaActivity = null
     val flow by Storage.stores.entryStore.getCurrentAndCollectFlow()
     val filtered = flow.filter { it.mediaID eqI mediaID }
     return if (settings["episode-asc", false]) filtered.sortedBy {

@@ -6,6 +6,8 @@ import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBackIos
+import androidx.compose.material.icons.automirrored.filled.ArrowForwardIos
 import androidx.compose.material.icons.automirrored.filled.ListAlt
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
@@ -64,19 +66,44 @@ fun NameRow(title: String, media: Media?, entry: MediaEntry?, nav: Navigator, tr
 }
 
 @Composable
-fun ColumnScope.ControlsRow(mediaPlayer: MediaPlayer, playbackStatus: PlaybackStatus, currentTime: Long, chapters: List<Chapter>, onTap: () -> Unit) {
+fun ColumnScope.ControlsRow(
+    mediaPlayer: MediaPlayer,
+    playbackStatus: PlaybackStatus,
+    currentTime: Long,
+    chapters: List<Chapter>,
+    nextEntry: MediaEntry?,
+    previousEntry: MediaEntry?,
+    onTap: () -> Unit
+) {
+    val scope = rememberCoroutineScope()
+    val colors = IconButtonDefaults.iconButtonColors(
+        contentColor = DarkColorScheme.onSurface,
+        containerColor = DarkColorScheme.background.copy(0.5F),
+        disabledContentColor = DarkColorScheme.inverseOnSurface
+    )
     val iconsEnabled = playbackStatus !in arrayOf(PlaybackStatus.Idle, PlaybackStatus.EOF, PlaybackStatus.Buffering)
     Row(
         Modifier.fillMaxWidth().weight(1f),
         horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically
     ) {
+        if (nextEntry != null || previousEntry != null) {
+            PlayerIconButton(
+                Icons.AutoMirrored.Filled.ArrowBackIos,
+                Modifier.padding(14.dp).requiredSize(32.dp),
+                enabled = previousEntry != null,
+                colors = colors
+            ) {
+                if (previousEntry != null)
+                    mediaPlayer.playEntry(previousEntry, scope)
+            }
+        }
         PlayerIconButton(
-            Icons.Default.KeyboardDoubleArrowLeft, Modifier.padding(14.dp).requiredSize(50.dp), colors = IconButtonDefaults.iconButtonColors(
-                contentColor = DarkColorScheme.onSurface,
-                containerColor = DarkColorScheme.background.copy(0.5F),
-                disabledContentColor = DarkColorScheme.inverseOnSurface
-            ), onLongPress = {
+            Icons.Default.KeyboardDoubleArrowLeft,
+            Modifier.padding(14.dp).requiredSize(50.dp),
+            iconsEnabled,
+            colors = colors,
+            onLongPress = {
                 onTap()
                 val validChapter = chapters.sortedBy { it.time }.findLast { it.time < currentTime }
                 if (chapters.isEmpty() || validChapter == null)
@@ -95,11 +122,7 @@ fun ColumnScope.ControlsRow(mediaPlayer: MediaPlayer, playbackStatus: PlaybackSt
             PlayerIconButton(
                 if (playbackStatus is PlaybackStatus.Paused) Icons.Default.PlayArrow else Icons.Default.Pause,
                 Modifier.padding(14.dp).requiredSize(50.dp),
-                colors = IconButtonDefaults.iconButtonColors(
-                    contentColor = DarkColorScheme.onSurface,
-                    containerColor = DarkColorScheme.background.copy(0.5F),
-                    disabledContentColor = DarkColorScheme.inverseOnSurface
-                ),
+                colors = colors,
                 enabled = iconsEnabled
             ) {
                 onTap()
@@ -107,11 +130,11 @@ fun ColumnScope.ControlsRow(mediaPlayer: MediaPlayer, playbackStatus: PlaybackSt
             }
         }
         PlayerIconButton(
-            Icons.Default.KeyboardDoubleArrowRight, Modifier.padding(14.dp).requiredSize(50.dp), colors = IconButtonDefaults.iconButtonColors(
-                contentColor = DarkColorScheme.onSurface,
-                containerColor = DarkColorScheme.background.copy(0.5F),
-                disabledContentColor = DarkColorScheme.inverseOnSurface
-            ), onLongPress = {
+            Icons.Default.KeyboardDoubleArrowRight,
+            Modifier.padding(14.dp).requiredSize(50.dp),
+            iconsEnabled,
+            colors = colors,
+            onLongPress = {
                 onTap()
                 val validChapter = chapters.sortedBy { it.time }.find { it.time > currentTime }
                 if (chapters.isEmpty() || validChapter == null)
@@ -121,6 +144,17 @@ fun ColumnScope.ControlsRow(mediaPlayer: MediaPlayer, playbackStatus: PlaybackSt
         ) {
             onTap()
             mediaPlayer.seek(currentTime + 10)
+        }
+        if (nextEntry != null || previousEntry != null) {
+            PlayerIconButton(
+                Icons.AutoMirrored.Filled.ArrowForwardIos,
+                Modifier.padding(14.dp).requiredSize(32.dp),
+                enabled = nextEntry != null,
+                colors = colors
+            ) {
+                if (nextEntry != null)
+                    mediaPlayer.playEntry(nextEntry, scope)
+            }
         }
     }
 }
