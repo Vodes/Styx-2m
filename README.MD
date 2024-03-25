@@ -34,7 +34,7 @@ iOS should technically be working already (besides the player), but I haven't fo
 
 
   #### Player view
-  ![player view](https://i.ibb.co/w77YMD7/Screenshot-20240325-235545.webp)
+  <img src="https://i.ibb.co/vhhDZ2h/Screenshot-20240325-235545.webp" title="player view" height="260" />
 </details>
 
 ## How do I use this?
