@@ -23,17 +23,15 @@ iOS should technically be working already (besides the player), but I haven't fo
 <details>
 	<summary>Click here</summary>
 
-  #### Search
-  ![search](https://i.ibb.co/wCzf1qj/Screenshot-20240325-235619.webp)
+  #### Search & Detail view
+  <img src="https://i.ibb.co/wCzf1qj/Screenshot-20240325-235619.webp" title="search" height="450"/>
+  <img src="https://i.ibb.co/CBTJMDp/Screenshot-20240325-235453.webp" title="detail view" height="450"/>
 
-  #### Detail view
-  ![detail view](https://i.ibb.co/CBTJMDp/Screenshot-20240325-235453.webp)
 
-  #### General settings
-  ![settings](https://i.ibb.co/kJcLwWv/Screenshot-20240325-235756.webp)
+  #### Settings
+  <img src="https://i.ibb.co/kJcLwWv/Screenshot-20240325-235756.webp" title="general settings" height="450"/>
+  <img src="https://i.ibb.co/rFCyDF3/Screenshot-20240325-235808.webp" title="player settings" height="450"/>
 
-  #### Player settings
-  ![player/mpv settings](https://i.ibb.co/rFCyDF3/Screenshot-20240325-235808.webp)
 
   #### Player view
   ![player view](https://i.ibb.co/w77YMD7/Screenshot-20240325-235545.webp)
