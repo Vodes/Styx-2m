@@ -20,15 +20,15 @@ import kotlinx.coroutines.flow.debounce
 import moe.styx.common.compose.components.anime.AnimeCard
 import moe.styx.common.compose.components.anime.AnimeListItem
 import moe.styx.common.compose.components.search.MediaSearch
+import moe.styx.common.compose.files.Storage
+import moe.styx.common.compose.files.collectWithEmptyInitial
 import moe.styx.common.compose.settings
 import moe.styx.common.compose.utils.LocalGlobalNavigator
 import moe.styx.common.compose.utils.SearchState
 import moe.styx.common.data.Media
-import moe.styx.common.extension.toBoolean
 import moe.styx.styx2m.misc.LayoutSizes
 import moe.styx.styx2m.misc.LocalLayoutSize
-import moe.styx.styx2m.views.anime.AnimeDetailView
-import moe.styx.styx2m.views.anime.MovieDetailView
+import moe.styx.styx2m.misc.pushMediaView
 
 object Tabs {
     val seriesTab = SeriesTab()
@@ -81,17 +81,27 @@ private fun getGridCells(sizes: LayoutSizes): GridCells {
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun MediaGrid(list: List<Media>, nav: Navigator, showUnseen: Boolean = false, sizes: LayoutSizes) {
-    LazyVerticalGrid(
-        columns = getGridCells(sizes),
-        contentPadding = PaddingValues(10.dp, 7.dp),
-    ) {
-        items(list, key = { it.GUID }) {
-            Row(modifier = Modifier.animateItemPlacement()) {
-                AnimeCard(it, showUnseen) {
-                    if (it.isSeries.toBoolean()) {
-                        nav.push(AnimeDetailView(it.GUID))
-                    } else
-                        nav.push(MovieDetailView(it.GUID))
+    if (showUnseen) {
+        val entryList by Storage.stores.entryStore.collectWithEmptyInitial()
+        val watchedList by Storage.stores.watchedStore.collectWithEmptyInitial()
+        LazyVerticalGrid(
+            columns = getGridCells(sizes),
+            contentPadding = PaddingValues(10.dp, 7.dp),
+        ) {
+            items(list, key = { it.GUID }) {
+                Row(modifier = Modifier.animateItemPlacement()) {
+                    AnimeCard(it, showUnseen, entryList = entryList, watchedEntries = watchedList) { nav.pushMediaView(it) }
+                }
+            }
+        }
+    } else {
+        LazyVerticalGrid(
+            columns = getGridCells(sizes),
+            contentPadding = PaddingValues(10.dp, 7.dp),
+        ) {
+            items(list, key = { it.GUID }) {
+                Row(modifier = Modifier.animateItemPlacement()) {
+                    AnimeCard(it, showUnseen) { nav.pushMediaView(it) }
                 }
             }
         }
@@ -104,12 +114,7 @@ private fun MediaList(list: List<Media>, nav: Navigator) {
     LazyColumn {
         items(list, key = { it.GUID }) {
             Row(Modifier.animateItemPlacement().padding(3.dp)) {
-                AnimeListItem(it) {
-                    if (it.isSeries.toBoolean()) {
-                        nav.push(AnimeDetailView(it.GUID))
-                    } else
-                        nav.push(MovieDetailView(it.GUID))
-                }
+                AnimeListItem(it) { nav.pushMediaView(it) }
             }
         }
     }

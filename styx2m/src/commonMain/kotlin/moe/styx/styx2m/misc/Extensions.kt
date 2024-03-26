@@ -2,6 +2,7 @@ package moe.styx.styx2m.misc
 
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.unit.dp
+import cafe.adriel.voyager.navigator.Navigator
 import com.russhwolf.settings.set
 import io.islandtime.measures.hours
 import io.islandtime.measures.seconds
@@ -17,7 +18,10 @@ import moe.styx.common.data.MediaEntry
 import moe.styx.common.data.MediaWatched
 import moe.styx.common.extension.currentUnixSeconds
 import moe.styx.common.extension.padString
+import moe.styx.common.extension.toBoolean
 import moe.styx.common.json
+import moe.styx.styx2m.views.anime.AnimeDetailView
+import moe.styx.styx2m.views.anime.MovieDetailView
 
 inline fun Float.ifInvalid(newValue: Float): Float {
     if (this.isNaN() || this.isInfinite())
@@ -33,6 +37,14 @@ fun Long.secondsDurationString(): String {
         } else
             "${hours.value.toInt().padString(2)}:${minutes.value.toInt().padString(2)}:${sec.value.toInt().padString(2)}"
     }
+}
+
+fun Navigator.pushMediaView(media: Media, replace: Boolean = false) {
+    val view = if (media.isSeries.toBoolean()) AnimeDetailView(media.GUID) else MovieDetailView(media.GUID)
+    if (replace)
+        this.replace(view)
+    else
+        this.push(view)
 }
 
 fun List<MediaEntry>.findNext(currentEntry: MediaEntry, parentMedia: Media): MediaEntry? {

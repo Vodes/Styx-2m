@@ -24,7 +24,7 @@ import moe.styx.common.compose.components.misc.OnlineUsersIcon
 import moe.styx.common.compose.settings
 import moe.styx.common.compose.utils.LocalGlobalNavigator
 import moe.styx.styx2m.misc.LocalLayoutSize
-import moe.styx.styx2m.views.anime.AnimeDetailView
+import moe.styx.styx2m.misc.pushMediaView
 import moe.styx.styx2m.views.tabs.Tabs
 
 class MainOverview : Screen {
@@ -42,7 +42,7 @@ class MainOverview : Screen {
         TabNavigator(defaultTab) {
             MainScaffold(Modifier.fillMaxSize(),
                 title = "${BuildConfig.APP_NAME} — Beta", addPopButton = false, actions = {
-                    OnlineUsersIcon { nav.push(AnimeDetailView(it.GUID)) }
+                    OnlineUsersIcon { nav.pushMediaView(it) }
                     if (!useRail)
                         IconButtonWithTooltip(Icons.Filled.Settings, "Settings") { nav.push(SettingsView()) }
                 }, bottomBarContent = {
@@ -90,44 +90,44 @@ class MainOverview : Screen {
             )
         }
     }
+}
 
-    @Composable
-    private fun RowScope.TabNavItem(tab: Tab) {
-        val tabNavigator = LocalTabNavigator.current
+@Composable
+fun RowScope.TabNavItem(tab: Tab) {
+    val tabNavigator = LocalTabNavigator.current
 
-        NavigationBarItem(
-            selected = tabNavigator.current.key == tab.key,
-            onClick = { tabNavigator.current = tab },
-            icon = { Icon(painter = tab.options.icon!!, contentDescription = tab.options.title) },
-            label = { Text(tab.options.title) },
-            alwaysShowLabel = false,
-            colors = NavigationBarItemDefaults.colors(
-                unselectedIconColor = MaterialTheme.colorScheme.onSurface,
-                unselectedTextColor = MaterialTheme.colorScheme.onSurface,
-                selectedIconColor = MaterialTheme.colorScheme.onPrimary,
-                selectedTextColor = MaterialTheme.colorScheme.primary,
-                indicatorColor = MaterialTheme.colorScheme.primary
-            )
+    NavigationBarItem(
+        selected = tabNavigator.current.key == tab.key,
+        onClick = { tabNavigator.current = tab },
+        icon = { Icon(painter = tab.options.icon!!, contentDescription = tab.options.title) },
+        label = { Text(tab.options.title) },
+        alwaysShowLabel = false,
+        colors = NavigationBarItemDefaults.colors(
+            unselectedIconColor = MaterialTheme.colorScheme.onSurface,
+            unselectedTextColor = MaterialTheme.colorScheme.onSurface,
+            selectedIconColor = MaterialTheme.colorScheme.onPrimary,
+            selectedTextColor = MaterialTheme.colorScheme.primary,
+            indicatorColor = MaterialTheme.colorScheme.primary
         )
-    }
+    )
+}
 
-    @Composable
-    private fun RailNavItem(tab: Tab) {
-        val tabNavigator = LocalTabNavigator.current
+@Composable
+fun RailNavItem(tab: Tab) {
+    val tabNavigator = LocalTabNavigator.current
 
-        NavigationRailItem(
-            selected = tabNavigator.current.key == tab.key,
-            onClick = { tabNavigator.current = tab },
-            icon = { Icon(painter = tab.options.icon!!, contentDescription = tab.options.title) },
-            label = { Text(tab.options.title) },
-            alwaysShowLabel = true,
-            colors = NavigationRailItemDefaults.colors(
-                unselectedIconColor = MaterialTheme.colorScheme.onSurface,
-                unselectedTextColor = MaterialTheme.colorScheme.onSurface,
-                selectedIconColor = MaterialTheme.colorScheme.onPrimary,
-                selectedTextColor = MaterialTheme.colorScheme.primary,
-                indicatorColor = MaterialTheme.colorScheme.primary
-            )
+    NavigationRailItem(
+        selected = tabNavigator.current.key == tab.key,
+        onClick = { tabNavigator.current = tab },
+        icon = { Icon(painter = tab.options.icon!!, contentDescription = tab.options.title) },
+        label = { Text(tab.options.title) },
+        alwaysShowLabel = true,
+        colors = NavigationRailItemDefaults.colors(
+            unselectedIconColor = MaterialTheme.colorScheme.onSurface,
+            unselectedTextColor = MaterialTheme.colorScheme.onSurface,
+            selectedIconColor = MaterialTheme.colorScheme.onPrimary,
+            selectedTextColor = MaterialTheme.colorScheme.primary,
+            indicatorColor = MaterialTheme.colorScheme.primary
         )
-    }
+    )
 }

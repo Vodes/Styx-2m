@@ -1,24 +1,26 @@
 package moe.styx.styx2m.views
 
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.padding
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.screen.Screen
 import com.russhwolf.settings.get
 import com.russhwolf.settings.set
+import moe.styx.common.compose.components.buttons.ExpandIconButton
 import moe.styx.common.compose.components.layout.MainScaffold
-import moe.styx.common.compose.components.misc.MpvCheckbox
-import moe.styx.common.compose.components.misc.SettingsCheckbox
-import moe.styx.common.compose.components.misc.StringChoices
+import moe.styx.common.compose.components.misc.Toggles
+import moe.styx.common.compose.components.misc.Toggles.settingsContainer
 import moe.styx.common.compose.settings
 import moe.styx.common.compose.utils.*
+import moe.styx.styx2m.misc.LocalLayoutSize
 import moe.styx.styx2m.misc.save
 
 class SettingsView : Screen {
@@ -27,104 +29,158 @@ class SettingsView : Screen {
 
     @Composable
     override fun Content() {
-        MainScaffold(title = "Settings") {
-            val scrollState = rememberScrollState()
-            Column(Modifier.padding(8.dp).verticalScroll(scrollState, true)) {
-                Text("Layout Options", modifier = Modifier.padding(5.dp), style = MaterialTheme.typography.headlineSmall)
-                SettingsCheckbox("Show Names on cards", "display-names", false)
-                SettingsCheckbox("Show episode summaries", "display-ep-synopsis", false)
-                SettingsCheckbox("Prefer german titles and summaries", "prefer-german-metadata", false)
-                HorizontalDivider(Modifier.padding(5.dp), thickness = 2.dp)
-                SettingsCheckbox("Use list for shows", "shows-list", false)
-                SettingsCheckbox("Use list for movies", "movies-list", false)
-                SettingsCheckbox("Sort episodes ascendingly", "episode-asc", false)
-                HorizontalDivider(Modifier.padding(5.dp), thickness = 2.dp)
-                Column {
-                    var porNumCards by remember { mutableStateOf(settings["portrait-cards", "3"]) }
-                    StringChoices("Number of cards to show in portrait", portraitCardChoices, value = porNumCards) {
-                        settings["portrait-cards"] = it
-                        porNumCards = it
-                        it
+        val sizes = LocalLayoutSize.current
+        if (sizes.isWide) {
+            MainScaffold(title = "Settings") {
+                Row {
+                    Column(Modifier.padding(8.dp).weight(1f).verticalScroll(rememberScrollState(), true)) {
+                        MainSettings()
                     }
-                    var landNumCards by remember { mutableStateOf(settings["landscape-cards", "7"]) }
-                    StringChoices("Number of cards to show in landscape", landScapeCardChoices, value = landNumCards) {
-                        settings["landscape-cards"] = it
-                        landNumCards = it
-                        it
+                    VerticalDivider(Modifier.fillMaxHeight().padding(3.dp, 8.dp), thickness = 2.dp)
+                    Column(Modifier.padding(8.dp).weight(1f).verticalScroll(rememberScrollState(), true)) {
+                        MpvSettings()
                     }
                 }
-                HorizontalDivider(Modifier.padding(5.dp), thickness = 2.dp)
-                Text("Mpv (Player) Options", modifier = Modifier.padding(5.dp), style = MaterialTheme.typography.headlineSmall)
-                MpvSettings()
             }
+        } else {
+            MainScaffold(title = "Settings") {
+                val scrollState = rememberScrollState()
+                Column(Modifier.padding(8.dp).verticalScroll(scrollState, true)) {
+                    MainSettings()
+                    var isExpanded by remember { mutableStateOf(false) }
+                    ElevatedCard(modifier = Modifier.padding(5.dp), onClick = { isExpanded = !isExpanded }) {
+                        Row(Modifier.fillMaxWidth().padding(3.dp)) {
+                            Text("Player Settings", modifier = Modifier.padding(5.dp).weight(1f), style = MaterialTheme.typography.headlineSmall)
+                            ExpandIconButton(isExpanded = isExpanded) {
+                                isExpanded = !isExpanded
+                            }
+                        }
+                        AnimatedVisibility(isExpanded) {
+                            MpvSettings()
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+
+    @Composable
+    fun MainSettings() {
+        Column(Modifier.settingsContainer()) {
+            Text("Layout Options", modifier = Modifier.padding(10.dp, 7.dp), style = MaterialTheme.typography.titleLarge)
+            Toggles.ContainerSwitch("Show names on cards", value = settings["display-names", false]) { settings["display-names"] = it }
+            Toggles.ContainerSwitch(
+                "Show episode summaries",
+                value = settings["display-ep-synopsis", false]
+            ) { settings["display-ep-synopsis"] = it }
+            Toggles.ContainerSwitch(
+                "Prefer german titles and summaries",
+                value = settings["prefer-german-metadata", false]
+            ) { settings["prefer-german-metadata"] = it }
+            Row(Modifier.fillMaxWidth()) {
+                Toggles.ContainerSwitch(
+                    "Use list for shows",
+                    modifier = Modifier.weight(1f),
+                    value = settings["shows-list", false],
+                    paddingValues = Toggles.rowStartPadding
+                ) { settings["shows-list"] = it }
+                Toggles.ContainerSwitch(
+                    "Use list for movies",
+                    modifier = Modifier.weight(1f),
+                    value = settings["movies-list", false],
+                    paddingValues = Toggles.rowEndPadding
+                ) { settings["movies-list"] = it }
+            }
+            Toggles.ContainerSwitch(
+                "Sort episodes ascendingly",
+                value = settings["episode-asc", false],
+                paddingValues = Toggles.colEndPadding
+            ) { settings["episode-asc"] = it }
+
+            Toggles.ContainerRadioSelect(
+                "Number of cards to show in portrait",
+                value = settings["portrait-cards", "3"],
+                choices = portraitCardChoices
+            ) {
+                settings["portrait-cards"] = it
+            }
+            Toggles.ContainerRadioSelect(
+                "Number of cards to show in landscape",
+                value = settings["landscape-cards", "7"],
+                choices = landScapeCardChoices
+            ) {
+                settings["landscape-cards"] = it
+            }
+            Spacer(Modifier.height(3.dp))
         }
     }
 
     @Composable
     fun MpvSettings() {
         var preferences by remember { mutableStateOf(MpvPreferences.getOrDefault()) }
-        Text("Performance / Quality", Modifier.padding(6.dp, 3.dp), style = MaterialTheme.typography.titleLarge)
-        Column(Modifier.padding(6.dp)) {
-            MpvCheckbox(
-                "Deband",
-                preferences.deband,
-                MpvDesc.deband
-            ) { preferences = preferences.copy(deband = it).save() }
-            StringChoices("Deband Iterations", debandIterationsChoices, "Higher = better (& slower)", preferences.debandIterations) {
-                preferences = preferences.copy(debandIterations = it).save()
-                it
+        println(preferences)
+        Column {
+            Column(Modifier.settingsContainer()) {
+                Text("Language Preferences", Modifier.padding(10.dp, 7.dp), style = MaterialTheme.typography.titleLarge)
+                Text(
+                    "If nothing is selected here, it defaults to english subtitles.",
+                    Modifier.padding(10.dp, 5.dp),
+                    style = MaterialTheme.typography.titleMedium
+                )
+                Toggles.ContainerSwitch(
+                    "Prefer German subtitles", value = preferences.preferGerman,
+                ) { preferences = preferences.copy(preferGerman = it).save() }
+                Toggles.ContainerSwitch(
+                    "Prefer German dub", value = preferences.preferDeDub,
+                ) { preferences = preferences.copy(preferDeDub = it).save() }
+                Toggles.ContainerSwitch(
+                    "Prefer English dub", value = preferences.preferEnDub,
+                ) { preferences = preferences.copy(preferEnDub = it).save() }
+                Spacer(Modifier.height(3.dp))
             }
 
-            StringChoices("Profile", profileChoices, MpvDesc.profileDescription, preferences.profile) {
-                preferences = preferences.copy(profile = it).save()
-                it
-            }
+            Column(Modifier.settingsContainer()) {
+                Text("Performance / Quality", Modifier.padding(10.dp, 7.dp), style = MaterialTheme.typography.titleLarge)
+                Toggles.ContainerSwitch(
+                    "Deband",
+                    MpvDesc.deband,
+                    value = preferences.deband,
+                ) { preferences = preferences.copy(deband = it).save() }
+                Toggles.ContainerRadioSelect(
+                    "Deband Iterations",
+                    "Higher = better (& slower)",
+                    value = preferences.debandIterations,
+                    choices = debandIterationsChoices,
+                ) { preferences = preferences.copy(debandIterations = it).save() }
 
-            MpvCheckbox(
-                "Hardware Decoding",
-                preferences.hwDecoding,
-                MpvDesc.hwDecoding
-            ) { preferences = preferences.copy(hwDecoding = it).save() }
-            MpvCheckbox(
-                "Alternative Hardware Decoding",
-                preferences.alternativeHwDecode,
-                "If the other doesn't work properly but you want to try regardless."
-            ) { preferences = preferences.copy(alternativeHwDecode = it).save() }
+                Toggles.ContainerRadioSelect(
+                    "Profile", MpvDesc.profileDescription, value = preferences.profile, choices = profileChoices,
+                ) { preferences = preferences.copy(profile = it).save() }
 
-            StringChoices("GPU-API", gpuApiChoices, MpvDesc.gpuAPI, preferences.gpuAPI) {
-                preferences = preferences.copy(gpuAPI = it).save()
-                it
+                Toggles.ContainerSwitch(
+                    "Hardware Decoding",
+                    MpvDesc.hwDecoding,
+                    value = preferences.hwDecoding,
+                ) { preferences = preferences.copy(hwDecoding = it).save() }
+                Toggles.ContainerSwitch(
+                    "Alternative Hardware Decoding",
+                    "If the other doesn't work properly but you want to try regardless.",
+                    value = preferences.alternativeHwDecode,
+                ) { preferences = preferences.copy(alternativeHwDecode = it).save() }
+
+
+                Toggles.ContainerRadioSelect(
+                    "GPU-API", MpvDesc.gpuAPI, value = preferences.gpuAPI, choices = gpuApiChoices,
+                ) { preferences = preferences.copy(gpuAPI = it).save() }
+                Toggles.ContainerRadioSelect(
+                    "Video Output Driver", MpvDesc.outputDriver, value = preferences.videoOutputDriver, choices = videoOutputDriverChoices,
+                ) { preferences = preferences.copy(videoOutputDriver = it).save() }
+                Toggles.ContainerSwitch(
+                    "Force 10bit Dithering", MpvDesc.dither10bit, value = preferences.dither10bit,
+                ) { preferences = preferences.copy(dither10bit = it).save() }
+                Spacer(Modifier.height(3.dp))
             }
-            StringChoices("Video Output Driver", videoOutputDriverChoices, MpvDesc.outputDriver, preferences.videoOutputDriver) {
-                preferences = preferences.copy(videoOutputDriver = it).save()
-                it
-            }
-            MpvCheckbox(
-                "Force 10bit Dithering",
-                preferences.dither10bit,
-                MpvDesc.dither10bit
-            ) { preferences = preferences.copy(dither10bit = it).save() }
-        }
-        HorizontalDivider(Modifier.padding(5.dp), thickness = 2.dp)
-        Text("Language Preferences", style = MaterialTheme.typography.titleLarge)
-        Column(Modifier.padding(6.dp)) {
-            Text(
-                "If nothing here is checked, it will default to English sub",
-                Modifier.padding(10.dp, 4.dp),
-                style = MaterialTheme.typography.bodyMedium
-            )
-            MpvCheckbox(
-                "Prefer German subtitles",
-                preferences.preferGerman
-            ) { preferences = preferences.copy(preferGerman = it).save() }
-            MpvCheckbox(
-                "Prefer English dub",
-                preferences.preferEnDub
-            ) { preferences = preferences.copy(preferEnDub = it).save() }
-            MpvCheckbox(
-                "Prefer German dub",
-                preferences.preferDeDub
-            ) { preferences = preferences.copy(preferDeDub = it).save() }
         }
     }
 }
