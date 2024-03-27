@@ -12,17 +12,19 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.viewinterop.AndroidView
 import dev.jdtech.mpv.MPVLib
+import io.github.xxfast.kstore.extensions.getOrEmpty
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import moe.styx.common.compose.files.Storage
 import moe.styx.common.compose.files.getCurrentAndCollectFlow
 import moe.styx.common.compose.http.login
-import moe.styx.common.compose.utils.Log
 import moe.styx.common.compose.utils.MpvPreferences
+import moe.styx.common.compose.utils.ServerStatus
 import moe.styx.common.data.MediaEntry
 import moe.styx.common.extension.eqI
 import moe.styx.common.json
+import moe.styx.common.util.Log
 
 actual class MediaPlayer actual constructor(initialEntryID: String, startAt: Long) : AMediaPlayer(initialEntryID, startAt) {
     val observer by lazy {
@@ -189,9 +191,24 @@ actual class MediaPlayer actual constructor(initialEntryID: String, startAt: Lon
         }, Modifier.fillMaxSize())
 
         LaunchedEffect(curEntryID) {
+            val downloaded = Storage.stores.downloadedStore.getOrEmpty().find { it.entryID eqI curEntryID }
             val currentEntry = entryList.find { it.GUID eqI curEntryID }
-            if (currentEntry != null && login != null) {
-                MPVLib.command(arrayOf("loadfile", "${BuildConfig.BASE_URL}/watch/${currentEntry.GUID}?token=${login?.watchToken}", "replace"))
+            if ((ServerStatus.lastKnown == ServerStatus.UNKNOWN || login == null) && downloaded == null) {
+                MPVLib.command(
+                    arrayOf(
+                        "show-text",
+                        "You do not have this episode downloaded and are not logged in.\nOr don't have a working connection...",
+                        "5000"
+                    )
+                )
+                return@LaunchedEffect
+            }
+            if (currentEntry != null) {
+                if (downloaded != null) {
+                    MPVLib.command(arrayOf("loadfile", downloaded.path, "replace"))
+                } else {
+                    MPVLib.command(arrayOf("loadfile", "${BuildConfig.BASE_URL}/watch/${currentEntry.GUID}?token=${login?.watchToken}", "replace"))
+                }
             }
         }
     }
@@ -261,6 +278,7 @@ private fun MediaPlayer.setMPVOptions() {
     MPVLib.setOptionString("gpu-context", "android")
     MPVLib.setOptionString("opengl-es", "yes")
     MPVLib.setOptionString("tls-verify", "no")
+    MPVLib.setOptionString("blend-subtitles", "yes")
     MPVLib.setOptionString("cache", "yes")
     MPVLib.setOptionString("demuxer-max-bytes", "50MiB")
     MPVLib.setOptionString("demuxer-max-back-bytes", "32MiB")

@@ -27,11 +27,12 @@ import moe.styx.common.compose.extensions.kamelConfig
 import moe.styx.common.compose.http.isLoggedIn
 import moe.styx.common.compose.http.login
 import moe.styx.common.compose.settings
+import moe.styx.common.compose.threads.DownloadQueue
 import moe.styx.common.compose.threads.Heartbeats
 import moe.styx.common.compose.threads.RequestQueue
 import moe.styx.common.compose.utils.LocalGlobalNavigator
-import moe.styx.common.compose.utils.Log
 import moe.styx.common.compose.utils.ServerStatus
+import moe.styx.common.util.Log
 import moe.styx.styx2m.misc.LocalLayoutSize
 import moe.styx.styx2m.misc.fetchWindowSize
 import moe.styx.styx2m.player.PlayerView
@@ -98,6 +99,7 @@ fun InitLifeCycleListener() {
                 Log.d { "Lifecycle Event: $event" }
                 Heartbeats.onLifecycleEvent(event)
                 RequestQueue.onLifecycleEvent(event)
+                DownloadQueue.onLifecycleEvent(event)
             }
         }
         LifecycleTracker.addListener(listener)
