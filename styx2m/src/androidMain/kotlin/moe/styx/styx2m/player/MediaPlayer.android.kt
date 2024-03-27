@@ -287,7 +287,7 @@ private fun MediaPlayer.setMPVOptions() {
     MPVLib.setOptionString("ytdl", "no")
     MPVLib.setOptionString("save-position-on-quit", "no")
     MPVLib.setOptionString("sub-font-provider", "none")
-    MPVLib.setOptionString("hwdec", if (pref.hwDecoding) (if (pref.alternativeHwDecode) "mediacodec-copy" else "mediacodec") else "no")
+    MPVLib.setOptionString("hwdec", if (pref.hwDecoding) (if (pref.alternativeHwDecode) "mediacodec" else "mediacodec-copy") else "no")
     MPVLib.setOptionString("hwdec-codecs", "h264,hevc,mpeg4,mpeg2video,vp8,vp9,av1")
     MPVLib.setOptionString("deband", if (pref.deband) "yes" else "no")
     MPVLib.setOptionString("deband-iterations", pref.debandIterations)
