@@ -16,6 +16,7 @@ import io.github.xxfast.kstore.extensions.getOrEmpty
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import moe.styx.common.compose.files.Storage
 import moe.styx.common.compose.files.getCurrentAndCollectFlow
 import moe.styx.common.compose.http.login
@@ -204,6 +205,10 @@ actual class MediaPlayer actual constructor(initialEntryID: String, startAt: Lon
                 return@LaunchedEffect
             }
             if (currentEntry != null) {
+                // "Fix" for downloaded files, stolen from findroid
+                withContext(Dispatchers.IO) {
+                    Thread.sleep(1)
+                }
                 if (downloaded != null) {
                     MPVLib.command(arrayOf("loadfile", downloaded.path, "replace"))
                 } else {
@@ -287,7 +292,7 @@ private fun MediaPlayer.setMPVOptions() {
     MPVLib.setOptionString("ytdl", "no")
     MPVLib.setOptionString("save-position-on-quit", "no")
     MPVLib.setOptionString("sub-font-provider", "none")
-    MPVLib.setOptionString("hwdec", if (pref.hwDecoding) (if (pref.alternativeHwDecode) "mediacodec" else "mediacodec-copy") else "no")
+    MPVLib.setOptionString("hwdec", if (pref.hwDecoding) (if (pref.alternativeHwDecode) "mediacodec-copy" else "mediacodec") else "no")
     MPVLib.setOptionString("hwdec-codecs", "h264,hevc,mpeg4,mpeg2video,vp8,vp9,av1")
     MPVLib.setOptionString("deband", if (pref.deband) "yes" else "no")
     MPVLib.setOptionString("deband-iterations", pref.debandIterations)
