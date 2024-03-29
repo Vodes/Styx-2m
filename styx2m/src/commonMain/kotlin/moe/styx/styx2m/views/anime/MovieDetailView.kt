@@ -34,12 +34,12 @@ import moe.styx.common.data.MediaEntry
 import moe.styx.common.data.MediaWatched
 import moe.styx.common.extension.currentUnixSeconds
 import moe.styx.common.extension.eqI
-import moe.styx.common.extension.toBoolean
 import moe.styx.styx2m.components.AboutView
 import moe.styx.styx2m.components.StupidImageNameArea
 import moe.styx.styx2m.misc.LayoutSizes
 import moe.styx.styx2m.misc.LocalLayoutSize
 import moe.styx.styx2m.misc.getProgress
+import moe.styx.styx2m.misc.pushMediaView
 import moe.styx.styx2m.player.PlayerView
 
 class MovieDetailView(private val mediaID: String) : Screen {
@@ -98,10 +98,7 @@ class MovieDetailView(private val mediaID: String) : Screen {
             HorizontalDivider(Modifier.fillMaxWidth().padding(10.dp, 4.dp, 10.dp, 5.dp), thickness = 2.dp)
             MediaRelations(media, mediaList) {
                 settings["episode-list-index"] = 0;
-                if (it.isSeries.toBoolean())
-                    nav.replace(AnimeDetailView(it.GUID))
-                else
-                    nav.replace(MovieDetailView(it.GUID))
+                nav.pushMediaView(it, true)
             }
         }
     }

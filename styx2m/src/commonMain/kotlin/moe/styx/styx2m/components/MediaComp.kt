@@ -30,10 +30,8 @@ import moe.styx.common.compose.components.misc.ExpandableText
 import moe.styx.common.compose.extensions.*
 import moe.styx.common.compose.settings
 import moe.styx.common.data.Media
-import moe.styx.common.extension.toBoolean
 import moe.styx.styx2m.misc.LayoutSizes
-import moe.styx.styx2m.views.anime.AnimeDetailView
-import moe.styx.styx2m.views.anime.MovieDetailView
+import moe.styx.styx2m.misc.pushMediaView
 
 
 @Composable
@@ -44,10 +42,7 @@ fun MetadataArea(media: Media, nav: Navigator, mediaList: List<Media>, nameImage
         HorizontalDivider(Modifier.fillMaxWidth().padding(10.dp, 4.dp, 10.dp, 5.dp), thickness = 2.dp)
         MediaRelations(media, mediaList) {
             settings["episode-list-index"] = 0
-            if (it.isSeries.toBoolean())
-                nav.replace(AnimeDetailView(it.GUID))
-            else
-                nav.replace(MovieDetailView(it.GUID))
+            nav.pushMediaView(it)
         }
     }
 }
