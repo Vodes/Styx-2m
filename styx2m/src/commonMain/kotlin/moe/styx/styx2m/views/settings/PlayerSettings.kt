@@ -76,6 +76,9 @@ fun MpvSettings() {
             Toggles.ContainerSwitch(
                 "Force 10bit Dithering", MpvDesc.dither10bit, value = preferences.dither10bit,
             ) { preferences = preferences.copy(dither10bit = it).save() }
+            Toggles.ContainerSwitch(
+                "Blend Subtitles", MpvDesc.blendSubs, value = preferences.blendSubs,
+            ) { preferences = preferences.copy(blendSubs = it).save() }
             Spacer(Modifier.height(3.dp))
         }
     }
