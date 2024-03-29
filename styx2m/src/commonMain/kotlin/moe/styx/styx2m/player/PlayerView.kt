@@ -80,7 +80,6 @@ class PlayerView(entryID: String, startAt: Long = 0L) : Screen {
         val duration by mediaPlayer.fileLength.collectAsState()
         val trackList by mediaPlayer.trackList.collectAsState()
         val chapters by mediaPlayer.chapters.collectAsState()
-        var showTrackSelection by remember { mutableStateOf(false) }
 
         val currentEntry = entryList.find { it.GUID eqI currentEntryState }
         val media = currentEntry?.let { mediaList.find { it.GUID eqI currentEntry.mediaID } }
@@ -97,7 +96,7 @@ class PlayerView(entryID: String, startAt: Long = 0L) : Screen {
             Row(Modifier.zIndex(0F).fillMaxSize()) {
                 mediaPlayer.PlayerComponent()
             }
-            AnimatedVisibility(controlsTimeout != 0 || showTrackSelection, enter = fadeIn(), exit = fadeOut()) {
+            AnimatedVisibility(controlsTimeout != 0, enter = fadeIn(), exit = fadeOut()) {
                 LaunchedEffect(key1 = "") {
                     while (controlsTimeout != 0) {
                         controlsTimeout--
@@ -108,13 +107,7 @@ class PlayerView(entryID: String, startAt: Long = 0L) : Screen {
                 }
 
                 Column(Modifier.zIndex(1F).fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
-                    println(trackList)
-                    NameRow(mediaTitle, media, currentEntry, nav, trackList) { showTrackSelection = true }
-                    AnimatedVisibility(showTrackSelection) {
-                        Column(Modifier.fillMaxSize()) {
-                            TracklistDialog(mediaPlayer, trackList) { showTrackSelection = false; controlsTimeout = 4 }
-                        }
-                    }
+                    NameRow(mediaTitle, media, currentEntry, nav, trackList, mediaPlayer) { controlsTimeout = 3 }
                     ControlsRow(mediaPlayer, playbackStatus, currentTime, chapters, next, prev) { controlsTimeout = 4 }
                     TimelineControls(mediaPlayer, currentTime, cacheTime, duration, chapters) { controlsTimeout = 4 }
                 }

@@ -2,6 +2,7 @@ package moe.styx.styx2m.player
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
@@ -12,8 +13,10 @@ import androidx.compose.material.icons.automirrored.filled.ListAlt
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
@@ -23,10 +26,13 @@ import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import cafe.adriel.voyager.navigator.Navigator
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import moe.styx.common.compose.components.AppShapes
 import moe.styx.common.compose.components.buttons.IconButtonWithTooltip
 import moe.styx.common.data.Media
 import moe.styx.common.data.MediaEntry
+import moe.styx.common.extension.eqI
 import moe.styx.styx2m.components.PlayerIconButton
 import moe.styx.styx2m.misc.Chapter
 import moe.styx.styx2m.misc.Track
@@ -37,10 +43,30 @@ import kotlin.math.max
 import kotlin.math.min
 
 @Composable
-fun NameRow(title: String, media: Media?, entry: MediaEntry?, nav: Navigator, trackList: List<Track>, onClickTracklist: () -> Unit) {
+fun NameRow(
+    title: String,
+    media: Media?,
+    entry: MediaEntry?,
+    nav: Navigator,
+    trackList: List<Track>,
+    mediaPlayer: MediaPlayer,
+    onTapped: () -> Unit
+) {
     val renderedTitle = if (title.isBlank() || title.contains("?token")) {
         "${media?.name ?: "Unknown"} - ${entry?.entryNumber}"
     } else title
+
+    var showTrackSelect by rememberSaveable { mutableStateOf(false) }
+
+    LaunchedEffect(showTrackSelect) {
+        launch {
+            while (showTrackSelect) {
+                onTapped()
+                delay(500)
+            }
+        }
+    }
+
     Row(
         Modifier.fillMaxWidth().background(DarkColorScheme.background.copy(0.5F)),
         verticalAlignment = Alignment.CenterVertically
@@ -55,12 +81,60 @@ fun NameRow(title: String, media: Media?, entry: MediaEntry?, nav: Navigator, tr
             )
         ) { nav.pop() }
         Text(renderedTitle, style = MaterialTheme.typography.bodyLarge, color = DarkColorScheme.onSurface, modifier = Modifier.weight(1f))
-        if (trackList.isNotEmpty()) {
-            IconButtonWithTooltip(
-                Icons.AutoMirrored.Filled.ListAlt,
-                "Track Selection",
-                Modifier.padding(10.dp, 0.dp).size(70.dp)
-            ) { onClickTracklist() }
+        Box {
+            if (trackList.isNotEmpty()) {
+                IconButtonWithTooltip(
+                    Icons.AutoMirrored.Filled.ListAlt,
+                    "Track Selection",
+                    Modifier.padding(10.dp, 0.dp).size(70.dp)
+                ) { showTrackSelect = !showTrackSelect }
+            }
+            DropdownMenu(
+                showTrackSelect,
+                onDismissRequest = { showTrackSelect = false },
+                modifier = Modifier.fillMaxHeight(0.7F).heightIn(100.dp, 300.dp).align(Alignment.TopEnd)
+            ) {
+                Column(Modifier.width(IntrinsicSize.Max).padding(3.dp), horizontalAlignment = Alignment.Start) {
+                    Text("Audio Tracks", Modifier.padding(4.dp, 0.dp, 0.dp, 6.dp), style = MaterialTheme.typography.titleMedium)
+                    trackList.filter { it.type eqI "audio" }.forEachIndexed { index, track ->
+                        TrackDropdownItem(track, mediaPlayer, index != 0)
+                    }
+                    Text("Subtitle Tracks", Modifier.padding(4.dp, 8.dp, 0.dp, 6.dp), style = MaterialTheme.typography.titleMedium)
+                    trackList.filter { it.type eqI "sub" }.forEachIndexed { index, track ->
+                        TrackDropdownItem(track, mediaPlayer, index != 0)
+                    }
+                }
+            }
+        }
+
+    }
+}
+
+@Composable
+fun TrackDropdownItem(track: Track, mediaPlayer: MediaPlayer, border: Boolean) {
+    Column {
+        if (border) {
+            HorizontalDivider(Modifier.padding(5.dp, 3.dp).fillMaxWidth(), thickness = 2.dp)
+        }
+        Row(
+            Modifier.padding(7.dp, 7.dp).height(IntrinsicSize.Min)
+                .clickable(enabled = !track.selected) {
+                    if (track.type eqI "sub")
+                        mediaPlayer.setSubtitleTrack(track.id)
+                    else
+                        mediaPlayer.setAudioTrack(track.id)
+                },
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                "${track.lang ?: "Unknown"}${if (track.title.isNullOrBlank()) "" else " | ${track.title}"}",
+                style = MaterialTheme.typography.labelMedium,
+                modifier = Modifier.weight(1f)
+            )
+            Icon(
+                Icons.Default.Done, "Selected track",
+                modifier = Modifier.padding(4.dp, 0.dp).size(20.dp).alpha(if (track.selected) 1f else 0f)
+            )
         }
     }
 }
