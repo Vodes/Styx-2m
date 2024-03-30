@@ -3,6 +3,7 @@ package moe.styx.styx2m.views.settings
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
@@ -20,7 +21,7 @@ fun AppSettings() {
         exitApp()
     Column(Modifier.padding(2.dp)) {
         Text(
-            "These are some options to \"fix\" unnecessary data usage.",
+            "Below are some options to \"fix\" unnecessary data usage.",
             style = MaterialTheme.typography.bodyLarge,
             modifier = Modifier.padding(5.dp)
         )
@@ -35,15 +36,22 @@ fun AppSettings() {
             style = MaterialTheme.typography.labelMedium,
             modifier = Modifier.padding(5.dp)
         )
-        Button({
-            val appDir = appConfig().appStoragePath.toPath()
-            val cacheDir = appConfig().appCachePath.toPath()
-            SYSTEMFILES.deleteRecursively(appDir)
-            SYSTEMFILES.deleteRecursively(cacheDir)
-            SYSTEMFILES.createDirectories(appDir)
-            SYSTEMFILES.createDirectories(cacheDir)
-            shouldExit = true
-        }, modifier = Modifier.padding(4.dp)) {
+        Button(
+            {
+                val appDir = appConfig().appStoragePath.toPath()
+                val cacheDir = appConfig().appCachePath.toPath()
+                SYSTEMFILES.deleteRecursively(appDir)
+                SYSTEMFILES.deleteRecursively(cacheDir)
+                SYSTEMFILES.createDirectories(appDir)
+                SYSTEMFILES.createDirectories(cacheDir)
+                shouldExit = true
+            },
+            modifier = Modifier.padding(4.dp),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = MaterialTheme.colorScheme.secondary,
+                contentColor = MaterialTheme.colorScheme.onSecondary
+            )
+        ) {
             Text("Delete all files")
         }
         Text(

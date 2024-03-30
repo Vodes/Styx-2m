@@ -1,6 +1,7 @@
 package moe.styx.styx2m.player
 
 import Styx_m.styx_m.BuildConfig
+import android.content.Context
 import android.view.SurfaceHolder
 import android.view.SurfaceView
 import androidx.compose.foundation.layout.fillMaxSize
@@ -17,6 +18,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import moe.styx.common.compose.appConfig
 import moe.styx.common.compose.files.Storage
 import moe.styx.common.compose.http.login
 import moe.styx.common.compose.utils.MpvPreferences
@@ -25,6 +27,10 @@ import moe.styx.common.data.MediaEntry
 import moe.styx.common.extension.eqI
 import moe.styx.common.json
 import moe.styx.common.util.Log
+import moe.styx.common.util.SYSTEMFILES
+import moe.styx.styx2m.R
+import okio.Path.Companion.toPath
+import java.io.FileOutputStream
 
 actual class MediaPlayer actual constructor(initialEntryID: String, startAt: Long) : AMediaPlayer(initialEntryID, startAt) {
     val observer by lazy {
@@ -178,7 +184,7 @@ actual class MediaPlayer actual constructor(initialEntryID: String, startAt: Lon
         )
         if (!playerInitialized && !libWasLoaded) {
             MPVLib.create(context)
-            setMPVOptions()
+            setMPVOptions(context)
             MPVLib.init()
             initObservers()
             libWasLoaded = true
@@ -267,9 +273,23 @@ private fun MediaPlayer.initObservers() {
     }
 }
 
-private fun MediaPlayer.setMPVOptions() {
+private fun MediaPlayer.setMPVOptions(context: Context) {
+    val configDir = appConfig().appStoragePath.toPath() / "mpv"
+    SYSTEMFILES.createDirectory(configDir)
+    if ((SYSTEMFILES.listOrNull(configDir) ?: emptyList()).find { it.name eqI "subfont.ttf" } == null) {
+        runCatching {
+            val fontStream = context.resources.openRawResource(R.raw.subfont)
+            val outputFile = configDir / "subfont.ttf"
+            fontStream.copyTo(FileOutputStream(outputFile.toFile()))
+        }.onFailure {
+            Log.e("MPV", exception = it) { "Failed to copy font to mpv config dir." }
+        }.onSuccess {
+            Log.i("MPV") { "Copied subfont.ttf file to mpv config dir." }
+        }
+    }
     val pref = MpvPreferences.getOrDefault()
-    MPVLib.setOptionString("config", "no")
+    MPVLib.setOptionString("config", "yes")
+    MPVLib.setOptionString("config-dir", configDir.toString())
     MPVLib.setOptionString("profile", pref.getPlatformProfile())
     if (pref.profile == "normal") {
         MPVLib.setOptionString("scale", "catmull_rom")
