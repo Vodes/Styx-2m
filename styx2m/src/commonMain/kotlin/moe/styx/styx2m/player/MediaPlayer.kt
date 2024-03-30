@@ -33,7 +33,7 @@ abstract class AMediaPlayer(val initialEntryID: String, val startAt: Long = 0L) 
     abstract fun internalPlayEntry(mediaEntry: MediaEntry, scope: CoroutineScope)
 
     @Composable
-    abstract fun PlayerComponent()
+    abstract fun PlayerComponent(entryList: List<MediaEntry>)
 
     abstract fun releasePlayer()
 }
@@ -47,5 +47,14 @@ sealed class PlaybackStatus {
     data object Buffering : PlaybackStatus()
     data object Seeking : PlaybackStatus()
 }
+
+data class PlayerState(
+    val mediaTitle: String = "",
+    val cacheEnd: Long = 0L,
+    val progress: Long = 0L,
+    val fileLength: Long = 0L,
+    val trackList: List<Track> = emptyList(),
+    val chapters: List<Chapter> = emptyList()
+)
 
 expect class MediaPlayer(initialEntryID: String, startAt: Long = 0L) : AMediaPlayer

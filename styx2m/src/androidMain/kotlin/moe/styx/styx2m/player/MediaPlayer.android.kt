@@ -18,7 +18,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import moe.styx.common.compose.files.Storage
-import moe.styx.common.compose.files.getCurrentAndCollectFlow
 import moe.styx.common.compose.http.login
 import moe.styx.common.compose.utils.MpvPreferences
 import moe.styx.common.compose.utils.ServerStatus
@@ -171,9 +170,8 @@ actual class MediaPlayer actual constructor(initialEntryID: String, startAt: Lon
     }
 
     @Composable
-    override fun PlayerComponent() {
+    override fun PlayerComponent(entryList: List<MediaEntry>) {
         val context = LocalContext.current
-        val entryList by Storage.stores.entryStore.getCurrentAndCollectFlow()
         val curEntryID by this.currentEntry.collectAsState()
         initialCommands = listOf(
             arrayOf("set", "start", "$startAt"),

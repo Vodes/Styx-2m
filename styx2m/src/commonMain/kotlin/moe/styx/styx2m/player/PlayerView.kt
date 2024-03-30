@@ -19,17 +19,16 @@ import com.moriatsushi.insetsx.rememberWindowInsetsController
 import com.multiplatform.lifecycle.LifecycleEvent
 import com.multiplatform.lifecycle.LifecycleListener
 import com.multiplatform.lifecycle.LifecycleTracker
+import io.github.xxfast.kstore.extensions.getOrEmpty
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.runBlocking
 import moe.styx.common.compose.files.Storage
-import moe.styx.common.compose.files.getCurrentAndCollectFlow
 import moe.styx.common.compose.threads.Heartbeats
 import moe.styx.common.compose.utils.LocalGlobalNavigator
 import moe.styx.common.data.MediaActivity
 import moe.styx.common.extension.eqI
-import moe.styx.styx2m.misc.KeepScreenOn
-import moe.styx.styx2m.misc.findNext
-import moe.styx.styx2m.misc.findPrevious
-import moe.styx.styx2m.misc.updateWatchedForID
+import moe.styx.styx2m.misc.*
 import kotlin.jvm.Transient
 
 class PlayerView(entryID: String, startAt: Long = 0L) : Screen {
@@ -48,8 +47,8 @@ class PlayerView(entryID: String, startAt: Long = 0L) : Screen {
     override fun Content() {
         val nav = LocalGlobalNavigator.current
         val insets = rememberWindowInsetsController()
-        val entryList by Storage.stores.entryStore.getCurrentAndCollectFlow()
-        val mediaList by Storage.stores.mediaStore.getCurrentAndCollectFlow()
+        val entryList = remember { runBlocking { Storage.stores.entryStore.getOrEmpty() } }
+        val mediaList = remember { runBlocking { Storage.stores.mediaStore.getOrEmpty() } }
         insets?.setIsNavigationBarsVisible(false)
         insets?.setIsStatusBarsVisible(false)
         insets?.setSystemBarsBehavior(SystemBarsBehavior.Immersive)
@@ -59,8 +58,24 @@ class PlayerView(entryID: String, startAt: Long = 0L) : Screen {
             LifecycleTracker.addListener(listener)
         }
 
-        val currentTime by mediaPlayer.progress.collectAsState()
         val currentEntryState by mediaPlayer.currentEntry.collectAsState()
+        val playbackStatus by mediaPlayer.playbackStatus.collectAsState()
+
+        val playerState by combine(
+            mediaPlayer.mediaTitle,
+            mediaPlayer.cacheEnd,
+            mediaPlayer.progress,
+            mediaPlayer.fileLength,
+            mediaPlayer.trackList,
+            mediaPlayer.chapters
+        ) {
+            PlayerState(it[0] as String, it[1] as Long, it[2] as Long, it[3] as Long, it[4] as List<Track>, it[5] as List<Chapter>)
+        }.collectAsState(PlayerState())
+
+        val currentEntry = remember(currentEntryState) { entryList.find { it.GUID eqI currentEntryState } }
+        val media = remember(currentEntry) { currentEntry?.let { mediaList.find { it.GUID eqI currentEntry.mediaID } } }
+        val next = remember(currentEntry, media) { currentEntry?.let { media?.let { entryList.findNext(currentEntry, media) } } }
+        val prev = remember(currentEntry, media) { currentEntry?.let { media?.let { entryList.findPrevious(currentEntry, media) } } }
 
         DisposableEffect(Unit) {
             onDispose {
@@ -70,31 +85,21 @@ class PlayerView(entryID: String, startAt: Long = 0L) : Screen {
                 insets?.setSystemBarsBehavior(SystemBarsBehavior.Default)
                 mediaPlayer.releasePlayer()
                 Heartbeats.mediaActivity = null
-                updateWatchedForID(currentEntryState, currentTime, mediaPlayer.playbackPercent)
+                updateWatchedForID(currentEntryState, playerState.progress, mediaPlayer.playbackPercent)
             }
         }
+
         var controlsTimeout by remember { mutableStateOf(4) }
         val interactionSource = remember { MutableInteractionSource() }
-        val playbackStatus by mediaPlayer.playbackStatus.collectAsState()
-        val cacheTime by mediaPlayer.cacheEnd.collectAsState()
-        val duration by mediaPlayer.fileLength.collectAsState()
-        val trackList by mediaPlayer.trackList.collectAsState()
-        val chapters by mediaPlayer.chapters.collectAsState()
 
-        val currentEntry = entryList.find { it.GUID eqI currentEntryState }
-        val media = currentEntry?.let { mediaList.find { it.GUID eqI currentEntry.mediaID } }
-        val mediaTitle by mediaPlayer.mediaTitle.collectAsState()
-        val next = media?.let { entryList.findNext(currentEntry, media) }
-        val prev = media?.let { entryList.findPrevious(currentEntry, media) }
-
-        LaunchedEffect(currentTime, playbackStatus, currentEntry) {
+        LaunchedEffect(playerState, playbackStatus, currentEntry) {
             if (currentEntry != null)
-                Heartbeats.mediaActivity = MediaActivity(currentEntry.GUID, currentTime, playbackStatus == PlaybackStatus.Playing)
+                Heartbeats.mediaActivity = MediaActivity(currentEntry.GUID, playerState.progress, playbackStatus == PlaybackStatus.Playing)
         }
 
         Box(Modifier.fillMaxSize().clickable(interactionSource, indication = null) { controlsTimeout = if (controlsTimeout > 0) 0 else 3 }) {
             Row(Modifier.zIndex(0F).fillMaxSize()) {
-                mediaPlayer.PlayerComponent()
+                mediaPlayer.PlayerComponent(entryList)
             }
             AnimatedVisibility(controlsTimeout != 0, enter = fadeIn(), exit = fadeOut()) {
                 LaunchedEffect(key1 = "") {
@@ -107,9 +112,15 @@ class PlayerView(entryID: String, startAt: Long = 0L) : Screen {
                 }
 
                 Column(Modifier.zIndex(1F).fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
-                    NameRow(mediaTitle, media, currentEntry, nav, trackList, mediaPlayer) { controlsTimeout = 3 }
-                    ControlsRow(mediaPlayer, playbackStatus, currentTime, chapters, next, prev) { controlsTimeout = 4 }
-                    TimelineControls(mediaPlayer, currentTime, cacheTime, duration, chapters) { controlsTimeout = 4 }
+                    NameRow(playerState.mediaTitle, media, currentEntry, nav, playerState.trackList, mediaPlayer) { controlsTimeout = 3 }
+                    ControlsRow(mediaPlayer, playbackStatus, playerState.progress, playerState.chapters, next, prev) { controlsTimeout = 4 }
+                    TimelineControls(
+                        mediaPlayer,
+                        playerState.progress,
+                        playerState.cacheEnd,
+                        playerState.fileLength,
+                        playerState.chapters
+                    ) { controlsTimeout = 4 }
                 }
             }
         }
