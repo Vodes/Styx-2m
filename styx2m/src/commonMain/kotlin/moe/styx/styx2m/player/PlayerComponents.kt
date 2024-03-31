@@ -118,9 +118,12 @@ fun TrackDropdownItem(track: Track, mediaPlayer: MediaPlayer, border: Boolean) {
         }
         Row(
             Modifier.padding(7.dp, 7.dp).height(IntrinsicSize.Min)
-                .clickable(enabled = !track.selected) {
+                .clickable(enabled = !track.selected || track.type eqI "sub") {
                     if (track.type eqI "sub")
-                        mediaPlayer.setSubtitleTrack(track.id)
+                        if (track.selected)
+                            mediaPlayer.setSubtitleTrack(-1)
+                        else
+                            mediaPlayer.setSubtitleTrack(track.id)
                     else
                         mediaPlayer.setAudioTrack(track.id)
                 },

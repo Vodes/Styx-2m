@@ -157,7 +157,7 @@ actual class MediaPlayer actual constructor(initialEntryID: String, startAt: Lon
 
     override fun setSubtitleTrack(id: Int) {
         if (playerInitialized && (playbackStatus.value in arrayOf(PlaybackStatus.Playing, PlaybackStatus.Paused))) {
-            MPVLib.command(arrayOf("set", "sub", "$id"))
+            MPVLib.command(arrayOf("set", "sub", if (id == -1) "no" else "$id"))
         }
     }
 
