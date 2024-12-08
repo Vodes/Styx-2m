@@ -5,12 +5,17 @@ composeApp/release/
 !gradle/wrapper/gradle-wrapper.jar
 !**/src/main/**/build/
 !**/src/test/**/build/
+.kotlin/metadata
+.idea/runConfigurations.xml
+.idea/misc.xml
+.idea/deploymentTargetSelector.xml
 
 ### IntelliJ IDEA ###
 .idea/modules.xml
 .idea/jarRepositories.xml
 .idea/compiler.xml
 .idea/libraries/
+
 *.iws
 *.iml
 *.ipr
