@@ -19,6 +19,7 @@ import moe.styx.common.compose.http.generateCode
 import moe.styx.common.compose.http.isLoggedIn
 import moe.styx.common.compose.utils.LocalGlobalNavigator
 import moe.styx.styx2m.openUrl
+import moe.styx.styx2m.views.MainOverview
 
 class LoginView : Screen {
 
@@ -35,7 +36,7 @@ class LoginView : Screen {
                     return@let checkLogin(creationResponse!!.GUID, true)
                 }
                 if (log != null) {
-                    nav.push(LoadingView())
+                    nav.replaceAll(MainOverview())
                     break
                 }
 

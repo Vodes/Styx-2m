@@ -4,7 +4,6 @@ import Styx_m.styx_m.BuildConfig
 import android.app.Application
 import android.content.Intent
 import android.net.Uri
-import android.os.Build
 import android.os.Bundle
 import android.view.WindowManager
 import androidx.activity.ComponentActivity
@@ -14,8 +13,10 @@ import androidx.core.view.WindowCompat
 import com.multiplatform.lifecycle.LifecycleTracker
 import com.multiplatform.lifecyle.AndroidLifecycleEventObserver
 import moe.styx.common.compose.AppConfig
-import moe.styx.common.compose.appConfig
+import moe.styx.common.compose.AppContextImpl
+import moe.styx.common.compose.AppContextImpl.appConfig
 import moe.styx.common.http.getHttpClient
+import moe.styx.common.util.Log
 
 class AndroidApp : Application() {
     companion object {
@@ -25,6 +26,7 @@ class AndroidApp : Application() {
     override fun onCreate() {
         super.onCreate()
         INSTANCE = this
+        AppContextImpl.setUp(this)
     }
 }
 
@@ -34,8 +36,7 @@ class AppActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         WindowCompat.setDecorFitsSystemWindows(window, false)
-        if (Build.VERSION.SDK_INT >= 28)
-            window.attributes.layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES
+        window.attributes.layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES
         enableEdgeToEdge()
         lifecycle.addObserver(observer)
         getHttpClient("${BuildConfig.APP_NAME} (Android) - ${BuildConfig.APP_VERSION}")
@@ -47,9 +48,11 @@ class AppActivity : ComponentActivity() {
                 BuildConfig.IMAGE_URL,
                 BuildConfig.DEBUG_TOKEN,
                 cacheDir.path,
-                filesDir.path
+                filesDir.path,
+                BuildConfig.VERSION_CHECK_URL
             )
         }
+        Log.debugEnabled = true
         setContent {
             App()
         }

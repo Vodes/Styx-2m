@@ -68,11 +68,11 @@ android {
     compileSdk = 35
 
     defaultConfig {
-        minSdk = 27
+        minSdk = 28
         //noinspection EditedTargetSdkVersion
         targetSdk = 35
 
-        applicationId = "moe.styx.styx2m"
+        applicationId = "moe.styx.styx2m.debug"
         versionCode = 4
         versionName = "${project.version}"
         base.archivesName = "$applicationId-v$versionName"
@@ -130,5 +130,5 @@ buildConfig {
     buildConfigField("IMAGE_URL", System.getenv("STYX_IMAGEURL")) // Example: https://images.company.com
     buildConfigField("SITE", siteURL.split("https://").getOrElse(1) { siteURL })
     buildConfigField("BUILD_TIME", (System.currentTimeMillis() / 1000))
-    buildConfigField("VERSION_CHECK_URL", "https://raw.githubusercontent.com/Vodes/Styx-2m/master/styx2m/build.gradle.kts")
+    buildConfigField("VERSION_CHECK_URL", "https://api.github.com/repos/Vodes/Styx-2m/tags")
 }

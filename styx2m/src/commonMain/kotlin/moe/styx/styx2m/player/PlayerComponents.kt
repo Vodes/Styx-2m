@@ -38,7 +38,7 @@ import moe.styx.styx2m.misc.Chapter
 import moe.styx.styx2m.misc.Track
 import moe.styx.styx2m.misc.ifInvalid
 import moe.styx.styx2m.misc.secondsDurationString
-import moe.styx.styx2m.theme.DarkColorScheme
+import moe.styx.styx2m.theme.darkScheme
 import kotlin.math.max
 import kotlin.math.min
 
@@ -68,7 +68,7 @@ fun NameRow(
     }
 
     Row(
-        Modifier.fillMaxWidth().background(DarkColorScheme.background.copy(0.5F)),
+        Modifier.fillMaxWidth().background(darkScheme.background.copy(0.5F)),
         verticalAlignment = Alignment.CenterVertically
     ) {
         IconButtonWithTooltip(
@@ -76,11 +76,11 @@ fun NameRow(
             "Back",
             Modifier.size(70.dp),
             colors = IconButtonDefaults.iconButtonColors(
-                contentColor = DarkColorScheme.onSurface,
-                disabledContentColor = DarkColorScheme.inverseOnSurface
+                contentColor = darkScheme.onSurface,
+                disabledContentColor = darkScheme.inverseOnSurface
             )
         ) { nav.pop() }
-        Text(renderedTitle, style = MaterialTheme.typography.bodyLarge, color = DarkColorScheme.onSurface, modifier = Modifier.weight(1f))
+        Text(renderedTitle, style = MaterialTheme.typography.bodyLarge, color = darkScheme.onSurface, modifier = Modifier.weight(1f))
         Box {
             if (trackList.isNotEmpty()) {
                 IconButtonWithTooltip(
@@ -154,9 +154,9 @@ fun ColumnScope.ControlsRow(
 ) {
     val scope = rememberCoroutineScope()
     val colors = IconButtonDefaults.iconButtonColors(
-        contentColor = DarkColorScheme.onSurface,
-        containerColor = DarkColorScheme.background.copy(0.5F),
-        disabledContentColor = DarkColorScheme.inverseOnSurface
+        contentColor = darkScheme.onSurface,
+        containerColor = darkScheme.background.copy(0.5F),
+        disabledContentColor = darkScheme.inverseOnSurface
     )
     val iconsEnabled = playbackStatus !in arrayOf(PlaybackStatus.Idle, PlaybackStatus.EOF, PlaybackStatus.Buffering)
     Row(
@@ -246,7 +246,7 @@ fun TimelineControls(
     onTap: () -> Unit
 ) {
     Row(
-        Modifier.padding(25.dp, 20.dp).clip(AppShapes.extraLarge).background(DarkColorScheme.background.copy(0.5F))
+        Modifier.padding(25.dp, 20.dp).clip(AppShapes.extraLarge).background(darkScheme.background.copy(0.5F))
             .fillMaxWidth(0.88F),
         horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically
@@ -285,13 +285,13 @@ fun TimelineControls(
             LinearProgressIndicator(
                 { (cacheTime.toFloat() / duration).ifInvalid(0F) },
                 Modifier.fillMaxWidth().height(18.dp).zIndex(1F).clip(AppShapes.small),
-                color = DarkColorScheme.onSurface.copy(0.3F),
-                trackColor = DarkColorScheme.surface.copy(0.8F)
+                color = darkScheme.onSurface.copy(0.3F),
+                trackColor = darkScheme.surface.copy(0.8F)
             )
             LinearProgressIndicator(
                 { (currentTime.toFloat() / duration).ifInvalid(0F) },
                 Modifier.fillMaxWidth().height(18.dp).zIndex(2F).clip(AppShapes.small),
-                color = DarkColorScheme.primary,
+                color = darkScheme.primary,
                 trackColor = Color.Transparent
             )
             if (chapters.isNotEmpty()) {
@@ -304,7 +304,7 @@ fun TimelineControls(
                             start = Offset(offX - 1F, 0F),
                             end = Offset(offX - 1F, height.toFloat() - 9F),
                             strokeWidth = 5F,
-                            color = DarkColorScheme.secondary
+                            color = darkScheme.secondary
                         )
                     }
                 }

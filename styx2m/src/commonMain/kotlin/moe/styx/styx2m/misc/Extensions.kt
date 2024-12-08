@@ -76,7 +76,7 @@ fun MediaWatched?.getProgress(): Long {
 
 fun updateWatchedForID(entryID: String, current: Long, percent: Float) = runBlocking {
     val watched = MediaWatched(entryID, login?.userID ?: "", currentUnixSeconds(), current, percent, percent)
-    RequestQueue.updateWatched(watched).join()
+    RequestQueue.updateWatched(watched).first.join()
     delay(200L)
 }
 

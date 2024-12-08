@@ -16,6 +16,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.IntOffset
 import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.transitions.SlideTransition
+import com.dokar.sonner.Toaster
+import com.dokar.sonner.rememberToasterState
 import com.multiplatform.lifecycle.LifecycleEvent
 import com.multiplatform.lifecycle.LifecycleListener
 import com.multiplatform.lifecycle.LifecycleTracker
@@ -24,22 +26,19 @@ import com.seiko.imageloader.LocalImageLoader
 import io.kamel.image.config.LocalKamelConfig
 import moe.styx.common.compose.extensions.getImageLoader
 import moe.styx.common.compose.extensions.kamelConfig
-import moe.styx.common.compose.http.isLoggedIn
-import moe.styx.common.compose.http.login
 import moe.styx.common.compose.settings
 import moe.styx.common.compose.threads.DownloadQueue
 import moe.styx.common.compose.threads.Heartbeats
 import moe.styx.common.compose.threads.RequestQueue
 import moe.styx.common.compose.utils.LocalGlobalNavigator
-import moe.styx.common.compose.utils.ServerStatus
+import moe.styx.common.compose.utils.LocalToaster
 import moe.styx.common.util.Log
 import moe.styx.styx2m.misc.LocalLayoutSize
 import moe.styx.styx2m.misc.fetchWindowSize
 import moe.styx.styx2m.player.PlayerView
 import moe.styx.styx2m.theme.AppTheme
-import moe.styx.styx2m.views.misc.LoadingView
-import moe.styx.styx2m.views.misc.LoginView
-import moe.styx.styx2m.views.misc.OfflineView
+import moe.styx.styx2m.theme.LocalThemeIsDark
+import moe.styx.styx2m.views.MainOverview
 
 @Composable
 internal fun App() = AppTheme {
@@ -55,23 +54,18 @@ internal fun App() = AppTheme {
     //            }
     val currentSizes = fetchWindowSize()
     settings["is-tablet"] = currentSizes.isProbablyTablet
-    val view = if (isLoggedIn()) {
-        Log.i { "Logged in as: ${login?.name}" }
-        LoadingView()
-    } else {
-        if (ServerStatus.lastKnown !in listOf(ServerStatus.ONLINE, ServerStatus.UNAUTHORIZED))
-            OfflineView()
-        else
-            LoginView()
-    }
     InitLifeCycleListener()
     Surface(modifier = Modifier.fillMaxSize()) {
-        Navigator(view) { navigator ->
+        val darkState = LocalThemeIsDark.current
+        val toasterState = rememberToasterState()
+        Toaster(toasterState, darkTheme = darkState.value, richColors = true)
+        Navigator(MainOverview()) { navigator ->
             CompositionLocalProvider(
                 LocalGlobalNavigator provides navigator,
                 LocalKamelConfig provides kamelConfig,
                 LocalImageLoader provides remember { getImageLoader() },
-                LocalLayoutSize provides currentSizes
+                LocalLayoutSize provides currentSizes,
+                LocalToaster provides toasterState
             ) {
                 SlideTransition(
                     navigator, animationSpec = spring(
