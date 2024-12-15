@@ -2,6 +2,7 @@ package moe.styx.styx2m
 
 import Styx_m.styx_m.BuildConfig
 import android.app.Application
+import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
@@ -40,18 +41,7 @@ class AppActivity : ComponentActivity() {
         enableEdgeToEdge()
         lifecycle.addObserver(observer)
         getHttpClient("${BuildConfig.APP_NAME} (Android) - ${BuildConfig.APP_VERSION}")
-        appConfig = {
-            AppConfig(
-                BuildConfig.APP_SECRET,
-                BuildConfig.APP_VERSION,
-                BuildConfig.BASE_URL,
-                BuildConfig.IMAGE_URL,
-                BuildConfig.DEBUG_TOKEN,
-                cacheDir.path,
-                filesDir.path,
-                BuildConfig.VERSION_CHECK_URL
-            )
-        }
+        appConfig = { fetchDeviceAppConfig(this) }
         Log.debugEnabled = true
         setContent {
             App()
@@ -62,6 +52,20 @@ class AppActivity : ComponentActivity() {
         super.onDestroy()
         lifecycle.removeObserver(observer)
     }
+}
+
+fun fetchDeviceAppConfig(context: Context?): AppConfig {
+    val ensuredContext = context ?: AppContextImpl.get()
+    return AppConfig(
+        BuildConfig.APP_SECRET,
+        BuildConfig.APP_VERSION,
+        BuildConfig.BASE_URL,
+        BuildConfig.IMAGE_URL,
+        BuildConfig.DEBUG_TOKEN,
+        ensuredContext.cacheDir.path,
+        ensuredContext.filesDir.path,
+        BuildConfig.VERSION_CHECK_URL
+    )
 }
 
 internal actual fun openUrl(url: String?) {
