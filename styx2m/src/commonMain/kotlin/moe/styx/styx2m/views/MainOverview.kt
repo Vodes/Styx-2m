@@ -7,10 +7,7 @@ import androidx.compose.material.icons.filled.CloudOff
 import androidx.compose.material.icons.filled.NoAccounts
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -43,6 +40,7 @@ import moe.styx.styx2m.misc.LocalLayoutSize
 import moe.styx.styx2m.misc.pushMediaView
 import moe.styx.styx2m.views.misc.LoginView
 import moe.styx.styx2m.views.misc.OutdatedView
+import moe.styx.styx2m.views.tabs.MediaTab
 import moe.styx.styx2m.views.tabs.Tabs
 
 class MainOverview : Screen {
@@ -50,9 +48,9 @@ class MainOverview : Screen {
     override val key: ScreenKey
         get() = "MainOverview"
 
+    @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     override fun Content() {
-
         val toaster = LocalToaster.current
         val overviewSm = rememberScreenModel { MobileOverviewModel() }
 
@@ -83,16 +81,26 @@ class MainOverview : Screen {
 
         val sm = nav.rememberNavigatorScreenModel("main-vm") { MainDataViewModel() }
         val isLoading by sm.isLoadingStateFlow.collectAsState()
-        val loadingState by sm.loadingStateFlow.collectAsState()
 
         val sizes = LocalLayoutSize.current
         val useRail = sizes.isWide
         val defaultTab = if (settings["favs-startup", false]) Tabs.favsTab else Tabs.seriesTab
         settings["episode-list-index"] = 0
         TabNavigator(defaultTab) {
+            val tabNav = LocalTabNavigator.current
             MainScaffold(
                 Modifier.fillMaxSize(),
-                title = "${BuildConfig.APP_NAME} — Beta", addPopButton = false, actions = {
+                topAppBarExpandedHeight = if (useRail) 96.dp else TopAppBarDefaults.TopAppBarExpandedHeight,
+                titleContent = {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(BuildConfig.APP_NAME)
+                        if (useRail) {
+                            key(tabNav.current) {
+                                (tabNav.current as? MediaTab)?.HeaderSearchBar(Modifier.heightIn(48.dp).weight(1f).padding(15.dp, 0.dp))
+                            }
+                        }
+                    }
+                }, addPopButton = false, actions = {
                     if (isLoading) {
                         Row(Modifier.fillMaxHeight(), verticalAlignment = Alignment.CenterVertically) {
                             LinearProgressIndicator(

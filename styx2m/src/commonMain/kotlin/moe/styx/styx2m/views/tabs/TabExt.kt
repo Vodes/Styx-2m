@@ -1,5 +1,6 @@
 package moe.styx.styx2m.views.tabs
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -42,7 +43,7 @@ object Tabs {
 
 @OptIn(FlowPreview::class)
 @Composable
-internal fun Tab.barWithListComp(
+internal fun Tab.MediaListing(
     mediaSearch: MediaSearch,
     initialState: SearchState,
     storage: MainDataViewModelStorage,
@@ -50,12 +51,20 @@ internal fun Tab.barWithListComp(
     useList: Boolean = false,
     listPosViewModel: ListPosViewModel,
     showUnseen: Boolean = false,
-    favourites: List<Favourite> = emptyList()
+    favourites: List<Favourite> = emptyList(),
+    showSearch: Boolean = true,
 ) {
     val sizes = LocalLayoutSize.current
     Column(Modifier.fillMaxSize()) {
-        mediaSearch.Component(Modifier.fillMaxWidth().padding(10.dp))
+        if (showSearch)
+            mediaSearch.Component(Modifier.fillMaxWidth().padding(10.dp))
         Column(Modifier.fillMaxSize()) {
+            if (!showSearch) {
+                val showFilters by mediaSearch.showFilters
+                AnimatedVisibility(showFilters) {
+                    mediaSearch.GenreCategoryFilters()
+                }
+            }
             val flow by mediaSearch.stateEmitter.debounce(150L).collectAsState(initialState)
             val processedMedia = flow.filterMedia(filtered, favourites)
             if (!useList)
@@ -84,7 +93,7 @@ private fun getGridCells(sizes: LayoutSizes): GridCells {
 }
 
 @Composable
-private fun MediaGrid(
+fun MediaGrid(
     storage: MainDataViewModelStorage,
     mediaList: List<Media>,
     listPosViewModel: ListPosViewModel,
@@ -132,7 +141,7 @@ private fun MediaGrid(
 }
 
 @Composable
-private fun MediaList(storage: MainDataViewModelStorage, mediaList: List<Media>, listPosViewModel: ListPosViewModel) {
+fun MediaList(storage: MainDataViewModelStorage, mediaList: List<Media>, listPosViewModel: ListPosViewModel) {
     val nav = LocalGlobalNavigator.current
     val listState = rememberLazyListState(listPosViewModel.scrollIndex, listPosViewModel.scrollOffset)
     LaunchedEffect(listState.isScrollInProgress) {
