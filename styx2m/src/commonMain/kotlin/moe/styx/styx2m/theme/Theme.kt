@@ -2,13 +2,18 @@ package moe.styx.styx2m.theme
 
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.*
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Shapes
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Typography
 import androidx.compose.runtime.*
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.russhwolf.settings.get
+import moe.styx.common.compose.settings
 
 private val AppShapes = Shapes(
     extraSmall = RoundedCornerShape(2.dp),
@@ -30,10 +35,16 @@ internal val LocalThemeIsDark = compositionLocalOf { mutableStateOf(true) }
 
 @Composable
 internal fun AppTheme(
-    content: @Composable() () -> Unit
+    content: @Composable () -> Unit
 ) {
     val systemIsDark = isSystemInDarkTheme()
-    val isDarkState = remember { mutableStateOf(systemIsDark) }
+    val requestedTheme = settings["theme", "System"]
+    val requestedDark = when (requestedTheme.lowercase()) {
+        "system" -> systemIsDark
+        "light" -> false
+        else -> true
+    }
+    val isDarkState = remember(requestedTheme, systemIsDark) { mutableStateOf(requestedDark) }
     CompositionLocalProvider(
         LocalThemeIsDark provides isDarkState
     ) {
