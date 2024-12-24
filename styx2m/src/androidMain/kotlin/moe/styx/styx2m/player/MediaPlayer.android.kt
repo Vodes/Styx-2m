@@ -12,6 +12,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.viewinterop.AndroidView
+import com.russhwolf.settings.get
 import dev.jdtech.mpv.MPVLib
 import io.github.xxfast.kstore.extensions.getOrEmpty
 import kotlinx.coroutines.CoroutineScope
@@ -21,6 +22,7 @@ import kotlinx.coroutines.withContext
 import moe.styx.common.compose.AppContextImpl.appConfig
 import moe.styx.common.compose.files.Storage
 import moe.styx.common.compose.http.login
+import moe.styx.common.compose.settings
 import moe.styx.common.compose.utils.MpvPreferences
 import moe.styx.common.compose.utils.ServerStatus
 import moe.styx.common.data.MediaEntry
@@ -310,7 +312,13 @@ private fun MediaPlayer.setMPVOptions(context: Context) {
     MPVLib.setOptionString("ytdl", "no")
     MPVLib.setOptionString("save-position-on-quit", "no")
     MPVLib.setOptionString("sub-font-provider", "none")
-    MPVLib.setOptionString("hwdec", if (pref.hwDecoding) (if (pref.alternativeHwDecode) "mediacodec-copy" else "mediacodec") else "no")
+    MPVLib.setOptionString(
+        "hwdec", when (settings["hwdec", "copy"]) {
+            "yes" -> "mediacodec"
+            "copy" -> "mediacodec-copy"
+            else -> "no"
+        }
+    )
     MPVLib.setOptionString("hwdec-codecs", "h264,hevc,mpeg4,mpeg2video,vp8,vp9,av1")
     MPVLib.setOptionString("deband", if (pref.deband) "yes" else "no")
     MPVLib.setOptionString("deband-iterations", pref.debandIterations)

@@ -8,10 +8,7 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.navigator.tab.Tab
@@ -57,7 +54,7 @@ internal fun Tab.barWithListComp(
         mediaSearch.Component(Modifier.fillMaxWidth().padding(10.dp))
         Column(Modifier.fillMaxSize()) {
             val flow by mediaSearch.stateEmitter.debounce(150L).collectAsState(initialState)
-            val processedMedia = flow.filterMedia(filtered, favourites)
+            val processedMedia = remember(flow, filtered, favourites) { flow.filterMedia(filtered, favourites) }
             if (!useList)
                 MediaGrid(storage, processedMedia, listPosViewModel, showUnseen, sizes)
             else
