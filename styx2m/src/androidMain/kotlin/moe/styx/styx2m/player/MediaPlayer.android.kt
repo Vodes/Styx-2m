@@ -145,31 +145,31 @@ actual class MediaPlayer actual constructor(initialEntryID: String, startAt: Lon
     var libWasLoaded = false
     var initialCommands: List<Array<String>> = emptyList()
 
-    override fun setPlaying(playing: Boolean) {
+    actual override fun setPlaying(playing: Boolean) {
         if (playerInitialized) {
             MPVLib.setPropertyBoolean("pause", !playing)
         }
     }
 
-    override fun seek(position: Long) {
+    actual override fun seek(position: Long) {
         if (playerInitialized) {
             MPVLib.command(arrayOf("set", "time-pos", "$position"))
         }
     }
 
-    override fun setSubtitleTrack(id: Int) {
+    actual override fun setSubtitleTrack(id: Int) {
         if (playerInitialized && (playbackStatus.value in arrayOf(PlaybackStatus.Playing, PlaybackStatus.Paused))) {
             MPVLib.command(arrayOf("set", "sub", if (id == -1) "no" else "$id"))
         }
     }
 
-    override fun setAudioTrack(id: Int) {
+    actual override fun setAudioTrack(id: Int) {
         if (playerInitialized && (playbackStatus.value in arrayOf(PlaybackStatus.Playing, PlaybackStatus.Paused))) {
             MPVLib.command(arrayOf("set", "audio", "$id"))
         }
     }
 
-    override fun internalPlayEntry(mediaEntry: MediaEntry, scope: CoroutineScope) {
+    actual override fun internalPlayEntry(mediaEntry: MediaEntry, scope: CoroutineScope) {
         if (!playerInitialized)
             return
         MPVLib.command(arrayOf("set", "start", "0"))
@@ -178,7 +178,7 @@ actual class MediaPlayer actual constructor(initialEntryID: String, startAt: Lon
     }
 
     @Composable
-    override fun PlayerComponent(entryList: List<MediaEntry>) {
+    actual override fun PlayerComponent(entryList: List<MediaEntry>) {
         val context = LocalContext.current
         val curEntryID by this.currentEntry.collectAsState()
         initialCommands = listOf(
@@ -224,7 +224,7 @@ actual class MediaPlayer actual constructor(initialEntryID: String, startAt: Lon
         }
     }
 
-    override fun releasePlayer() {
+    actual override fun releasePlayer() {
         runCatching {
             MPVLib.removeObserver(observer)
             MPVLib.destroy()
@@ -299,7 +299,7 @@ private fun MediaPlayer.setMPVOptions(context: Context) {
         MPVLib.setOptionString("dscale", "bilinear")
     }
 
-    MPVLib.setOptionString("gpu-api", pref.gpuAPI)
+    MPVLib.setOptionString("gpu-api", pref.gpuAPI) // Offers vulkan but doesn't seem to do anything
     MPVLib.setOptionString("gpu-context", "android")
     MPVLib.setOptionString("opengl-es", "yes")
     MPVLib.setOptionString("tls-verify", "no")

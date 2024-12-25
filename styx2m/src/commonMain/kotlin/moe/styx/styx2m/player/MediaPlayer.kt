@@ -57,4 +57,14 @@ data class PlayerState(
     val chapters: List<Chapter> = emptyList()
 )
 
-expect class MediaPlayer(initialEntryID: String, startAt: Long = 0L) : AMediaPlayer
+expect class MediaPlayer(initialEntryID: String, startAt: Long = 0L) : AMediaPlayer {
+    override fun releasePlayer()
+    override fun seek(position: Long)
+    override fun setAudioTrack(id: Int)
+    override fun setSubtitleTrack(id: Int)
+    override fun setPlaying(playing: Boolean)
+    override fun internalPlayEntry(mediaEntry: MediaEntry, scope: CoroutineScope)
+
+    @Composable
+    override fun PlayerComponent(entryList: List<MediaEntry>)
+}
