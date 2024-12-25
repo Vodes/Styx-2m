@@ -13,6 +13,8 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.model.rememberNavigatorScreenModel
 import cafe.adriel.voyager.core.model.rememberScreenModel
@@ -29,6 +31,7 @@ import com.dokar.sonner.Toast
 import com.russhwolf.settings.get
 import com.russhwolf.settings.set
 import kotlinx.coroutines.launch
+import moe.styx.common.compose.components.AppShapes
 import moe.styx.common.compose.components.buttons.IconButtonWithTooltip
 import moe.styx.common.compose.components.layout.MainScaffold
 import moe.styx.common.compose.components.misc.OnlineUsersIcon
@@ -92,7 +95,7 @@ class MainOverview : Screen {
         TabNavigator(defaultTab) {
             MainScaffold(
                 Modifier.fillMaxSize(),
-                title = "${BuildConfig.APP_NAME} — Beta", addPopButton = false, actions = {
+                title = BuildConfig.APP_NAME, addPopButton = false, addAnimatedTitleBackground = useRail, actions = {
                     if (isLoading) {
                         Row(Modifier.fillMaxHeight(), verticalAlignment = Alignment.CenterVertically) {
                             LinearProgressIndicator(
@@ -149,7 +152,10 @@ class MainOverview : Screen {
 
     @Composable
     private fun SideNavRail(parentNav: Navigator, isLandscape: Boolean) {
-        NavigationRail(Modifier.fillMaxHeight().padding(0.dp, 0.dp, 5.dp, 0.dp)) {
+        NavigationRail(
+            Modifier.fillMaxHeight().padding(7.dp, 6.dp, 3.dp, 8.dp).shadow(2.dp, AppShapes.large).clip(AppShapes.large),
+            containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(1.dp)
+        ) {
             RailNavItem(Tabs.seriesTab)
             RailNavItem(Tabs.moviesTab)
             RailNavItem(Tabs.favsTab)
@@ -195,7 +201,7 @@ fun RailNavItem(tab: Tab) {
         selected = tabNavigator.current.key == tab.key,
         onClick = { tabNavigator.current = tab },
         icon = { Icon(painter = tab.options.icon!!, contentDescription = tab.options.title) },
-        label = { Text(tab.options.title) },
+        label = { Text(tab.options.title, modifier = Modifier.padding(3.dp, 1.dp)) },
         alwaysShowLabel = true,
         colors = NavigationRailItemDefaults.colors(
             unselectedIconColor = MaterialTheme.colorScheme.onSurface,
