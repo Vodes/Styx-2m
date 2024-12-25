@@ -24,6 +24,10 @@ abstract class AMediaPlayer(val initialEntryID: String, val startAt: Long = 0L) 
     abstract fun seek(position: Long)
     abstract fun setSubtitleTrack(id: Int)
     abstract fun setAudioTrack(id: Int)
+    @Composable
+    abstract fun requestRotationLock()
+    @Composable
+    abstract fun releaseRotationLock()
 
     fun playEntry(mediaEntry: MediaEntry, scope: CoroutineScope) {
         updateWatchedForID(currentEntry.value, progress.value, playbackPercent)
@@ -64,6 +68,12 @@ expect class MediaPlayer(initialEntryID: String, startAt: Long = 0L) : AMediaPla
     override fun setSubtitleTrack(id: Int)
     override fun setPlaying(playing: Boolean)
     override fun internalPlayEntry(mediaEntry: MediaEntry, scope: CoroutineScope)
+
+    @Composable
+    override fun requestRotationLock()
+
+    @Composable
+    override fun releaseRotationLock()
 
     @Composable
     override fun PlayerComponent(entryList: List<MediaEntry>)

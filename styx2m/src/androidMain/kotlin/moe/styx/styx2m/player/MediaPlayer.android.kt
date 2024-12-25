@@ -2,13 +2,11 @@ package moe.styx.styx2m.player
 
 import Styx_m.styx_m.BuildConfig
 import android.content.Context
+import android.content.pm.ActivityInfo
 import android.view.SurfaceHolder
 import android.view.SurfaceView
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.viewinterop.AndroidView
@@ -31,6 +29,7 @@ import moe.styx.common.json
 import moe.styx.common.util.Log
 import moe.styx.common.util.SYSTEMFILES
 import moe.styx.styx2m.R
+import moe.styx.styx2m.misc.findActivity
 import okio.Path.Companion.toPath
 import java.io.FileOutputStream
 
@@ -154,6 +153,32 @@ actual class MediaPlayer actual constructor(initialEntryID: String, startAt: Lon
     actual override fun seek(position: Long) {
         if (playerInitialized) {
             MPVLib.command(arrayOf("set", "time-pos", "$position"))
+        }
+    }
+
+    @Composable
+    actual override fun requestRotationLock() {
+        val context = LocalContext.current
+        val activity = context.findActivity()
+        LaunchedEffect(Unit) {
+            activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LOCKED
+            Log.d { "Requesting locked rotation: ${activity != null}" }
+        }
+        DisposableEffect(Unit) {
+            onDispose {
+                activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
+                Log.d { "Releasing locked rotation: ${activity != null}" }
+            }
+        }
+    }
+
+    @Composable
+    actual override fun releaseRotationLock() {
+        val context = LocalContext.current
+        val activity = context.findActivity()
+        LaunchedEffect(Unit) {
+            activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
+            Log.d { "Releasing locked rotation: ${activity != null}" }
         }
     }
 

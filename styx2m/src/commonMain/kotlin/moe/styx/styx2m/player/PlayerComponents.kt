@@ -50,6 +50,8 @@ fun NameRow(
     nav: Navigator,
     trackList: List<Track>,
     mediaPlayer: MediaPlayer,
+    isLocked: Boolean,
+    onLockKeyPressed: () -> Unit,
     onTapped: () -> Unit
 ) {
     val renderedTitle = if (title.isBlank() || title.contains("?token")) {
@@ -81,6 +83,15 @@ fun NameRow(
             )
         ) { nav.pop() }
         Text(renderedTitle, style = MaterialTheme.typography.bodyLarge, color = darkScheme.onSurface, modifier = Modifier.weight(1f))
+        IconButtonWithTooltip(
+            Icons.Default.ScreenLockRotation, "Lock rotation", Modifier.size(70.dp), tint = if (isLocked)
+                darkScheme.primary
+            else
+                darkScheme.onSurface
+        ) {
+            onLockKeyPressed()
+        }
+
         Box {
             if (trackList.isNotEmpty()) {
                 IconButtonWithTooltip(
