@@ -79,7 +79,8 @@ android {
 
     signingConfigs {
         create("release") {
-            storeFile = file("../styx2m.jks")
+            storeFile = System.getenv("KEY_FILE_PATH").let { it ?: "" }
+                .let { if (it.isBlank()) file("../styx2m.jks") else File(it) }
             storePassword = System.getenv("STYX_SIGNING_KEY_PASS")
             keyAlias = System.getenv("STYX_SIGNING_ALIAS")
             keyPassword = System.getenv("STYX_SIGNING_KEY_PASS")

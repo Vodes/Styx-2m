@@ -33,9 +33,12 @@ jobs:
         uses: android-actions/setup-android@v3
       - name: "Decode secret to keystore file"
         uses: timheuer/base64-to-file@v1
+        id: keyfile_writer
         with:
           fileName: styx2m.jks
           encodedString: '${{ secrets.STYX_SIGNING_KEY_FILE }}'
+      - name: "Set env variable for key path"
+        run: echo "KEY_FILE_PATH=${{ steps.keyfile_writer.outputs.filePath }}" >> $GITHUB_ENV
       - name: "Build & Sign release apks"
         env:
           JAVA_HOME: ${{ steps.java.outputs.path }}
@@ -43,7 +46,7 @@ jobs:
           chmod u+x ./gradlew
           ./gradlew assembleRelease
       - name: "Print and save sha384 for apks"
-        run: find ./build/outputs/apk -type f -iname 'moe.styx.styx2m*-release.apk' -exec shasum -a 384 {} \; | tee checksums.sha384
+        run: find ./styx2m/build/outputs/apk -type f -iname 'moe.styx.styx2m*-release.apk' -exec shasum -a 384 {} \; | tee checksums.sha384
       - name: "Upload checksum file"
         uses: actions/upload-artifact@v4
         with:
@@ -57,5 +60,5 @@ jobs:
           password: ${{ secrets.FTP_PASS }}
           protocol: ftps
           security: loose
-          local-dir: "./build/outputs/apk/release/"
+          local-dir: "./styx2m/build/outputs/apk/release/"
           server-dir: "/${{ inputs.version }}/"
