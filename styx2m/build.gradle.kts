@@ -69,13 +69,21 @@ android {
 
     defaultConfig {
         minSdk = 28
-        //noinspection EditedTargetSdkVersion
         targetSdk = 35
 
         applicationId = "moe.styx.styx2m.debug"
         versionCode = 4
         versionName = "${project.version}"
         base.archivesName = "$applicationId-v$versionName"
+    }
+
+    signingConfigs {
+        create("release") {
+            storeFile = file("../styx2m.jks")
+            storePassword = System.getenv("STYX_SIGNING_KEY_PASS")
+            keyAlias = System.getenv("STYX_SIGNING_ALIAS")
+            keyPassword = System.getenv("STYX_SIGNING_KEY_PASS")
+        }
     }
 
     splits {
@@ -85,7 +93,7 @@ android {
         abi {
             isEnable = true
             reset()
-            //noinspection ChromeOsAbiSupport - this is covered by universal... cmon
+            //noinspection ChromeOsAbiSupport - this should be covered by universal (?)
             include("arm64-v8a")
             isUniversalApk = true
         }
@@ -94,6 +102,7 @@ android {
     buildTypes {
         getByName("release") {
             isMinifyEnabled = true
+            signingConfig = signingConfigs.getByName("release")
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 project.file("../proguard.rules")
