@@ -10,40 +10,41 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.FilterQuality
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.navigator.Navigator
 import com.russhwolf.settings.get
-import com.russhwolf.settings.set
 import io.kamel.core.Resource
 import io.kamel.image.KamelImage
-import io.kamel.image.asyncPainterResource
-import io.ktor.http.*
 import moe.styx.common.compose.components.AppShapes
 import moe.styx.common.compose.components.anime.MediaGenreListing
 import moe.styx.common.compose.components.anime.MediaNameListing
 import moe.styx.common.compose.components.anime.MediaRelations
 import moe.styx.common.compose.components.misc.ExpandableText
-import moe.styx.common.compose.extensions.*
+import moe.styx.common.compose.extensions.getPainter
+import moe.styx.common.compose.extensions.removeSomeHTMLTags
 import moe.styx.common.compose.settings
+import moe.styx.common.compose.viewmodels.MediaStorage
 import moe.styx.common.data.Media
 import moe.styx.styx2m.misc.LayoutSizes
 import moe.styx.styx2m.misc.pushMediaView
 
 
 @Composable
-fun MetadataArea(media: Media, nav: Navigator, mediaList: List<Media>, nameImageModifier: Modifier = Modifier, layoutSizes: LayoutSizes) = Column {
-    StupidImageNameArea(media, nameImageModifier)
-    AboutView(media, layoutSizes)
-    if (!media.sequel.isNullOrBlank() || !media.prequel.isNullOrBlank()) {
+fun MetadataArea(
+    mediaStorage: MediaStorage,
+    nav: Navigator,
+    nameImageModifier: Modifier = Modifier,
+    layoutSizes: LayoutSizes
+) = Column {
+    StupidImageNameArea(mediaStorage, nameImageModifier)
+    AboutView(mediaStorage.media, layoutSizes)
+
+    if (mediaStorage.hasSequel() || mediaStorage.hasPrequel()) {
         HorizontalDivider(Modifier.fillMaxWidth().padding(10.dp, 4.dp, 10.dp, 5.dp), thickness = 2.dp)
-        MediaRelations(media, mediaList) {
-            settings["episode-list-index"] = 0
-            nav.pushMediaView(it)
-        }
+        MediaRelations(mediaStorage) { nav.pushMediaView(it, true) }
     }
 }
 
@@ -65,17 +66,15 @@ fun AboutView(media: Media, layoutSizes: LayoutSizes) {
 
 @Composable
 fun StupidImageNameArea(
-    media: Media,
+    mediaStorage: MediaStorage,
     modifier: Modifier = Modifier,
     dynamicMaxWidth: Dp = 760.dp,
     requiredWidth: Dp = 385.dp,
     requiredHeight: Dp = 535.dp,
     otherContent: @Composable () -> Unit = {}
 ) {
-    val img = media.getThumb()!!
-    val painter = if (img.isCached()) {
-        asyncPainterResource("file:/${img.getPath()}", key = img.GUID, filterQuality = FilterQuality.Low)
-    } else asyncPainterResource(Url(img.getURL()), key = img.GUID, filterQuality = FilterQuality.Low)
+    val (media, img) = mediaStorage.media to mediaStorage.image
+    val painter = img?.getPainter()
     BoxWithConstraints(modifier) {
         val width = this.maxWidth
         Row(Modifier.align(Alignment.TopStart).height(IntrinsicSize.Max).fillMaxWidth()) {
@@ -91,27 +90,26 @@ fun StupidImageNameArea(
                 BigScalingCardImage(painter, Modifier.fillMaxHeight(), cardModifier = Modifier.aspectRatio(0.71F))
             }
             Column(Modifier.fillMaxWidth().weight(1f, true)) {
-                MediaNameListing(media, Modifier.align(Alignment.Start))//, Modifier.weight(0.5F))
+                MediaNameListing(media, Modifier.align(Alignment.Start))
                 otherContent()
-//                Spacer(Modifier.weight(1f, true))
-//                MappingIcons(media)
             }
         }
     }
 }
 
 @Composable
-fun BigScalingCardImage(image: Resource<Painter>, modifier: Modifier = Modifier, cardModifier: Modifier = Modifier) {
+fun BigScalingCardImage(image: Resource<Painter>?, modifier: Modifier = Modifier, cardModifier: Modifier = Modifier) {
     Column(modifier) {
         ElevatedCard(
             cardModifier.align(Alignment.Start).padding(12.dp),
         ) {
-            KamelImage(
-                image,
-                contentDescription = "Thumbnail",
-                modifier = Modifier.padding(2.dp).clip(AppShapes.small),
-                contentScale = ContentScale.FillBounds
-            )
+            if (image != null)
+                KamelImage(
+                    { image },
+                    contentDescription = "Thumbnail",
+                    modifier = Modifier.padding(2.dp).clip(AppShapes.small),
+                    contentScale = ContentScale.FillBounds
+                )
         }
     }
 }

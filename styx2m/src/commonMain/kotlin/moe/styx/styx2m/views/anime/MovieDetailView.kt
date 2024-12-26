@@ -11,6 +11,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
+import cafe.adriel.voyager.core.model.rememberNavigatorScreenModel
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.core.screen.ScreenKey
 import cafe.adriel.voyager.navigator.Navigator
@@ -23,14 +24,14 @@ import moe.styx.common.compose.components.layout.MainScaffold
 import moe.styx.common.compose.extensions.readableSize
 import moe.styx.common.compose.files.Storage
 import moe.styx.common.compose.files.collectWithEmptyInitial
-import moe.styx.common.compose.files.getCurrentAndCollectFlow
 import moe.styx.common.compose.files.updateList
 import moe.styx.common.compose.http.login
 import moe.styx.common.compose.settings
 import moe.styx.common.compose.threads.DownloadQueue
 import moe.styx.common.compose.threads.RequestQueue
 import moe.styx.common.compose.utils.LocalGlobalNavigator
-import moe.styx.common.data.Media
+import moe.styx.common.compose.viewmodels.MainDataViewModel
+import moe.styx.common.compose.viewmodels.MediaStorage
 import moe.styx.common.data.MediaEntry
 import moe.styx.common.data.MediaWatched
 import moe.styx.common.extension.currentUnixSeconds
@@ -53,41 +54,42 @@ class MovieDetailView(private val mediaID: String) : Screen {
     @Composable
     override fun Content() {
         val nav = LocalGlobalNavigator.current
-        val mediaList by Storage.stores.mediaStore.getCurrentAndCollectFlow()
-        val media = remember { mediaList.find { it.GUID eqI mediaID } }
-        val movieEntry = fetchEntries(mediaID).minByOrNull { it.entryNumber.toDoubleOrNull() ?: 0.0 }
-        if (media == null) {
+        val sm = nav.rememberNavigatorScreenModel("main-vm") { MainDataViewModel() }
+        val storage by sm.storageFlow.collectAsState()
+        val mediaStorage = remember(storage) { sm.getMediaStorageForID(mediaID, storage) }
+        val movieEntry = mediaStorage.entries.getOrNull(0)
+
+        if (mediaStorage.image == null) {
             nav.pop()
             return
         }
         val sizes = LocalLayoutSize.current
-        val watchedList by Storage.stores.watchedStore.collectWithEmptyInitial()
-        val watched = movieEntry?.let { watchedList.find { it.entryID eqI movieEntry.GUID } }
+        val watched = movieEntry?.let { storage.watchedList.find { it.entryID eqI movieEntry.GUID } }
         var showMediaInfoDialog by remember { mutableStateOf(false) }
         if (showMediaInfoDialog && movieEntry != null) {
             MediaInfoDialog(movieEntry) { showMediaInfoDialog = false }
         }
-        MainScaffold(Modifier.fillMaxSize(), title = media.name) {
+        MainScaffold(Modifier.fillMaxSize(), title = mediaStorage.media.name) {
             val scrollState = rememberScrollState()
             ElevatedCard(Modifier.fillMaxSize().padding(2.dp)) {
                 if (sizes.isWide) {
                     Row(Modifier.fillMaxSize()) {
                         Column(Modifier.weight(0.5F).verticalScroll(scrollState)) {
-                            StupidImageNameArea(media)
+                            StupidImageNameArea(mediaStorage)
                             PlaycontrolRow(nav, false, movieEntry, watched) { showMediaInfoDialog = !showMediaInfoDialog }
                         }
                         VerticalDivider(Modifier.fillMaxHeight().padding(10.dp), thickness = 3.dp)
                         Column(Modifier.weight(0.5F).padding(0.dp, 8.dp).verticalScroll(rememberScrollState())) {
-                            MovieAboutView(media, nav, mediaList, sizes)
+                            MovieAboutView(mediaStorage, nav, sizes)
                         }
                     }
                 } else {
                     Column(Modifier.fillMaxSize().verticalScroll(scrollState)) {
-                        StupidImageNameArea(media, otherContent = {
+                        StupidImageNameArea(mediaStorage, otherContent = {
                             PlaycontrolRow(nav, true, movieEntry, watched) { showMediaInfoDialog = !showMediaInfoDialog }
                         })
                         HorizontalDivider(Modifier.fillMaxWidth().padding(10.dp))
-                        MovieAboutView(media, nav, mediaList, sizes)
+                        MovieAboutView(mediaStorage, nav, sizes)
                     }
                 }
             }
@@ -95,11 +97,11 @@ class MovieDetailView(private val mediaID: String) : Screen {
     }
 
     @Composable
-    fun MovieAboutView(media: Media, nav: Navigator, mediaList: List<Media>, sizes: LayoutSizes) {
-        AboutView(media, sizes)
-        if (!media.sequel.isNullOrBlank() || !media.prequel.isNullOrBlank()) {
+    fun MovieAboutView(mediaStorage: MediaStorage, nav: Navigator, sizes: LayoutSizes) {
+        AboutView(mediaStorage.media, sizes)
+        if (mediaStorage.hasSequel() || mediaStorage.hasPrequel()) {
             HorizontalDivider(Modifier.fillMaxWidth().padding(10.dp, 4.dp, 10.dp, 5.dp), thickness = 2.dp)
-            MediaRelations(media, mediaList) {
+            MediaRelations(mediaStorage) {
                 settings["episode-list-index"] = 0;
                 nav.pushMediaView(it, true)
             }

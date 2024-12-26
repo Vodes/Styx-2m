@@ -9,10 +9,21 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.russhwolf.settings.get
+import com.russhwolf.settings.set
 import moe.styx.common.compose.components.misc.Toggles
 import moe.styx.common.compose.components.misc.Toggles.settingsContainer
+import moe.styx.common.compose.settings
 import moe.styx.common.compose.utils.*
 import moe.styx.styx2m.misc.save
+
+
+val hwDecoding = """
+        Use your GPU to decode the video. Both faster and more efficient.
+        Leave on if at all possible and not causing issues.
+        Copy is the same as yes but with copying the frame back to ram first.
+        This may (will) work more reliably but will use more ram.
+    """.trimIndent()
 
 @Composable
 fun MpvSettings() {
@@ -55,17 +66,9 @@ fun MpvSettings() {
                 "Profile", MpvDesc.profileDescription, value = preferences.profile, choices = profileChoices,
             ) { preferences = preferences.copy(profile = it).save() }
 
-            Toggles.ContainerSwitch(
-                "Hardware Decoding",
-                MpvDesc.hwDecoding,
-                value = preferences.hwDecoding,
-            ) { preferences = preferences.copy(hwDecoding = it).save() }
-            Toggles.ContainerSwitch(
-                "Alternative Hardware Decoding",
-                "If the other doesn't work properly but you want to try regardless.",
-                value = preferences.alternativeHwDecode,
-            ) { preferences = preferences.copy(alternativeHwDecode = it).save() }
-
+            Toggles.ContainerRadioSelect(
+                "Hardware Decoding", hwDecoding, value = settings["hwdec", "copy"], choices = listOf("no", "yes", "copy"),
+            ) { settings["hwdec"] = it }
 
             Toggles.ContainerRadioSelect(
                 "GPU-API", MpvDesc.gpuAPI, value = preferences.gpuAPI, choices = gpuApiChoices,

@@ -2,25 +2,25 @@ package moe.styx.styx2m.player
 
 import Styx_m.styx_m.BuildConfig
 import android.content.Context
+import android.content.pm.ActivityInfo
 import android.view.SurfaceHolder
 import android.view.SurfaceView
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.viewinterop.AndroidView
+import com.russhwolf.settings.get
 import dev.jdtech.mpv.MPVLib
 import io.github.xxfast.kstore.extensions.getOrEmpty
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import moe.styx.common.compose.appConfig
+import moe.styx.common.compose.AppContextImpl.appConfig
 import moe.styx.common.compose.files.Storage
 import moe.styx.common.compose.http.login
+import moe.styx.common.compose.settings
 import moe.styx.common.compose.utils.MpvPreferences
 import moe.styx.common.compose.utils.ServerStatus
 import moe.styx.common.data.MediaEntry
@@ -29,6 +29,7 @@ import moe.styx.common.json
 import moe.styx.common.util.Log
 import moe.styx.common.util.SYSTEMFILES
 import moe.styx.styx2m.R
+import moe.styx.styx2m.misc.findActivity
 import okio.Path.Companion.toPath
 import java.io.FileOutputStream
 
@@ -143,31 +144,57 @@ actual class MediaPlayer actual constructor(initialEntryID: String, startAt: Lon
     var libWasLoaded = false
     var initialCommands: List<Array<String>> = emptyList()
 
-    override fun setPlaying(playing: Boolean) {
+    actual override fun setPlaying(playing: Boolean) {
         if (playerInitialized) {
             MPVLib.setPropertyBoolean("pause", !playing)
         }
     }
 
-    override fun seek(position: Long) {
+    actual override fun seek(position: Long) {
         if (playerInitialized) {
             MPVLib.command(arrayOf("set", "time-pos", "$position"))
         }
     }
 
-    override fun setSubtitleTrack(id: Int) {
+    @Composable
+    actual override fun requestRotationLock() {
+        val context = LocalContext.current
+        val activity = context.findActivity()
+        LaunchedEffect(Unit) {
+            activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LOCKED
+            Log.d { "Requesting locked rotation: ${activity != null}" }
+        }
+        DisposableEffect(Unit) {
+            onDispose {
+                activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
+                Log.d { "Releasing locked rotation: ${activity != null}" }
+            }
+        }
+    }
+
+    @Composable
+    actual override fun releaseRotationLock() {
+        val context = LocalContext.current
+        val activity = context.findActivity()
+        LaunchedEffect(Unit) {
+            activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
+            Log.d { "Releasing locked rotation: ${activity != null}" }
+        }
+    }
+
+    actual override fun setSubtitleTrack(id: Int) {
         if (playerInitialized && (playbackStatus.value in arrayOf(PlaybackStatus.Playing, PlaybackStatus.Paused))) {
             MPVLib.command(arrayOf("set", "sub", if (id == -1) "no" else "$id"))
         }
     }
 
-    override fun setAudioTrack(id: Int) {
+    actual override fun setAudioTrack(id: Int) {
         if (playerInitialized && (playbackStatus.value in arrayOf(PlaybackStatus.Playing, PlaybackStatus.Paused))) {
             MPVLib.command(arrayOf("set", "audio", "$id"))
         }
     }
 
-    override fun internalPlayEntry(mediaEntry: MediaEntry, scope: CoroutineScope) {
+    actual override fun internalPlayEntry(mediaEntry: MediaEntry, scope: CoroutineScope) {
         if (!playerInitialized)
             return
         MPVLib.command(arrayOf("set", "start", "0"))
@@ -176,7 +203,7 @@ actual class MediaPlayer actual constructor(initialEntryID: String, startAt: Lon
     }
 
     @Composable
-    override fun PlayerComponent(entryList: List<MediaEntry>) {
+    actual override fun PlayerComponent(entryList: List<MediaEntry>) {
         val context = LocalContext.current
         val curEntryID by this.currentEntry.collectAsState()
         initialCommands = listOf(
@@ -222,7 +249,7 @@ actual class MediaPlayer actual constructor(initialEntryID: String, startAt: Lon
         }
     }
 
-    override fun releasePlayer() {
+    actual override fun releasePlayer() {
         runCatching {
             MPVLib.removeObserver(observer)
             MPVLib.destroy()
@@ -297,7 +324,7 @@ private fun MediaPlayer.setMPVOptions(context: Context) {
         MPVLib.setOptionString("dscale", "bilinear")
     }
 
-    MPVLib.setOptionString("gpu-api", pref.gpuAPI)
+    MPVLib.setOptionString("gpu-api", pref.gpuAPI) // Offers vulkan but doesn't seem to do anything
     MPVLib.setOptionString("gpu-context", "android")
     MPVLib.setOptionString("opengl-es", "yes")
     MPVLib.setOptionString("tls-verify", "no")
@@ -310,7 +337,13 @@ private fun MediaPlayer.setMPVOptions(context: Context) {
     MPVLib.setOptionString("ytdl", "no")
     MPVLib.setOptionString("save-position-on-quit", "no")
     MPVLib.setOptionString("sub-font-provider", "none")
-    MPVLib.setOptionString("hwdec", if (pref.hwDecoding) (if (pref.alternativeHwDecode) "mediacodec-copy" else "mediacodec") else "no")
+    MPVLib.setOptionString(
+        "hwdec", when (settings["hwdec", "copy"]) {
+            "yes" -> "mediacodec"
+            "copy" -> "mediacodec-copy"
+            else -> "no"
+        }
+    )
     MPVLib.setOptionString("hwdec-codecs", "h264,hevc,mpeg4,mpeg2video,vp8,vp9,av1")
     MPVLib.setOptionString("deband", if (pref.deband) "yes" else "no")
     MPVLib.setOptionString("deband-iterations", pref.debandIterations)

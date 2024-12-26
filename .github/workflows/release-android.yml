@@ -1,0 +1,61 @@
+name: "Run Linux Build (deb, rpm, jar)"
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Mostly just the version folder it will be uploaded to."
+        required: true
+        type: string
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    env:
+      STYX_BASEURL: ${{ secrets.STYX_BASEURL }}
+      STYX_IMAGEURL: ${{ secrets.STYX_IMAGEURL }}
+      STYX_SITEURL: ${{ secrets.STYX_SITEURL }}
+      STYX_SECRET: ${{ secrets.STYX_SECRET }}
+      STYX_SIGNING_ALIAS: ${{ secrets.STYX_SIGNING_ALIAS }}
+      STYX_SIGNING_KEY_PASS: ${{ secrets.STYX_SIGNING_KEY_PASS }}
+
+    steps:
+      - name: "Checkout"
+        uses: actions/checkout@v4
+      - name: "Setup JDK"
+        id: java
+        uses: gmitch215/setup-java@main
+        with:
+          distribution: temurin
+          java-version: 17
+          java-package: jdk
+          cache: "gradle"
+      - name: "Setup Android"
+        uses: android-actions/setup-android@v3
+      - name: "Decode secret to keystore file"
+        uses: timheuer/base64-to-file@v1
+        with:
+          fileName: styx2m.jks
+          encodedString: '${{ secrets.STYX_SIGNING_KEY_FILE }}'
+      - name: "Build & Sign release apks"
+        env:
+          JAVA_HOME: ${{ steps.java.outputs.path }}
+        run: |
+          chmod u+x ./gradlew
+          ./gradlew assembleRelease
+      - name: "Print and save sha384 for apks"
+        run: find ./build/outputs/apk -type f -iname 'moe.styx.styx2m*-release.apk' -exec shasum -a 384 {} \; | tee checksums.sha384
+      - name: "Upload checksum file"
+        uses: actions/upload-artifact@v4
+        with:
+          name: checksums.sha384
+          path: checksums.sha384
+      - name: "Upload apks to FTP"
+        uses: "SamKirkland/FTP-Deploy-Action@v4.3.5"
+        with:
+          server: ${{ secrets.FTP_HOST }}
+          username: ${{ secrets.FTP_USER }}
+          password: ${{ secrets.FTP_PASS }}
+          protocol: ftps
+          security: loose
+          local-dir: "./build/outputs/apk/release/"
+          server-dir: "/${{ inputs.version }}/"

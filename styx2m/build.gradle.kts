@@ -1,8 +1,7 @@
-import org.jetbrains.kotlin.gradle.plugin.mpp.pm20.util.archivesName
-
 plugins {
     alias(libs.plugins.multiplatform)
     alias(libs.plugins.compose)
+    alias(libs.plugins.compose.compiler)
     alias(libs.plugins.android.application)
     alias(libs.plugins.buildConfig)
     alias(libs.plugins.kotlinx.serialization)
@@ -16,17 +15,11 @@ repositories {
     mavenLocal()
 }
 
-version = "0.0.3"
+version = "0.1.0"
 
 kotlin {
-    androidTarget {
-        compilations.all {
-            kotlinOptions {
-                jvmTarget = "17"
-            }
-        }
-    }
-
+    jvmToolchain(17)
+    androidTarget()
     listOf(
         iosX64(),
         iosArm64(),
@@ -52,10 +45,7 @@ kotlin {
             @OptIn(org.jetbrains.compose.ExperimentalComposeLibrary::class)
             implementation(compose.components.resources)
             implementation(libs.moko.permissions)
-            implementation(libs.kstore)
-            implementation(libs.kstore.file)
             implementation(libs.multiplatform.insets)
-            implementation(libs.styx.common)
             implementation(libs.styx.common.compose)
         }
 
@@ -75,16 +65,25 @@ kotlin {
 
 android {
     namespace = "moe.styx.styx2m"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
-        minSdk = 27
-        targetSdk = 34
+        minSdk = 28
+        targetSdk = 35
 
-        applicationId = "moe.styx.styx2m"
-        versionCode = 3
+        applicationId = "moe.styx.styx2m.debug"
+        versionCode = 4
         versionName = "${project.version}"
-        archivesName = "$applicationId-v$versionName"
+        base.archivesName = "$applicationId-v$versionName"
+    }
+
+    signingConfigs {
+        create("release") {
+            storeFile = file("../styx2m.jks")
+            storePassword = System.getenv("STYX_SIGNING_KEY_PASS")
+            keyAlias = System.getenv("STYX_SIGNING_ALIAS")
+            keyPassword = System.getenv("STYX_SIGNING_KEY_PASS")
+        }
     }
 
     splits {
@@ -94,7 +93,8 @@ android {
         abi {
             isEnable = true
             reset()
-            include("armeabi-v7a", "arm64-v8a", "x86", "x86_64")
+            //noinspection ChromeOsAbiSupport - this should be covered by universal (?)
+            include("arm64-v8a")
             isUniversalApk = true
         }
     }
@@ -102,6 +102,7 @@ android {
     buildTypes {
         getByName("release") {
             isMinifyEnabled = true
+            signingConfig = signingConfigs.getByName("release")
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 project.file("../proguard.rules")
@@ -138,10 +139,5 @@ buildConfig {
     buildConfigField("IMAGE_URL", System.getenv("STYX_IMAGEURL")) // Example: https://images.company.com
     buildConfigField("SITE", siteURL.split("https://").getOrElse(1) { siteURL })
     buildConfigField("BUILD_TIME", (System.currentTimeMillis() / 1000))
-    buildConfigField("VERSION_CHECK_URL", "https://raw.githubusercontent.com/Vodes/Styx-2m/master/styx2m/build.gradle.kts")
+    buildConfigField("VERSION_CHECK_URL", "https://api.github.com/repos/Vodes/Styx-2m/tags")
 }
-
-//buildConfig {
-//    // BuildConfig configuration here.
-//    // https://github.com/gmazzo/gradle-buildconfig-plugin#usage-in-kts
-//}

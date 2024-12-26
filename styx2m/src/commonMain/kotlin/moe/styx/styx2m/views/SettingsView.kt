@@ -1,23 +1,25 @@
 package moe.styx.styx2m.views
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.ElevatedCard
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.material3.VerticalDivider
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import cafe.adriel.voyager.core.model.ScreenModel
+import cafe.adriel.voyager.core.model.rememberScreenModel
 import cafe.adriel.voyager.core.screen.Screen
-import moe.styx.common.compose.components.buttons.ExpandIconButton
 import moe.styx.common.compose.components.layout.MainScaffold
-import moe.styx.common.compose.components.misc.Toggles.settingsContainer
+import moe.styx.common.compose.components.misc.ExpandableSettings
 import moe.styx.styx2m.misc.LocalLayoutSize
 import moe.styx.styx2m.views.settings.AppSettings
-import moe.styx.styx2m.views.settings.MainSettings
+import moe.styx.styx2m.views.settings.AppearanceSettings
+import moe.styx.styx2m.views.settings.MetadataSettings
 import moe.styx.styx2m.views.settings.MpvSettings
 
 class SettingsView : Screen {
@@ -25,117 +27,73 @@ class SettingsView : Screen {
     @Composable
     override fun Content() {
         val sizes = LocalLayoutSize.current
-        if (sizes.isWide) {
-            MainScaffold(title = "Settings") {
-                var isLayoutExpanded by remember { mutableStateOf(true) }
-                var isAppExpanded by remember { mutableStateOf(false) }
-                Row {
-                    Column(Modifier.padding(8.dp).weight(1f).verticalScroll(rememberScrollState(), true)) {
-                        ExpandableSettings(
-                            "Layout Options",
-                            isLayoutExpanded,
-                            {
-                                isLayoutExpanded = !isLayoutExpanded
-                                if (isLayoutExpanded)
-                                    isAppExpanded = false
-                            }) {
-                            MainSettings()
-                        }
 
-                        ExpandableSettings(
-                            "App Settings",
-                            isAppExpanded,
-                            {
-                                isAppExpanded = !isAppExpanded;
-                                if (isAppExpanded)
-                                    isLayoutExpanded = false
-                            }) {
-                            AppSettings()
+        val vm = if (sizes.isWide)
+            rememberScreenModel("wide-settings-vm") { SettingsViewModel() }
+        else
+            rememberScreenModel("settings-vm") { SettingsViewModel() }
+
+        MainScaffold(title = "Settings") {
+            Row {
+                Column(Modifier.padding(8.dp).weight(1f).verticalScroll(rememberScrollState(), true)) {
+                    ExpandableSettings("Appearance Settings", vm.appearanceExpanded, { vm.appearanceExpanded = !vm.appearanceExpanded }) {
+                        AppearanceSettings()
+                    }
+                    ExpandableSettings("Metadata Settings", vm.metadataExpanded, { vm.metadataExpanded = !vm.metadataExpanded }) {
+                        MetadataSettings()
+                    }
+                    ExpandableSettings("App Settings", vm.appExpanded, { vm.appExpanded = !vm.appExpanded; }) {
+                        AppSettings()
+                    }
+                    if (!sizes.isWide) {
+                        ExpandableSettings("Player Settings", vm.playerExpanded, { vm.playerExpanded = !vm.playerExpanded; }, false) {
+                            MpvSettings()
                         }
                     }
+                }
+                if (sizes.isWide) {
                     VerticalDivider(Modifier.fillMaxHeight().padding(3.dp, 8.dp), thickness = 2.dp)
                     Column(Modifier.padding(8.dp).weight(1f).verticalScroll(rememberScrollState(), true)) {
                         MpvSettings()
                     }
                 }
             }
-        } else {
-            MainScaffold(title = "Settings") {
-                val scrollState = rememberScrollState()
-                var isLayoutExpanded by remember { mutableStateOf(true) }
-                var isPlayerExpanded by remember { mutableStateOf(false) }
-                var isAppExpanded by remember { mutableStateOf(false) }
-                Column(Modifier.padding(8.dp).verticalScroll(scrollState, true)) {
-                    ExpandableSettings(
-                        "Layout Options",
-                        isLayoutExpanded,
-                        {
-                            isLayoutExpanded = !isLayoutExpanded
-                            if (isLayoutExpanded) {
-                                isPlayerExpanded = false
-                                isAppExpanded = false
-                            }
-                        }) {
-                        MainSettings()
-                    }
-
-                    ExpandableSettings(
-                        "App Settings",
-                        isAppExpanded,
-                        {
-                            isAppExpanded = !isAppExpanded;
-                            if (isAppExpanded) {
-                                isLayoutExpanded = false
-                                isPlayerExpanded = false
-                            }
-                        }) {
-                        AppSettings()
-                    }
-
-
-                    ExpandableSettings(
-                        "Player Options",
-                        isPlayerExpanded,
-                        {
-                            isPlayerExpanded = !isPlayerExpanded;
-                            if (isPlayerExpanded) {
-                                isLayoutExpanded = false
-                                isAppExpanded = false
-                            }
-                        },
-                        false
-                    ) {
-                        MpvSettings()
-                    }
-                }
-            }
         }
     }
+}
 
-    @Composable
-    fun ExpandableSettings(
-        title: String,
-        isExpanded: Boolean,
-        onExpandClick: () -> Unit,
-        withContainer: Boolean = true,
-        content: (@Composable ColumnScope.() -> Unit)
-    ) {
-        ElevatedCard(onExpandClick, Modifier.padding(5.dp)) {
-            Row(Modifier.fillMaxWidth().padding(3.dp)) {
-                Text(title, modifier = Modifier.padding(5.dp).weight(1f), style = MaterialTheme.typography.headlineSmall)
-                ExpandIconButton(isExpanded = isExpanded, onClick = onExpandClick)
-            }
-            AnimatedVisibility(isExpanded) {
-                if (withContainer) {
-                    Column(Modifier.settingsContainer()) {
-                        content()
-                    }
-                } else {
-                    Column(Modifier.fillMaxWidth()) {
-                        content()
-                    }
-                }
-            }
+class SettingsViewModel : ScreenModel {
+    private var _appearanceExpanded = mutableStateOf(true)
+    var appearanceExpanded: Boolean
+        get() = _appearanceExpanded.value
+        set(value) {
+            _appearanceExpanded.value = value
+            allBackingMutables.forEach { if (it != _appearanceExpanded) it.value = false }
         }
-    }
+
+    private var _metadataExpanded = mutableStateOf(false)
+    var metadataExpanded: Boolean
+        get() = _metadataExpanded.value
+        set(value) {
+            _metadataExpanded.value = value
+            allBackingMutables.forEach { if (it != _metadataExpanded) it.value = false }
+        }
+
+    private var _appExpanded = mutableStateOf(false)
+    var appExpanded: Boolean
+        get() = _appExpanded.value
+        set(value) {
+            _appExpanded.value = value
+            allBackingMutables.forEach { if (it != _appExpanded) it.value = false }
+        }
+
+    private var _playerExpanded = mutableStateOf(false)
+    var playerExpanded: Boolean
+        get() = _playerExpanded.value
+        set(value) {
+            _playerExpanded.value = value
+            allBackingMutables.forEach { if (it != _playerExpanded) it.value = false }
+        }
+
+    private val allBackingMutables = arrayOf(_metadataExpanded, _appExpanded, _playerExpanded, _appearanceExpanded)
 }

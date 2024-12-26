@@ -16,8 +16,7 @@ private val portraitCardChoices = listOf("3", "4", "5")
 private val landScapeCardChoices = listOf("Adaptive", "7", "8", "9", "10")
 
 @Composable
-fun MainSettings() {
-    Toggles.ContainerSwitch("Show names on cards", value = settings["display-names", false]) { settings["display-names"] = it }
+fun MetadataSettings() {
     Toggles.ContainerSwitch(
         "Show episode summaries",
         value = settings["display-ep-synopsis", false]

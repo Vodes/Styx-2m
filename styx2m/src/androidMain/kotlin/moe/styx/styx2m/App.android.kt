@@ -2,9 +2,9 @@ package moe.styx.styx2m
 
 import Styx_m.styx_m.BuildConfig
 import android.app.Application
+import android.content.Context
 import android.content.Intent
 import android.net.Uri
-import android.os.Build
 import android.os.Bundle
 import android.view.WindowManager
 import androidx.activity.ComponentActivity
@@ -14,8 +14,10 @@ import androidx.core.view.WindowCompat
 import com.multiplatform.lifecycle.LifecycleTracker
 import com.multiplatform.lifecyle.AndroidLifecycleEventObserver
 import moe.styx.common.compose.AppConfig
-import moe.styx.common.compose.appConfig
+import moe.styx.common.compose.AppContextImpl
+import moe.styx.common.compose.AppContextImpl.appConfig
 import moe.styx.common.http.getHttpClient
+import moe.styx.common.util.Log
 
 class AndroidApp : Application() {
     companion object {
@@ -25,6 +27,7 @@ class AndroidApp : Application() {
     override fun onCreate() {
         super.onCreate()
         INSTANCE = this
+        AppContextImpl.setUp(this)
     }
 }
 
@@ -34,22 +37,12 @@ class AppActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         WindowCompat.setDecorFitsSystemWindows(window, false)
-        if (Build.VERSION.SDK_INT >= 28)
-            window.attributes.layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES
+        window.attributes.layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES
         enableEdgeToEdge()
         lifecycle.addObserver(observer)
         getHttpClient("${BuildConfig.APP_NAME} (Android) - ${BuildConfig.APP_VERSION}")
-        appConfig = {
-            AppConfig(
-                BuildConfig.APP_SECRET,
-                BuildConfig.APP_VERSION,
-                BuildConfig.BASE_URL,
-                BuildConfig.IMAGE_URL,
-                BuildConfig.DEBUG_TOKEN,
-                cacheDir.path,
-                filesDir.path
-            )
-        }
+        appConfig = { fetchDeviceAppConfig(this) }
+        Log.debugEnabled = true
         setContent {
             App()
         }
@@ -59,6 +52,20 @@ class AppActivity : ComponentActivity() {
         super.onDestroy()
         lifecycle.removeObserver(observer)
     }
+}
+
+fun fetchDeviceAppConfig(context: Context?): AppConfig {
+    val ensuredContext = context ?: AppContextImpl.get()
+    return AppConfig(
+        BuildConfig.APP_SECRET,
+        BuildConfig.APP_VERSION,
+        BuildConfig.BASE_URL,
+        BuildConfig.IMAGE_URL,
+        BuildConfig.DEBUG_TOKEN,
+        ensuredContext.cacheDir.path,
+        ensuredContext.filesDir.path,
+        BuildConfig.VERSION_CHECK_URL
+    )
 }
 
 internal actual fun openUrl(url: String?) {
