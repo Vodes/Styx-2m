@@ -71,7 +71,7 @@ android {
         minSdk = 28
         targetSdk = 35
 
-        applicationId = "moe.styx.styx2m.debug"
+        applicationId = "moe.styx.styx2m"
         versionCode = 4
         versionName = "${project.version}"
         base.archivesName = "$applicationId-v$versionName"
