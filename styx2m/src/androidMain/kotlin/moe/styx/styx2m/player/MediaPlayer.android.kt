@@ -1,6 +1,5 @@
 package moe.styx.styx2m.player
 
-import Styx2m.styx2m.BuildConfig
 import android.content.Context
 import android.content.pm.ActivityInfo
 import android.view.SurfaceHolder
@@ -19,6 +18,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import moe.styx.common.compose.AppContextImpl.appConfig
 import moe.styx.common.compose.files.Storage
+import moe.styx.common.compose.http.Endpoints
 import moe.styx.common.compose.http.login
 import moe.styx.common.compose.settings
 import moe.styx.common.compose.utils.MpvPreferences
@@ -255,7 +255,7 @@ actual class MediaPlayer actual constructor(initialEntryID: String, startAt: Lon
                     MPVLib.command(
                         arrayOf(
                             "loadfile",
-                            "${BuildConfig.BASE_URL}/watch/${currentEntry.GUID}?token=${login?.watchToken}",
+                            "${Endpoints.WATCH.url()}/${currentEntry.GUID}?token=${login?.watchToken}",
                             "replace"
                         )
                     )
