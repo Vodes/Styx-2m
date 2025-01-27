@@ -1,10 +1,8 @@
 package moe.styx.styx2m.player
 
-import androidx.compose.foundation.Canvas
+import SeekerDefaults
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.detectHorizontalDragGestures
-import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBackIos
@@ -18,13 +16,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.zIndex
 import cafe.adriel.voyager.navigator.Navigator
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -32,12 +25,16 @@ import moe.styx.common.compose.components.AppShapes
 import moe.styx.common.compose.components.buttons.IconButtonWithTooltip
 import moe.styx.common.data.Media
 import moe.styx.common.data.MediaEntry
+import moe.styx.common.extension.containsAny
 import moe.styx.common.extension.eqI
 import moe.styx.styx2m.components.PlayerIconButton
 import moe.styx.styx2m.misc.Chapter
 import moe.styx.styx2m.misc.Track
 import moe.styx.styx2m.misc.ifInvalid
 import moe.styx.styx2m.misc.secondsDurationString
+import moe.styx.styx2m.player.seeker.Seeker
+import moe.styx.styx2m.player.seeker.Segment
+import moe.styx.styx2m.player.seeker.rememberSeekerState
 import moe.styx.styx2m.theme.darkScheme
 import kotlin.math.max
 import kotlin.math.min
@@ -82,7 +79,12 @@ fun NameRow(
                 disabledContentColor = darkScheme.inverseOnSurface
             )
         ) { nav.pop() }
-        Text(renderedTitle, style = MaterialTheme.typography.bodyLarge, color = darkScheme.onSurface, modifier = Modifier.weight(1f))
+        Text(
+            renderedTitle,
+            style = MaterialTheme.typography.bodyLarge,
+            color = darkScheme.onSurface,
+            modifier = Modifier.weight(1f)
+        )
         IconButtonWithTooltip(
             Icons.Default.ScreenLockRotation, "Lock rotation", Modifier.size(70.dp), tint = if (isLocked)
                 darkScheme.primary
@@ -106,11 +108,19 @@ fun NameRow(
                 modifier = Modifier.fillMaxHeight(0.7F).heightIn(100.dp, 300.dp).align(Alignment.TopEnd)
             ) {
                 Column(Modifier.width(IntrinsicSize.Max).padding(3.dp), horizontalAlignment = Alignment.Start) {
-                    Text("Audio Tracks", Modifier.padding(4.dp, 0.dp, 0.dp, 6.dp), style = MaterialTheme.typography.titleMedium)
+                    Text(
+                        "Audio Tracks",
+                        Modifier.padding(4.dp, 0.dp, 0.dp, 6.dp),
+                        style = MaterialTheme.typography.titleMedium
+                    )
                     trackList.filter { it.type eqI "audio" }.forEachIndexed { index, track ->
                         TrackDropdownItem(track, mediaPlayer, index != 0)
                     }
-                    Text("Subtitle Tracks", Modifier.padding(4.dp, 8.dp, 0.dp, 6.dp), style = MaterialTheme.typography.titleMedium)
+                    Text(
+                        "Subtitle Tracks",
+                        Modifier.padding(4.dp, 8.dp, 0.dp, 6.dp),
+                        style = MaterialTheme.typography.titleMedium
+                    )
                     trackList.filter { it.type eqI "sub" }.forEachIndexed { index, track ->
                         TrackDropdownItem(track, mediaPlayer, index != 0)
                     }
@@ -205,7 +215,10 @@ fun ColumnScope.ControlsRow(
             mediaPlayer.seek(currentTime - 5)
         }
         if (playbackStatus in arrayOf(PlaybackStatus.Buffering, PlaybackStatus.Seeking)) {
-            CircularProgressIndicator(modifier = Modifier.padding(14.dp).requiredSize(60.dp), color = MaterialTheme.colorScheme.secondary)
+            CircularProgressIndicator(
+                modifier = Modifier.padding(14.dp).requiredSize(60.dp),
+                color = MaterialTheme.colorScheme.secondary
+            )
         } else {
             PlayerIconButton(
                 if (playbackStatus is PlaybackStatus.Paused) Icons.Default.PlayArrow else Icons.Default.Pause,
@@ -256,71 +269,54 @@ fun TimelineControls(
     chapters: List<Chapter>,
     onTap: () -> Unit
 ) {
+    val seekerState = rememberSeekerState()
+    var isDragging by remember { mutableStateOf(false) }
+    var seekerValue by remember { mutableStateOf(0f) }
     Row(
         Modifier.padding(25.dp, 20.dp).clip(AppShapes.extraLarge).background(darkScheme.background.copy(0.5F))
             .fillMaxWidth(0.88F),
         horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        var size by remember { mutableStateOf(IntSize.Zero) }
-        var currentDragOffset by remember { mutableStateOf(0f) }
-        var startingOffset by remember { mutableStateOf(0f) }
-        Text(currentTime.secondsDurationString(), Modifier.padding(10.dp, 0.dp, 7.dp, 0.dp))
-        BoxWithConstraints(Modifier.padding(20.dp).weight(1f).onGloballyPositioned {
-            size = it.size
-        }.pointerInput(Unit) {
-            detectTapGestures { offset ->
+        Text(
+            if (isDragging) seekerValue.toLong().secondsDurationString() else currentTime.secondsDurationString(),
+            Modifier.padding(10.dp, 0.dp, 7.dp, 0.dp)
+        )
+
+        Seeker(
+            Modifier.padding(20.dp, 5.dp).weight(1f),
+            seekerState,
+            value = max(currentTime.toFloat(), 0f).ifInvalid(0f),
+            thumbValue = if (isDragging) seekerValue else max(currentTime.toFloat(), 0f).ifInvalid(0f),
+            range = 0f..duration.toFloat().ifInvalid(1f),
+            readAheadValue = cacheTime.toFloat().ifInvalid(0f),
+            segments = chapters.map {
+                Segment(
+                    it.title,
+                    it.time,
+                    if (it.title.containsAny("op", "intro", "ed", "end", "credits"))
+                        darkScheme.secondary
+                    else
+                        Color.Unspecified
+                )
+            },
+            onValueChange = {
+                isDragging = true
+                seekerValue = it
                 onTap()
-                if (size != IntSize.Zero) {
-                    val sizeRatio = offset.x / size.width
-                    mediaPlayer.seek(max(min((duration * sizeRatio).toLong(), duration - 1), 0))
-                }
-            }
-            detectHorizontalDragGestures(onDragStart = { startingOffset = it.x }, onDragCancel = {
-                onTap()
-                currentDragOffset = 0f
-                startingOffset = 0f
-            }, onDragEnd = {
-                val sizeRatio = currentDragOffset / size.width
-                mediaPlayer.seek(max(min((duration * sizeRatio).toLong(), duration - 1), 0))
-            }) { _, amount ->
-                onTap()
-                if (size != IntSize.Zero && startingOffset != 0f) {
-                    val cur = if (currentDragOffset == 0F) {
-                        startingOffset
-                    } else currentDragOffset
-                    currentDragOffset = cur + amount
-                }
-            }
-        }) {
-            LinearProgressIndicator(
-                { (cacheTime.toFloat() / duration).ifInvalid(0F) },
-                Modifier.fillMaxWidth().height(18.dp).zIndex(1F).clip(AppShapes.small),
-                color = darkScheme.onSurface.copy(0.3F),
-                trackColor = darkScheme.surface.copy(0.8F)
+            },
+            onValueChangeFinished = {
+                mediaPlayer.seek(max(min(seekerValue.toLong(), duration - 1), 0))
+                isDragging = false
+            },
+            colors = SeekerDefaults.seekerColors(
+                darkScheme.primary,
+                darkScheme.surface.copy(0.8F),
+                thumbColor = darkScheme.primary,
+                readAheadColor = darkScheme.onSurface.copy(0.3F)
             )
-            LinearProgressIndicator(
-                { (currentTime.toFloat() / duration).ifInvalid(0F) },
-                Modifier.fillMaxWidth().height(18.dp).zIndex(2F).clip(AppShapes.small),
-                color = darkScheme.primary,
-                trackColor = Color.Transparent
-            )
-            if (chapters.isNotEmpty()) {
-                Canvas(Modifier.fillMaxWidth().height(20.dp).zIndex(3F).padding(0.dp, 1.dp).clip(AppShapes.small)) {
-                    val width = size.width
-                    val height = size.height
-                    for (chapter in chapters.filter { it.time > 1F }) {
-                        val offX = width * (chapter.time / duration.toFloat())
-                        drawLine(
-                            start = Offset(offX - 1F, 0F),
-                            end = Offset(offX - 1F, height.toFloat() - 9F),
-                            strokeWidth = 5F,
-                            color = darkScheme.secondary
-                        )
-                    }
-                }
-            }
-        }
+        )
+
         Text(duration.secondsDurationString(), Modifier.padding(7.dp, 0.dp, 10.dp, 0.dp))
     }
 }
