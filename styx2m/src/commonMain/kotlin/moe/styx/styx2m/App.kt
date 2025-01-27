@@ -3,10 +3,7 @@ package moe.styx.styx2m
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.VisibilityThreshold
 import androidx.compose.animation.core.spring
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.safeDrawing
-import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.foundation.layout.*
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -14,6 +11,7 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.transitions.SlideTransition
 import com.dokar.sonner.Toaster
@@ -58,7 +56,7 @@ internal fun App() = AppTheme {
     Surface(modifier = Modifier.fillMaxSize()) {
         val darkState = LocalThemeIsDark.current
         val toasterState = rememberToasterState()
-        Toaster(toasterState, darkTheme = darkState.value, richColors = true)
+        Toaster(toasterState, modifier = Modifier.padding(0.dp, 0.dp, 0.dp, 38.dp), darkTheme = darkState.value, richColors = true)
         Navigator(MainOverview()) { navigator ->
             CompositionLocalProvider(
                 LocalGlobalNavigator provides navigator,
