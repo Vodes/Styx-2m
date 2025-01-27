@@ -1,6 +1,6 @@
 package moe.styx.styx2m.player
 
-import Styx_m.styx_m.BuildConfig
+import Styx2m.styx2m.BuildConfig
 import android.content.Context
 import android.content.pm.ActivityInfo
 import android.view.SurfaceHolder
@@ -33,7 +33,8 @@ import moe.styx.styx2m.misc.findActivity
 import okio.Path.Companion.toPath
 import java.io.FileOutputStream
 
-actual class MediaPlayer actual constructor(initialEntryID: String, startAt: Long) : AMediaPlayer(initialEntryID, startAt) {
+actual class MediaPlayer actual constructor(initialEntryID: String, startAt: Long) :
+    AMediaPlayer(initialEntryID, startAt) {
     val observer by lazy {
         object : MPVLib.EventObserver {
             override fun event(@MPVLib.Event eventID: Int) {
@@ -91,13 +92,21 @@ actual class MediaPlayer actual constructor(initialEntryID: String, startAt: Lon
                     "pause" -> {
                         isPaused = value
                         if (playbackStatus.value !is PlaybackStatus.Buffering) {
-                            scope.launch { if (value) playbackStatus.emit(PlaybackStatus.Paused) else playbackStatus.emit(PlaybackStatus.Playing) }
+                            scope.launch {
+                                if (value) playbackStatus.emit(PlaybackStatus.Paused) else playbackStatus.emit(
+                                    PlaybackStatus.Playing
+                                )
+                            }
                         }
                     }
 
                     "paused-for-cache" -> {
                         if (playerInitialized)
-                            scope.launch { if (value) playbackStatus.emit(PlaybackStatus.Buffering) else playbackStatus.emit(PlaybackStatus.Playing) }
+                            scope.launch {
+                                if (value) playbackStatus.emit(PlaybackStatus.Buffering) else playbackStatus.emit(
+                                    PlaybackStatus.Playing
+                                )
+                            }
                     }
 
                     "seeking" -> {
@@ -243,7 +252,13 @@ actual class MediaPlayer actual constructor(initialEntryID: String, startAt: Lon
                 if (downloaded != null) {
                     MPVLib.command(arrayOf("loadfile", downloaded.path, "replace"))
                 } else {
-                    MPVLib.command(arrayOf("loadfile", "${BuildConfig.BASE_URL}/watch/${currentEntry.GUID}?token=${login?.watchToken}", "replace"))
+                    MPVLib.command(
+                        arrayOf(
+                            "loadfile",
+                            "${BuildConfig.BASE_URL}/watch/${currentEntry.GUID}?token=${login?.watchToken}",
+                            "replace"
+                        )
+                    )
                 }
             }
         }
@@ -323,6 +338,8 @@ private fun MediaPlayer.setMPVOptions(context: Context) {
         MPVLib.setOptionString("cscale", "bilinear")
         MPVLib.setOptionString("dscale", "bilinear")
     }
+
+    MPVLib.setOptionString("dither", if (pref.profile == "high") "fruit" else "ordered")
 
     MPVLib.setOptionString("gpu-api", pref.gpuAPI) // Offers vulkan but doesn't seem to do anything
     MPVLib.setOptionString("gpu-context", "android")

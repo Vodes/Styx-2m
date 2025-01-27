@@ -1,6 +1,6 @@
 package moe.styx.styx2m
 
-import Styx_m.styx_m.BuildConfig
+import Styx2m.styx2m.BuildConfig
 import android.app.Application
 import android.content.Context
 import android.content.Intent
@@ -37,7 +37,8 @@ class AppActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         WindowCompat.setDecorFitsSystemWindows(window, false)
-        window.attributes.layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES
+        window.attributes.layoutInDisplayCutoutMode =
+            WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES
         enableEdgeToEdge()
         lifecycle.addObserver(observer)
         getHttpClient("${BuildConfig.APP_NAME} (Android) - ${BuildConfig.APP_VERSION}")

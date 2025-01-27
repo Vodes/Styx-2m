@@ -1,6 +1,6 @@
 package moe.styx.styx2m.views.misc
 
-import Styx_m.styx_m.BuildConfig
+import Styx2m.styx2m.BuildConfig
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -68,7 +68,8 @@ class LoginView : Screen {
 
                 CircularProgressIndicator(
                     progress = { progressAnimation },
-                    modifier = Modifier.align(Alignment.CenterHorizontally).padding(0.dp, 15.dp).fillMaxSize(.3F).weight(0.5F),
+                    modifier = Modifier.align(Alignment.CenterHorizontally).padding(0.dp, 15.dp).fillMaxSize(.3F)
+                        .weight(0.5F),
                 )
             }
             Button(onClick = {

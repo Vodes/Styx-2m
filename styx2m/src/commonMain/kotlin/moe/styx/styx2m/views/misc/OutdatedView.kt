@@ -1,6 +1,6 @@
 package moe.styx.styx2m.views.misc
 
-import Styx_m.styx_m.BuildConfig
+import Styx2m.styx2m.BuildConfig
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -30,9 +30,13 @@ class OutdatedView(private val requestedVersion: String? = null) : Screen {
                 )
                 if (Platform.current == Platform.ANDROID)
                     AndroidDownloadButtons()
-                Button({
-                    openUrl("${BuildConfig.SITE_URL}/user")
-                }, colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary), modifier = Modifier.padding(10.dp)) {
+                Button(
+                    {
+                        openUrl("${BuildConfig.SITE_URL}/user")
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary),
+                    modifier = Modifier.padding(10.dp)
+                ) {
                     Text("Open ${BuildConfig.SITE}")
                 }
             }

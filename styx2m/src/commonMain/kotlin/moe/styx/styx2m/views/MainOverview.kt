@@ -1,6 +1,6 @@
 package moe.styx.styx2m.views
 
-import Styx_m.styx_m.BuildConfig
+import Styx2m.styx2m.BuildConfig
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CloudOff
@@ -153,7 +153,8 @@ class MainOverview : Screen {
     @Composable
     private fun SideNavRail(parentNav: Navigator, isLandscape: Boolean) {
         NavigationRail(
-            Modifier.fillMaxHeight().padding(7.dp, 6.dp, 3.dp, 8.dp).shadow(2.dp, AppShapes.large).clip(AppShapes.large),
+            Modifier.fillMaxHeight().padding(7.dp, 6.dp, 3.dp, 8.dp).shadow(2.dp, AppShapes.large)
+                .clip(AppShapes.large),
             containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(1.dp)
         ) {
             RailNavItem(Tabs.seriesTab)
