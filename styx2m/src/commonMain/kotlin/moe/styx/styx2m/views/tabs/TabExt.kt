@@ -17,6 +17,7 @@ import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.debounce
 import moe.styx.common.compose.components.anime.AnimeCard
 import moe.styx.common.compose.components.anime.AnimeListItem
+import moe.styx.common.compose.components.misc.ScrollToTopContainer
 import moe.styx.common.compose.components.search.MediaSearch
 import moe.styx.common.compose.settings
 import moe.styx.common.compose.utils.LocalGlobalNavigator
@@ -96,32 +97,34 @@ private fun MediaGrid(
             listPosViewModel.scrollOffset = listState.firstVisibleItemScrollOffset
         }
     }
-    if (showUnseen) {
-        LazyVerticalGrid(
-            columns = getGridCells(sizes),
-            contentPadding = PaddingValues(10.dp, 7.dp),
-            state = listState
-        ) {
-            items(mediaList, key = { it.GUID }) {
-                Row(modifier = Modifier.animateItem()) {
-                    AnimeCard(
-                        it to storage.imageList.find { img -> img.GUID eqI it.thumbID },
-                        true,
-                        entryList = storage.entryList,
-                        watchedEntries = storage.watchedList
-                    ) { nav.pushMediaView(it) }
+    ScrollToTopContainer(Modifier.fillMaxSize(), scrollableState = listState) {
+        if (showUnseen) {
+            LazyVerticalGrid(
+                columns = getGridCells(sizes),
+                contentPadding = PaddingValues(10.dp, 7.dp),
+                state = listState
+            ) {
+                items(mediaList, key = { it.GUID }) {
+                    Row(modifier = Modifier.animateItem()) {
+                        AnimeCard(
+                            it to storage.imageList.find { img -> img.GUID eqI it.thumbID },
+                            true,
+                            entryList = storage.entryList,
+                            watchedEntries = storage.watchedList
+                        ) { nav.pushMediaView(it) }
+                    }
                 }
             }
-        }
-    } else {
-        LazyVerticalGrid(
-            columns = getGridCells(sizes),
-            contentPadding = PaddingValues(10.dp, 7.dp),
-            state = listState
-        ) {
-            items(mediaList, key = { it.GUID }) {
-                Row(modifier = Modifier.animateItem()) {
-                    AnimeCard(it to storage.imageList.find { img -> img.GUID eqI it.thumbID }) { nav.pushMediaView(it) }
+        } else {
+            LazyVerticalGrid(
+                columns = getGridCells(sizes),
+                contentPadding = PaddingValues(10.dp, 7.dp),
+                state = listState
+            ) {
+                items(mediaList, key = { it.GUID }) {
+                    Row(modifier = Modifier.animateItem()) {
+                        AnimeCard(it to storage.imageList.find { img -> img.GUID eqI it.thumbID }) { nav.pushMediaView(it) }
+                    }
                 }
             }
         }
@@ -138,10 +141,12 @@ private fun MediaList(storage: MainDataViewModelStorage, mediaList: List<Media>,
             listPosViewModel.scrollOffset = listState.firstVisibleItemScrollOffset
         }
     }
-    LazyColumn(state = listState) {
-        items(mediaList, key = { it.GUID }) {
-            Row(Modifier.animateItem().padding(3.dp)) {
-                AnimeListItem(it, storage.imageList.find { img -> img.GUID eqI it.thumbID }) { nav.pushMediaView(it) }
+    ScrollToTopContainer(Modifier.fillMaxSize(), scrollableState = listState) {
+        LazyColumn(state = listState) {
+            items(mediaList, key = { it.GUID }) {
+                Row(Modifier.animateItem().padding(3.dp)) {
+                    AnimeListItem(it, storage.imageList.find { img -> img.GUID eqI it.thumbID }) { nav.pushMediaView(it) }
+                }
             }
         }
     }
