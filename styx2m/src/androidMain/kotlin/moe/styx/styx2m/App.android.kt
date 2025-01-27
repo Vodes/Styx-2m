@@ -41,7 +41,7 @@ class AppActivity : ComponentActivity() {
             WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES
         enableEdgeToEdge()
         lifecycle.addObserver(observer)
-        getHttpClient("${BuildConfig.APP_NAME} (Android) - ${BuildConfig.APP_VERSION}")
+        getHttpClient("${BuildConfig.APP_NAME} (Android) - ${BuildConfig.APP_VERSION}", enableZstd = true)
         appConfig = { fetchDeviceAppConfig(this) }
         Log.debugEnabled = true
         setContent {

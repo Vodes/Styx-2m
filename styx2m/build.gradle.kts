@@ -45,7 +45,9 @@ kotlin {
             implementation(compose.components.resources)
             implementation(libs.moko.permissions)
             implementation(libs.multiplatform.insets)
-            implementation(libs.styx.common.compose)
+            implementation("moe.styx:styx-common-compose:0.1.11") {
+                exclude(group = "com.github.luben")
+            }
         }
 
         androidMain.dependencies {
@@ -54,6 +56,8 @@ kotlin {
             implementation(libs.compose.uitooling)
             implementation(libs.kotlinx.coroutines.android)
             implementation(libs.android.libmpv)
+            //noinspection UseTomlInstead
+            implementation("com.github.luben:zstd-jni:1.5.6-9@aar")
         }
 
         iosMain.dependencies {
