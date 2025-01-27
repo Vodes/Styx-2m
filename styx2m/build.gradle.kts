@@ -15,7 +15,7 @@ repositories {
     mavenLocal()
 }
 
-version = "0.1.1-beta1"
+version = "0.1.1-beta2"
 
 kotlin {
     jvmToolchain(17)
