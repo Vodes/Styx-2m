@@ -74,6 +74,7 @@ fun NameRow(
             Icons.Default.Close,
             "Back",
             Modifier.size(70.dp),
+            tint = darkScheme.onSurface,
             colors = IconButtonDefaults.iconButtonColors(
                 contentColor = darkScheme.onSurface,
                 disabledContentColor = darkScheme.inverseOnSurface
@@ -99,7 +100,8 @@ fun NameRow(
                 IconButtonWithTooltip(
                     Icons.AutoMirrored.Filled.ListAlt,
                     "Track Selection",
-                    Modifier.padding(10.dp, 0.dp).size(70.dp)
+                    Modifier.padding(10.dp, 0.dp).size(70.dp),
+                    tint = darkScheme.onSurface
                 ) { showTrackSelect = !showTrackSelect }
             }
             DropdownMenu(
@@ -280,7 +282,8 @@ fun TimelineControls(
     ) {
         Text(
             if (isDragging) seekerValue.toLong().secondsDurationString() else currentTime.secondsDurationString(),
-            Modifier.padding(10.dp, 0.dp, 7.dp, 0.dp)
+            Modifier.padding(10.dp, 0.dp, 7.dp, 0.dp),
+            color = darkScheme.onSurface
         )
 
         Seeker(
@@ -317,6 +320,6 @@ fun TimelineControls(
             )
         )
 
-        Text(duration.secondsDurationString(), Modifier.padding(7.dp, 0.dp, 10.dp, 0.dp))
+        Text(duration.secondsDurationString(), Modifier.padding(7.dp, 0.dp, 10.dp, 0.dp), color = darkScheme.onSurface)
     }
 }
