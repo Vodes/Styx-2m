@@ -25,6 +25,10 @@ import moe.styx.common.compose.utils.LocalGlobalNavigator
 import moe.styx.common.compose.viewmodels.MainDataViewModel
 import moe.styx.common.data.MediaActivity
 import moe.styx.common.extension.eqI
+import moe.styx.styx2m.components.player.ControlsRow
+import moe.styx.styx2m.components.player.NameRow
+import moe.styx.styx2m.components.player.PlayerControlsSurface
+import moe.styx.styx2m.components.player.TimelineControls
 import moe.styx.styx2m.misc.*
 import kotlin.jvm.Transient
 
