@@ -3,9 +3,6 @@ package moe.styx.styx2m.player
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -94,7 +91,6 @@ class PlayerView(val entryID: String, startAt: Long = 0L) : Screen {
         }
 
         var controlsTimeout by remember { mutableStateOf(4) }
-        val interactionSource = remember { MutableInteractionSource() }
 
         LaunchedEffect(playerState, playbackStatus, currentEntry) {
             if (currentEntry != null)
@@ -109,7 +105,35 @@ class PlayerView(val entryID: String, startAt: Long = 0L) : Screen {
             mediaPlayer.releaseRotationLock()
         }
 
-        Box(Modifier.fillMaxSize().clickable(interactionSource, indication = null) { controlsTimeout = if (controlsTimeout > 0) 0 else 3 }) {
+        PlayerControlsSurface(Modifier.fillMaxSize(), onTap = {
+            controlsTimeout = if (controlsTimeout > 0) 0 else 3
+        }, onSeekForward = {
+            if (playerState.progress < playerState.fileLength - 15) {
+                mediaPlayer.seek(playerState.progress + 10)
+                controlsTimeout = 2
+                return@PlayerControlsSurface true
+            }
+            return@PlayerControlsSurface false
+        }, onSeekBackward = {
+            if (playerState.progress > 7) {
+                mediaPlayer.seek(playerState.progress - 5)
+                controlsTimeout = 2
+                return@PlayerControlsSurface true
+            }
+            return@PlayerControlsSurface false
+        }, onChapterSkipForward = {
+            val validChapter = playerState.chapters.sortedBy { it.time }.find { it.time > playerState.progress }
+            if (playerState.chapters.isEmpty() || validChapter == null)
+                return@PlayerControlsSurface false
+            mediaPlayer.seek(validChapter.time.toLong())
+            return@PlayerControlsSurface true
+        }, onChapterSkipBackward = {
+            val validChapter = playerState.chapters.sortedBy { it.time }.findLast { it.time < playerState.progress }
+            if (playerState.chapters.isEmpty() || validChapter == null)
+                return@PlayerControlsSurface false
+            mediaPlayer.seek(validChapter.time.toLong())
+            return@PlayerControlsSurface true
+        }) {
             Row(Modifier.zIndex(0F).fillMaxSize()) {
                 mediaPlayer.PlayerComponent(mediaStorage.entries)
             }

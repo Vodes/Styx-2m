@@ -1,8 +1,13 @@
 package moe.styx.styx2m.player
 
 import SeekerDefaults
+import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.indication
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.PressInteraction
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBackIos
@@ -17,6 +22,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.navigator.Navigator
 import kotlinx.coroutines.delay
@@ -28,16 +35,60 @@ import moe.styx.common.data.MediaEntry
 import moe.styx.common.extension.containsAny
 import moe.styx.common.extension.eqI
 import moe.styx.styx2m.components.PlayerIconButton
-import moe.styx.styx2m.misc.Chapter
-import moe.styx.styx2m.misc.Track
-import moe.styx.styx2m.misc.ifInvalid
-import moe.styx.styx2m.misc.secondsDurationString
+import moe.styx.styx2m.misc.*
 import moe.styx.styx2m.player.seeker.Seeker
 import moe.styx.styx2m.player.seeker.Segment
 import moe.styx.styx2m.player.seeker.rememberSeekerState
 import moe.styx.styx2m.theme.darkScheme
 import kotlin.math.max
 import kotlin.math.min
+
+@Composable
+fun PlayerControlsSurface(
+    modifier: Modifier = Modifier,
+    onTap: () -> Unit = {},
+    onChapterSkipForward: () -> Boolean = { false },
+    onChapterSkipBackward: () -> Boolean = { false },
+    onSeekForward: () -> Boolean = { false },
+    onSeekBackward: () -> Boolean = { false },
+    content: @Composable BoxScope.() -> Unit
+) {
+    val indicator = remember { MutableInteractionSource() }
+    val scope = rememberCoroutineScope()
+    val sizes = LocalLayoutSize.current
+    val currentSize = remember(sizes.isLandScape) { IntSize(sizes.width, sizes.height) }
+    Box(modifier.fillMaxSize().indication(indicator, LocalIndication.current).pointerInput(currentSize) {
+        detectTapGestures(onDoubleTap = {
+            val offsetSize = IntSize(it.x.toDp().roundToPx(), it.y.toDp().roundToPx())
+            val success = if (offsetSize.width < (currentSize.width / 2))
+                onSeekBackward()
+            else
+                onSeekForward()
+            if (success)
+                scope.launch {
+                    val press = PressInteraction.Press(it)
+                    indicator.emit(press)
+                    delay(40)
+                    indicator.emit(PressInteraction.Release(press))
+                }
+        }, onLongPress = {
+            val offsetSize = IntSize(it.x.toDp().roundToPx(), it.y.toDp().roundToPx())
+            val success = if (offsetSize.width < (currentSize.width / 2))
+                onChapterSkipBackward()
+            else
+                onChapterSkipForward()
+            if (success)
+                scope.launch {
+                    val press = PressInteraction.Press(it)
+                    indicator.emit(press)
+                    delay(40)
+                    indicator.emit(PressInteraction.Release(press))
+                }
+        }, onTap = { onTap() })
+    }) {
+        content()
+    }
+}
 
 @Composable
 fun NameRow(
