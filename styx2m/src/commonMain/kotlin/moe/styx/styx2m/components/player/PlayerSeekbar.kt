@@ -49,6 +49,24 @@ fun TimelineControls(
             Modifier.padding(10.dp, 0.dp, 7.dp, 0.dp),
             color = darkScheme.onSurface
         )
+        val segments = chapters.filter { it.time in (0f..duration.toFloat().ifInvalid(1f)) }.map {
+            Segment(
+                it.title,
+                it.time,
+                if (it.title.containsAny("op", "intro", "ed", "end", "credits"))
+                    darkScheme.secondary
+                else
+                    Color.Unspecified
+            )
+        }.toMutableList().apply {
+            if (isNotEmpty() && first().start != 0f) {
+                val first = first()
+                if (first.start > 2f)
+                    add(0, Segment("", 0f))
+                else
+                    set(0, Segment(first.name, 0f))
+            }
+        }
 
         Seeker(
             Modifier.padding(20.dp, 5.dp).weight(1f),
@@ -57,16 +75,7 @@ fun TimelineControls(
             thumbValue = if (isDragging) seekerValue else max(currentTime.toFloat(), 0f).ifInvalid(0f),
             range = 0f..duration.toFloat().ifInvalid(1f),
             readAheadValue = cacheTime.toFloat().ifInvalid(0f),
-            segments = chapters.filter { it.time in (0f..duration.toFloat().ifInvalid(1f)) }.map {
-                Segment(
-                    it.title,
-                    it.time,
-                    if (it.title.containsAny("op", "intro", "ed", "end", "credits"))
-                        darkScheme.secondary
-                    else
-                        Color.Unspecified
-                )
-            },
+            segments = segments,
             onValueChange = {
                 isDragging = true
                 seekerValue = it
