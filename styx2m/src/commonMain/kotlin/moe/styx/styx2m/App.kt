@@ -40,16 +40,6 @@ import moe.styx.styx2m.views.MainOverview
 
 @Composable
 internal fun App() = AppTheme {
-    //            var isDark by LocalThemeIsDark.current
-    //            IconButton(
-    //                onClick = { isDark = !isDark }
-    //            ) {
-    //                Icon(
-    //                    modifier = Modifier.padding(8.dp).size(20.dp),
-    //                    imageVector = if (isDark) Icons.Default.LightMode else Icons.Default.DarkMode,
-    //                    contentDescription = null
-    //                )
-    //            }
     val currentSizes = fetchWindowSize()
     settings["is-tablet"] = currentSizes.isProbablyTablet
     InitLifeCycleListener()
