@@ -16,12 +16,13 @@ import androidx.compose.ui.unit.dp
 import moe.styx.common.extension.eqI
 import moe.styx.styx2m.misc.Track
 import moe.styx.styx2m.player.MediaPlayer
+import moe.styx.styx2m.theme.darkScheme
 
 @Composable
 fun TrackDropdownItem(track: Track, mediaPlayer: MediaPlayer, border: Boolean) {
     Column {
         if (border) {
-            HorizontalDivider(Modifier.padding(5.dp, 3.dp).fillMaxWidth(), thickness = 2.dp)
+            HorizontalDivider(Modifier.padding(5.dp, 3.dp).fillMaxWidth(), thickness = 2.dp, color = darkScheme.outlineVariant)
         }
         Row(
             Modifier.padding(7.dp, 7.dp).height(IntrinsicSize.Min)
@@ -39,11 +40,13 @@ fun TrackDropdownItem(track: Track, mediaPlayer: MediaPlayer, border: Boolean) {
             Text(
                 "${track.lang ?: "Unknown"}${if (track.title.isNullOrBlank()) "" else " | ${track.title}"}",
                 style = MaterialTheme.typography.labelMedium,
-                modifier = Modifier.weight(1f)
+                modifier = Modifier.weight(1f),
+                color = darkScheme.onSurface
             )
             Icon(
                 Icons.Default.Done, "Selected track",
-                modifier = Modifier.padding(4.dp, 0.dp).size(20.dp).alpha(if (track.selected) 1f else 0f)
+                modifier = Modifier.padding(4.dp, 0.dp).size(20.dp).alpha(if (track.selected) 1f else 0f),
+                tint = darkScheme.onSurface
             )
         }
     }

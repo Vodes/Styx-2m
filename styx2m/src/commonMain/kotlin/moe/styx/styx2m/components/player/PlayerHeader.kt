@@ -2,6 +2,7 @@ package moe.styx.styx2m.components.player
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ListAlt
 import androidx.compose.material.icons.filled.Close
@@ -58,10 +59,12 @@ fun NameRow(
         Modifier.fillMaxWidth().background(darkScheme.background.copy(0.5F)),
         verticalAlignment = Alignment.CenterVertically
     ) {
+        Spacer(Modifier.width(12.dp))
         IconButtonWithTooltip(
             Icons.Default.Close,
             "Back",
-            Modifier.size(70.dp),
+            Modifier.size(50.dp).padding(10.dp),
+            iconModifier = Modifier.requiredSize(30.dp),
             tint = darkScheme.onSurface,
             colors = IconButtonDefaults.iconButtonColors(
                 contentColor = darkScheme.onSurface,
@@ -75,7 +78,11 @@ fun NameRow(
             modifier = Modifier.weight(1f)
         )
         IconButtonWithTooltip(
-            Icons.Default.ScreenLockRotation, "Lock rotation", Modifier.size(70.dp), tint = if (isLocked)
+            Icons.Default.ScreenLockRotation,
+            "Lock rotation",
+            Modifier.padding(7.dp, 10.dp),
+            iconModifier = Modifier.requiredSize(30.dp),
+            tint = if (isLocked)
                 darkScheme.primary
             else
                 darkScheme.onSurface
@@ -88,20 +95,24 @@ fun NameRow(
                 IconButtonWithTooltip(
                     Icons.AutoMirrored.Filled.ListAlt,
                     "Track Selection",
-                    Modifier.padding(10.dp, 0.dp).size(70.dp),
+                    Modifier.padding(7.dp, 10.dp),
+                    iconModifier = Modifier.requiredSize(30.dp),
                     tint = darkScheme.onSurface
                 ) { showTrackSelect = !showTrackSelect }
             }
             DropdownMenu(
                 showTrackSelect,
                 onDismissRequest = { showTrackSelect = false },
-                modifier = Modifier.fillMaxHeight(0.7F).heightIn(100.dp, 300.dp).align(Alignment.TopEnd)
+                modifier = Modifier.fillMaxHeight(0.7F).heightIn(100.dp, 300.dp).align(Alignment.TopEnd),
+                containerColor = darkScheme.surfaceContainer.copy(alpha = 0.85F),
+                shape = RoundedCornerShape(8.dp)
             ) {
-                Column(Modifier.width(IntrinsicSize.Max).padding(3.dp), horizontalAlignment = Alignment.Start) {
+                Column(Modifier.width(IntrinsicSize.Max).padding(6.dp), horizontalAlignment = Alignment.Start) {
                     Text(
                         "Audio Tracks",
                         Modifier.padding(4.dp, 0.dp, 0.dp, 6.dp),
-                        style = MaterialTheme.typography.titleMedium
+                        style = MaterialTheme.typography.titleMedium,
+                        color = darkScheme.onSurface
                     )
                     trackList.filter { it.type eqI "audio" }.forEachIndexed { index, track ->
                         TrackDropdownItem(track, mediaPlayer, index != 0)
@@ -109,7 +120,8 @@ fun NameRow(
                     Text(
                         "Subtitle Tracks",
                         Modifier.padding(4.dp, 8.dp, 0.dp, 6.dp),
-                        style = MaterialTheme.typography.titleMedium
+                        style = MaterialTheme.typography.titleMedium,
+                        color = darkScheme.onSurface
                     )
                     trackList.filter { it.type eqI "sub" }.forEachIndexed { index, track ->
                         TrackDropdownItem(track, mediaPlayer, index != 0)
@@ -117,5 +129,6 @@ fun NameRow(
                 }
             }
         }
+        Spacer(Modifier.width(12.dp))
     }
 }
