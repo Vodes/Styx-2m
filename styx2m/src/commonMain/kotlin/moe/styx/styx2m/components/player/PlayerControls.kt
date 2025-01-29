@@ -95,7 +95,7 @@ fun ColumnScope.ControlsRow(
             enabled = iconsEnabled,
             onLongPress = {
                 onTap()
-                val validChapter = chapters.sortedBy { it.time }.findLast { it.time < currentTime }
+                val validChapter = chapters.sortedBy { it.time }.findLast { it.time < (currentTime - 2) }
                 if (chapters.isEmpty() || validChapter == null)
                     return@PlayerIconButton
                 mediaPlayer.seek(validChapter.time.toLong())

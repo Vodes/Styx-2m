@@ -132,7 +132,7 @@ class PlayerView(val entryID: String, startAt: Long = 0L) : Screen {
             mediaPlayer.seek(validChapter.time.toLong())
             return@PlayerControlsSurface true
         }, onChapterSkipBackward = {
-            val validChapter = playerState.chapters.sortedBy { it.time }.findLast { it.time < playerState.progress }
+            val validChapter = playerState.chapters.sortedBy { it.time }.findLast { it.time < (playerState.progress - 2) }
             if (playerState.chapters.isEmpty() || validChapter == null)
                 return@PlayerControlsSurface false
             mediaPlayer.seek(validChapter.time.toLong())
