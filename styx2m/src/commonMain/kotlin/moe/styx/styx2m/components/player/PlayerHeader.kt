@@ -88,6 +88,7 @@ fun NameRow(
                 darkScheme.onSurface
         ) {
             onLockKeyPressed()
+            onTapped()
         }
 
         Box {
