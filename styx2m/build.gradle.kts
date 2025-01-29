@@ -15,7 +15,7 @@ repositories {
     mavenLocal()
 }
 
-version = "0.1.1-beta2"
+version = "0.1.1"
 
 kotlin {
     jvmToolchain(17)
@@ -75,7 +75,7 @@ android {
         targetSdk = 35
 
         applicationId = "moe.styx.styx2m"
-        versionCode = 5
+        versionCode = 6
         versionName = "${project.version}"
         base.archivesName = "$applicationId-v$versionName"
     }
