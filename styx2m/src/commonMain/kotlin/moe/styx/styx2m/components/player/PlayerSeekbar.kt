@@ -57,7 +57,7 @@ fun TimelineControls(
             thumbValue = if (isDragging) seekerValue else max(currentTime.toFloat(), 0f).ifInvalid(0f),
             range = 0f..duration.toFloat().ifInvalid(1f),
             readAheadValue = cacheTime.toFloat().ifInvalid(0f),
-            segments = chapters.map {
+            segments = chapters.filter { it.time in (0f..duration.toFloat().ifInvalid(1f)) }.map {
                 Segment(
                     it.title,
                     it.time,
