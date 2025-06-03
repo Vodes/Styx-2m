@@ -15,7 +15,7 @@ import moe.styx.common.Platform
 import moe.styx.common.compose.components.layout.MainScaffold
 import moe.styx.common.compose.http.Endpoints
 import moe.styx.common.compose.http.login
-import moe.styx.styx2m.openUrl
+import moe.styx.common.compose.utils.openURI
 
 class OutdatedView(private val requestedVersion: String? = null) : Screen {
 
@@ -32,7 +32,7 @@ class OutdatedView(private val requestedVersion: String? = null) : Screen {
                     AndroidDownloadButtons()
                 Button(
                     {
-                        openUrl("${BuildConfig.SITE_URL}/user")
+                        openURI("${BuildConfig.SITE_URL}/user")
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary),
                     modifier = Modifier.padding(10.dp)
@@ -49,13 +49,13 @@ class OutdatedView(private val requestedVersion: String? = null) : Screen {
             Text("This has to match what you installed first for a seamless update.", Modifier.padding(8.dp))
             Row {
                 Button({
-                    openUrl(Endpoints.DOWNLOAD_BUILD_BASE.url() + "/android-arm64" + (if (requestedVersion != null) "/$requestedVersion" else "") + "?token=${login?.accessToken}")
+                    openURI(Endpoints.DOWNLOAD_BUILD_BASE.url() + "/android-arm64" + (if (requestedVersion != null) "/$requestedVersion" else "") + "?token=${login?.accessToken}")
                 }, modifier = Modifier.padding(12.dp)) {
                     Text("ARM-64 APK")
                 }
 
                 Button({
-                    openUrl(Endpoints.DOWNLOAD_BUILD_BASE.url() + "/android-universal" + (if (requestedVersion != null) "/$requestedVersion" else "") + "?token=${login?.accessToken}")
+                    openURI(Endpoints.DOWNLOAD_BUILD_BASE.url() + "/android-universal" + (if (requestedVersion != null) "/$requestedVersion" else "") + "?token=${login?.accessToken}")
                 }, modifier = Modifier.padding(12.dp)) {
                     Text("Universal APK")
                 }

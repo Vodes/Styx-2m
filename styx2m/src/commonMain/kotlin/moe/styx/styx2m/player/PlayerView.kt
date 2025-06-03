@@ -139,7 +139,7 @@ class PlayerView(val entryID: String, startAt: Long = 0L) : Screen {
             return@PlayerControlsSurface true
         }) {
             Row(Modifier.zIndex(0F).fillMaxSize()) {
-                mediaPlayer.PlayerComponent(mediaStorage.entries)
+                mediaPlayer.PlayerComponent(mediaStorage.entries, mediaStorage.preferences)
             }
             AnimatedVisibility(controlsTimeout != 0, enter = fadeIn(), exit = fadeOut()) {
                 LaunchedEffect(key1 = "") {

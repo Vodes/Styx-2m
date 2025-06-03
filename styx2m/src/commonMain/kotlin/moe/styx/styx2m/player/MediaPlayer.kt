@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import moe.styx.common.data.MediaEntry
+import moe.styx.common.data.MediaPreferences
 import moe.styx.styx2m.misc.Chapter
 import moe.styx.styx2m.misc.Track
 import moe.styx.styx2m.misc.updateWatchedForID
@@ -24,8 +25,10 @@ abstract class AMediaPlayer(val initialEntryID: String, val startAt: Long = 0L) 
     abstract fun seek(position: Long)
     abstract fun setSubtitleTrack(id: Int)
     abstract fun setAudioTrack(id: Int)
+
     @Composable
     abstract fun requestRotationLock()
+
     @Composable
     abstract fun releaseRotationLock()
 
@@ -37,7 +40,7 @@ abstract class AMediaPlayer(val initialEntryID: String, val startAt: Long = 0L) 
     abstract fun internalPlayEntry(mediaEntry: MediaEntry, scope: CoroutineScope)
 
     @Composable
-    abstract fun PlayerComponent(entryList: List<MediaEntry>)
+    abstract fun PlayerComponent(entryList: List<MediaEntry>, preferences: MediaPreferences?)
 
     abstract fun releasePlayer()
 }
@@ -76,5 +79,5 @@ expect class MediaPlayer(initialEntryID: String, startAt: Long = 0L) : AMediaPla
     override fun releaseRotationLock()
 
     @Composable
-    override fun PlayerComponent(entryList: List<MediaEntry>)
+    override fun PlayerComponent(entryList: List<MediaEntry>, preferences: MediaPreferences?)
 }

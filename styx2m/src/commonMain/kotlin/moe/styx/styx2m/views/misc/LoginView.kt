@@ -18,7 +18,7 @@ import moe.styx.common.compose.http.checkLogin
 import moe.styx.common.compose.http.generateCode
 import moe.styx.common.compose.http.isLoggedIn
 import moe.styx.common.compose.utils.LocalGlobalNavigator
-import moe.styx.styx2m.openUrl
+import moe.styx.common.compose.utils.openURI
 import moe.styx.styx2m.views.MainOverview
 
 class LoginView : Screen {
@@ -73,7 +73,7 @@ class LoginView : Screen {
                 )
             }
             Button(onClick = {
-                openUrl(BuildConfig.SITE_URL)
+                openURI(BuildConfig.SITE_URL)
             }, Modifier.padding(10.dp)) {
                 Text("Open ${BuildConfig.SITE}")
             }

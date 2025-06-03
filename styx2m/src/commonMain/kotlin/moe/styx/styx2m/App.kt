@@ -8,7 +8,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
@@ -20,9 +19,7 @@ import com.multiplatform.lifecycle.LifecycleEvent
 import com.multiplatform.lifecycle.LifecycleListener
 import com.multiplatform.lifecycle.LifecycleTracker
 import com.russhwolf.settings.set
-import com.seiko.imageloader.LocalImageLoader
 import io.kamel.image.config.LocalKamelConfig
-import moe.styx.common.compose.extensions.getImageLoader
 import moe.styx.common.compose.extensions.kamelConfig
 import moe.styx.common.compose.settings
 import moe.styx.common.compose.threads.DownloadQueue
@@ -51,7 +48,6 @@ internal fun App() = AppTheme {
             CompositionLocalProvider(
                 LocalGlobalNavigator provides navigator,
                 LocalKamelConfig provides kamelConfig,
-                LocalImageLoader provides remember { getImageLoader() },
                 LocalLayoutSize provides currentSizes,
                 LocalToaster provides toasterState
             ) {
@@ -91,5 +87,3 @@ fun InitLifeCycleListener() {
         }
     }
 }
-
-internal expect fun openUrl(url: String?)

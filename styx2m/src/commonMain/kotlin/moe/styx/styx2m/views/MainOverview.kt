@@ -28,6 +28,7 @@ import cafe.adriel.voyager.navigator.tab.Tab
 import cafe.adriel.voyager.navigator.tab.TabNavigator
 import com.dokar.sonner.TextToastAction
 import com.dokar.sonner.Toast
+import com.dokar.sonner.ToasterDefaults
 import com.russhwolf.settings.get
 import com.russhwolf.settings.set
 import kotlinx.coroutines.launch
@@ -77,7 +78,8 @@ class MainOverview : Screen {
                         "New Pre-Release version available: $ver",
                         action = TextToastAction("Download") {
                             nav.push(OutdatedView(ver))
-                        }
+                        },
+                        duration = ToasterDefaults.DurationLong
                     )
                 )
                 overviewSm.availablePreRelease = null

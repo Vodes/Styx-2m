@@ -16,9 +16,7 @@ import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.core.screen.ScreenKey
 import cafe.adriel.voyager.navigator.Navigator
 import com.russhwolf.settings.set
-import moe.styx.common.compose.components.anime.MediaInfoDialog
-import moe.styx.common.compose.components.anime.MediaRelations
-import moe.styx.common.compose.components.anime.WatchedIndicator
+import moe.styx.common.compose.components.anime.*
 import moe.styx.common.compose.components.buttons.IconButtonWithTooltip
 import moe.styx.common.compose.components.layout.MainScaffold
 import moe.styx.common.compose.extensions.readableSize
@@ -39,7 +37,6 @@ import moe.styx.common.extension.eqI
 import moe.styx.common.util.SYSTEMFILES
 import moe.styx.common.util.launchThreaded
 import moe.styx.styx2m.components.AboutView
-import moe.styx.styx2m.components.StupidImageNameArea
 import moe.styx.styx2m.misc.LayoutSizes
 import moe.styx.styx2m.misc.LocalLayoutSize
 import moe.styx.styx2m.misc.getProgress
@@ -69,13 +66,15 @@ class MovieDetailView(private val mediaID: String) : Screen {
         if (showMediaInfoDialog && movieEntry != null) {
             MediaInfoDialog(movieEntry) { showMediaInfoDialog = false }
         }
-        MainScaffold(Modifier.fillMaxSize(), title = mediaStorage.media.name) {
+        MainScaffold(Modifier.fillMaxSize(), title = mediaStorage.media.name, actions = {
+            MediaPreferencesIconButton(mediaStorage.preferences, mediaStorage.media, sm)
+        }) {
             val scrollState = rememberScrollState()
             ElevatedCard(Modifier.fillMaxSize().padding(2.dp)) {
                 if (sizes.isWide) {
                     Row(Modifier.fillMaxSize()) {
                         Column(Modifier.weight(0.5F).verticalScroll(scrollState)) {
-                            StupidImageNameArea(mediaStorage)
+                            StupidImageNameArea(mediaStorage, requiredMaxHeight = 535.dp)
                             PlaycontrolRow(nav, false, movieEntry, watched) { showMediaInfoDialog = !showMediaInfoDialog }
                         }
                         VerticalDivider(Modifier.fillMaxHeight().padding(10.dp), thickness = 3.dp)
@@ -85,7 +84,7 @@ class MovieDetailView(private val mediaID: String) : Screen {
                     }
                 } else {
                     Column(Modifier.fillMaxSize().verticalScroll(scrollState)) {
-                        StupidImageNameArea(mediaStorage, otherContent = {
+                        StupidImageNameArea(mediaStorage, requiredMaxHeight = 535.dp, otherContent = {
                             PlaycontrolRow(nav, true, movieEntry, watched) { showMediaInfoDialog = !showMediaInfoDialog }
                         })
                         HorizontalDivider(Modifier.fillMaxWidth().padding(10.dp))

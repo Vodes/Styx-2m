@@ -24,6 +24,7 @@ import moe.styx.common.compose.settings
 import moe.styx.common.compose.utils.MpvPreferences
 import moe.styx.common.compose.utils.ServerStatus
 import moe.styx.common.data.MediaEntry
+import moe.styx.common.data.MediaPreferences
 import moe.styx.common.extension.eqI
 import moe.styx.common.json
 import moe.styx.common.util.Log
@@ -212,7 +213,7 @@ actual class MediaPlayer actual constructor(initialEntryID: String, startAt: Lon
     }
 
     @Composable
-    actual override fun PlayerComponent(entryList: List<MediaEntry>) {
+    actual override fun PlayerComponent(entryList: List<MediaEntry>, preferences: MediaPreferences?) {
         val context = LocalContext.current
         val curEntryID by this.currentEntry.collectAsState()
         initialCommands = listOf(
@@ -220,7 +221,7 @@ actual class MediaPlayer actual constructor(initialEntryID: String, startAt: Lon
         )
         if (!playerInitialized && !libWasLoaded) {
             MPVLib.create(context)
-            setMPVOptions(context)
+            setMPVOptions(context, preferences)
             MPVLib.init()
             initObservers()
             libWasLoaded = true
@@ -315,7 +316,7 @@ private fun MediaPlayer.initObservers() {
     }
 }
 
-private fun MediaPlayer.setMPVOptions(context: Context) {
+private fun MediaPlayer.setMPVOptions(context: Context, preferences: MediaPreferences?) {
     val configDir = appConfig().appStoragePath.toPath() / "mpv"
     SYSTEMFILES.createDirectory(configDir)
     if ((SYSTEMFILES.listOrNull(configDir) ?: emptyList()).find { it.name eqI "subfont.ttf" } == null) {
@@ -365,8 +366,8 @@ private fun MediaPlayer.setMPVOptions(context: Context) {
     MPVLib.setOptionString("deband", if (pref.deband) "yes" else "no")
     MPVLib.setOptionString("deband-iterations", pref.debandIterations)
     MPVLib.setOptionString("dither-depth", if (pref.dither10bit) "10" else "8")
-    MPVLib.setOptionString("slang", pref.getSlangArg())
-    MPVLib.setOptionString("alang", pref.getAlangArg())
+    MPVLib.setOptionString("slang", pref.getSlangArg(preferences))
+    MPVLib.setOptionString("alang", pref.getAlangArg(preferences))
     if (this.startAt != 0L) {
         MPVLib.setOptionString("start", "$startAt")
     }

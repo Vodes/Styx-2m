@@ -22,15 +22,12 @@ import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.debounce
 import moe.styx.common.compose.components.anime.EpisodeList
+import moe.styx.common.compose.components.anime.MediaPreferencesIconButton
 import moe.styx.common.compose.components.buttons.FavouriteIconButton
 import moe.styx.common.compose.components.layout.MainScaffold
-import moe.styx.common.compose.files.Storage
-import moe.styx.common.compose.files.getCurrentAndCollectFlow
 import moe.styx.common.compose.settings
-import moe.styx.common.compose.threads.Heartbeats
 import moe.styx.common.compose.utils.LocalGlobalNavigator
 import moe.styx.common.compose.viewmodels.MainDataViewModel
-import moe.styx.common.data.MediaEntry
 import moe.styx.common.extension.eqI
 import moe.styx.styx2m.components.MetadataArea
 import moe.styx.styx2m.misc.LocalLayoutSize
@@ -56,6 +53,7 @@ class AnimeDetailView(private val mediaID: String) : Screen {
         val mediaStorage = remember(storage) { sm.getMediaStorageForID(mediaID, storage) }
 
         MainScaffold(Modifier.safeAreaPadding(), title = mediaStorage.media.name, actions = {
+            MediaPreferencesIconButton(mediaStorage.preferences, mediaStorage.media, sm)
             FavouriteIconButton(mediaStorage.media, sm, storage)
         }) {
             val showSelection = remember { mutableStateOf(false) }
@@ -94,14 +92,4 @@ class AnimeDetailView(private val mediaID: String) : Screen {
             }
         }
     }
-}
-
-@Composable
-fun fetchEntries(mediaID: String): List<MediaEntry> {
-    Heartbeats.mediaActivity = null
-    val flow by Storage.stores.entryStore.getCurrentAndCollectFlow()
-    val filtered = flow.filter { it.mediaID eqI mediaID }
-    return if (settings["episode-asc", false]) filtered.sortedBy {
-        it.entryNumber.toDoubleOrNull() ?: 0.0
-    } else filtered.sortedByDescending { it.entryNumber.toDoubleOrNull() ?: 0.0 }
 }
