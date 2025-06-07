@@ -19,6 +19,7 @@ import com.russhwolf.settings.set
 import moe.styx.common.compose.components.anime.*
 import moe.styx.common.compose.components.buttons.IconButtonWithTooltip
 import moe.styx.common.compose.components.layout.MainScaffold
+import moe.styx.common.compose.extensions.joinAndSyncProgress
 import moe.styx.common.compose.extensions.readableSize
 import moe.styx.common.compose.files.Storage
 import moe.styx.common.compose.files.collectWithEmptyInitial
@@ -75,7 +76,7 @@ class MovieDetailView(private val mediaID: String) : Screen {
                     Row(Modifier.fillMaxSize()) {
                         Column(Modifier.weight(0.5F).verticalScroll(scrollState)) {
                             StupidImageNameArea(mediaStorage, requiredMaxHeight = 535.dp)
-                            PlaycontrolRow(nav, false, movieEntry, watched) { showMediaInfoDialog = !showMediaInfoDialog }
+                            PlaycontrolRow(nav, false, movieEntry, watched, sm) { showMediaInfoDialog = !showMediaInfoDialog }
                         }
                         VerticalDivider(Modifier.fillMaxHeight().padding(10.dp), thickness = 3.dp)
                         Column(Modifier.weight(0.5F).padding(0.dp, 8.dp).verticalScroll(rememberScrollState())) {
@@ -85,7 +86,7 @@ class MovieDetailView(private val mediaID: String) : Screen {
                 } else {
                     Column(Modifier.fillMaxSize().verticalScroll(scrollState)) {
                         StupidImageNameArea(mediaStorage, requiredMaxHeight = 535.dp, otherContent = {
-                            PlaycontrolRow(nav, true, movieEntry, watched) { showMediaInfoDialog = !showMediaInfoDialog }
+                            PlaycontrolRow(nav, true, movieEntry, watched, sm) { showMediaInfoDialog = !showMediaInfoDialog }
                         })
                         HorizontalDivider(Modifier.fillMaxWidth().padding(10.dp))
                         MovieAboutView(mediaStorage, nav, sizes)
@@ -113,6 +114,7 @@ class MovieDetailView(private val mediaID: String) : Screen {
         limitWidth: Boolean = true,
         movieEntry: MediaEntry?,
         watched: MediaWatched?,
+        mainVm: MainDataViewModel,
         onClickMediaInfo: () -> Unit
     ) {
         val mod = if (limitWidth) Modifier.padding(6.dp).widthIn(0.dp, 560.dp)
@@ -130,7 +132,10 @@ class MovieDetailView(private val mediaID: String) : Screen {
 
                 if (watched != null) {
                     IconButton(onClick = {
-                        movieEntry?.let { RequestQueue.removeWatched(movieEntry) }
+                        movieEntry?.let {
+                            RequestQueue.removeWatched(movieEntry)
+                            mainVm.updateData(true).joinAndSyncProgress(movieEntry, mainVm)
+                        }
                     }) { Icon(Icons.Default.VisibilityOff, "Set Unwatched") }
                 } else {
                     IconButton(onClick = {
@@ -138,6 +143,7 @@ class MovieDetailView(private val mediaID: String) : Screen {
                             RequestQueue.updateWatched(
                                 MediaWatched(movieEntry.GUID, login?.userID ?: "", currentUnixSeconds(), 0, 0F, 100F)
                             )
+                            mainVm.updateData(true).joinAndSyncProgress(movieEntry, mainVm)
                         }
                     }) { Icon(Icons.Default.Visibility, "Set Watched") }
                 }

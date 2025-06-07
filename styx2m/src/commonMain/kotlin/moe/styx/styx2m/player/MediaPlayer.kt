@@ -3,8 +3,11 @@ package moe.styx.styx2m.player
 import androidx.compose.runtime.Composable
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
+import moe.styx.common.compose.extensions.joinAndSyncProgress
+import moe.styx.common.compose.viewmodels.MainDataViewModel
 import moe.styx.common.data.MediaEntry
 import moe.styx.common.data.MediaPreferences
+import moe.styx.common.util.Log
 import moe.styx.styx2m.misc.Chapter
 import moe.styx.styx2m.misc.Track
 import moe.styx.styx2m.misc.updateWatchedForID
@@ -20,6 +23,7 @@ abstract class AMediaPlayer(val initialEntryID: String, val startAt: Long = 0L) 
     val playbackStatus = MutableStateFlow<PlaybackStatus>(PlaybackStatus.Idle)
     var playbackPercent = 0.0F
     var isPaused = false
+    var mainVm: MainDataViewModel? = null
 
     abstract fun setPlaying(playing: Boolean)
     abstract fun seek(position: Long)
@@ -34,6 +38,11 @@ abstract class AMediaPlayer(val initialEntryID: String, val startAt: Long = 0L) 
 
     fun playEntry(mediaEntry: MediaEntry, scope: CoroutineScope) {
         updateWatchedForID(currentEntry.value, progress.value, playbackPercent)
+        if (mainVm != null) {
+            val mainVm = mainVm!!
+            mainVm.updateData().joinAndSyncProgress(currentEntry.value, mainVm)
+        } else
+            Log.w(source = "MediaPlayer") { "MainVM was null!" }
         internalPlayEntry(mediaEntry, scope)
     }
 

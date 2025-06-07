@@ -20,6 +20,7 @@ import com.multiplatform.lifecycle.LifecycleListener
 import com.multiplatform.lifecycle.LifecycleTracker
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.combine
+import moe.styx.common.compose.extensions.joinAndSyncProgress
 import moe.styx.common.compose.threads.Heartbeats
 import moe.styx.common.compose.utils.LocalGlobalNavigator
 import moe.styx.common.compose.viewmodels.MainDataViewModel
@@ -58,6 +59,7 @@ class PlayerView(val entryID: String, startAt: Long = 0L) : Screen {
         KeepScreenOn()
 
         LaunchedEffect(Unit) {
+            mediaPlayer.mainVm = sm
             LifecycleTracker.addListener(listener)
         }
 
@@ -90,7 +92,7 @@ class PlayerView(val entryID: String, startAt: Long = 0L) : Screen {
                 mediaPlayer.releasePlayer()
                 Heartbeats.mediaActivity = null
                 updateWatchedForID(currentEntryState, playerState.progress, mediaPlayer.playbackPercent)
-                sm.updateData(true)
+                sm.updateData(true).joinAndSyncProgress(currentEntryState, sm)
             }
         }
 
