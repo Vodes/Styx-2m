@@ -85,9 +85,8 @@ class MovieDetailView(private val mediaID: String) : Screen {
                     }
                 } else {
                     Column(Modifier.fillMaxSize().verticalScroll(scrollState)) {
-                        StupidImageNameArea(mediaStorage, requiredMaxHeight = 535.dp, otherContent = {
-                            PlaycontrolRow(nav, true, movieEntry, watched, sm) { showMediaInfoDialog = !showMediaInfoDialog }
-                        })
+                        StupidImageNameArea(mediaStorage, requiredMaxHeight = 535.dp)
+                        PlaycontrolRow(nav, true, movieEntry, watched, sm) { showMediaInfoDialog = !showMediaInfoDialog }
                         HorizontalDivider(Modifier.fillMaxWidth().padding(10.dp))
                         MovieAboutView(mediaStorage, nav, sizes)
                     }
@@ -147,12 +146,11 @@ class MovieDetailView(private val mediaID: String) : Screen {
                         }
                     }) { Icon(Icons.Default.Visibility, "Set Watched") }
                 }
-
+                if (movieEntry != null)
+                    DownloadRow(movieEntry)
                 Spacer(Modifier.weight(1f))
                 Text(movieEntry?.fileSize?.readableSize() ?: "", style = MaterialTheme.typography.bodyMedium)
             }
-            if (movieEntry != null)
-                DownloadRow(movieEntry)
             if (watched != null) {
                 WatchedIndicator(watched, Modifier.fillMaxWidth().padding(0.dp, 2.dp, 0.dp, 5.dp))
             }
@@ -164,7 +162,7 @@ class MovieDetailView(private val mediaID: String) : Screen {
         val downloaded by Storage.stores.downloadedStore.collectWithEmptyInitial()
         val currentlyDownloading by DownloadQueue.currentDownload.collectAsState()
         val queued by DownloadQueue.queuedEntries.collectAsState()
-        Row(Modifier.padding(8.dp, 5.dp).fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+        Row(Modifier.padding(3.dp), verticalAlignment = Alignment.CenterVertically) {
             val isDownloaded = downloaded.find { it.entryID eqI entry.GUID } != null
             val isQueued = queued.contains(entry.GUID)
             val progress = currentlyDownloading?.let { if (it.entryID eqI entry.GUID) it else null }
