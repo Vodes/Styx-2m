@@ -97,7 +97,9 @@ class MainOverview : Screen {
         TabNavigator(defaultTab) {
             MainScaffold(
                 Modifier.fillMaxSize(),
-                title = BuildConfig.APP_NAME, addPopButton = false, addAnimatedTitleBackground = useRail, actions = {
+                title = BuildConfig.APP_NAME, addPopButton = false, addAnimatedTitleBackground = useRail, titleClickable = {
+                    nav.push(AboutView())
+                }, actions = {
                     if (isLoading) {
                         Row(Modifier.fillMaxHeight(), verticalAlignment = Alignment.CenterVertically) {
                             LinearProgressIndicator(

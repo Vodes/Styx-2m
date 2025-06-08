@@ -44,7 +44,7 @@ kotlin {
             implementation(compose.components.resources)
             implementation(libs.moko.permissions)
             implementation(libs.multiplatform.insets)
-            implementation("moe.styx:styx-common-compose:0.2.7") {
+            implementation("moe.styx:styx-common-compose:0.2.8") {
                 exclude(group = "com.github.luben")
             }
         }

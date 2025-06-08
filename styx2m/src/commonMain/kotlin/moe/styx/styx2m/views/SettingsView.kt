@@ -6,6 +6,8 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
@@ -14,10 +16,12 @@ import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.core.model.rememberScreenModel
 import cafe.adriel.voyager.core.screen.Screen
+import moe.styx.common.compose.components.buttons.IconButtonWithTooltip
 import moe.styx.common.compose.components.layout.MainScaffold
 import moe.styx.common.compose.components.misc.ExpandableSettings
 import moe.styx.common.compose.components.settings.MetadataSettings
 import moe.styx.common.compose.components.settings.TrackingSettings
+import moe.styx.common.compose.utils.LocalGlobalNavigator
 import moe.styx.styx2m.misc.LocalLayoutSize
 import moe.styx.styx2m.views.settings.AppSettings
 import moe.styx.styx2m.views.settings.AppearanceSettings
@@ -28,13 +32,17 @@ class SettingsView : Screen {
     @Composable
     override fun Content() {
         val sizes = LocalLayoutSize.current
-
+        val nav = LocalGlobalNavigator.current
         val vm = if (sizes.isWide)
             rememberScreenModel("wide-settings-vm") { SettingsViewModel() }
         else
             rememberScreenModel("settings-vm") { SettingsViewModel() }
 
-        MainScaffold(title = "Settings") {
+        MainScaffold(title = "Settings", actions = {
+            IconButtonWithTooltip(Icons.Default.Info, "View info about this app") {
+                nav.push(AboutView())
+            }
+        }) {
             Row {
                 Column(Modifier.padding(8.dp).weight(1f).verticalScroll(rememberScrollState(), true)) {
                     ExpandableSettings("Appearance Settings", vm.appearanceExpanded, { vm.appearanceExpanded = !vm.appearanceExpanded }) {
