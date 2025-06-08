@@ -16,10 +16,11 @@ import cafe.adriel.voyager.core.model.rememberScreenModel
 import cafe.adriel.voyager.core.screen.Screen
 import moe.styx.common.compose.components.layout.MainScaffold
 import moe.styx.common.compose.components.misc.ExpandableSettings
+import moe.styx.common.compose.components.settings.MetadataSettings
+import moe.styx.common.compose.components.settings.TrackingSettings
 import moe.styx.styx2m.misc.LocalLayoutSize
 import moe.styx.styx2m.views.settings.AppSettings
 import moe.styx.styx2m.views.settings.AppearanceSettings
-import moe.styx.styx2m.views.settings.MetadataSettings
 import moe.styx.styx2m.views.settings.MpvSettings
 
 class SettingsView : Screen {
@@ -41,6 +42,9 @@ class SettingsView : Screen {
                     }
                     ExpandableSettings("Metadata Settings", vm.metadataExpanded, { vm.metadataExpanded = !vm.metadataExpanded }) {
                         MetadataSettings()
+                    }
+                    ExpandableSettings("Tracking Settings", vm.trackingExpanded, { vm.trackingExpanded = !vm.trackingExpanded }) {
+                        TrackingSettings()
                     }
                     ExpandableSettings("App Settings", vm.appExpanded, { vm.appExpanded = !vm.appExpanded; }) {
                         AppSettings()
@@ -95,5 +99,14 @@ class SettingsViewModel : ScreenModel {
             allBackingMutables.forEach { if (it != _playerExpanded) it.value = false }
         }
 
-    private val allBackingMutables = arrayOf(_metadataExpanded, _appExpanded, _playerExpanded, _appearanceExpanded)
+    private var _trackingExpanded = mutableStateOf(false)
+    var trackingExpanded: Boolean
+        get() = _trackingExpanded.value
+        set(value) {
+            _trackingExpanded.value = value
+            allBackingMutables.forEach { if (it != _trackingExpanded) it.value = false }
+        }
+
+
+    private val allBackingMutables = arrayOf(_metadataExpanded, _appExpanded, _playerExpanded, _appearanceExpanded, _trackingExpanded)
 }

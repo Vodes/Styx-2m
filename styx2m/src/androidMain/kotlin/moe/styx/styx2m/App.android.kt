@@ -63,6 +63,8 @@ fun fetchDeviceAppConfig(context: Context?): AppConfig {
         BuildConfig.DEBUG_TOKEN,
         ensuredContext.cacheDir.path,
         ensuredContext.filesDir.path,
-        BuildConfig.VERSION_CHECK_URL
+        BuildConfig.VERSION_CHECK_URL,
+        BuildConfig.SITE,
+        BuildConfig.SITE_URL
     )
 }

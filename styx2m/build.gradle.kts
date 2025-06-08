@@ -41,11 +41,10 @@ kotlin {
             implementation(compose.runtime)
             implementation(compose.material3)
             implementation(compose.materialIconsExtended)
-            @OptIn(org.jetbrains.compose.ExperimentalComposeLibrary::class)
             implementation(compose.components.resources)
             implementation(libs.moko.permissions)
             implementation(libs.multiplatform.insets)
-            implementation("moe.styx:styx-common-compose:0.2.5") {
+            implementation("moe.styx:styx-common-compose:0.2.7") {
                 exclude(group = "com.github.luben")
             }
         }
