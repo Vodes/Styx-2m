@@ -39,11 +39,11 @@ import moe.styx.common.compose.components.misc.OnlineUsersIcon
 import moe.styx.common.compose.http.login
 import moe.styx.common.compose.settings
 import moe.styx.common.compose.utils.LocalGlobalNavigator
+import moe.styx.common.compose.utils.LocalLayoutSize
 import moe.styx.common.compose.utils.LocalToaster
 import moe.styx.common.compose.utils.ServerStatus
 import moe.styx.common.compose.viewmodels.MainDataViewModel
 import moe.styx.common.compose.viewmodels.OverviewViewModel
-import moe.styx.styx2m.misc.LocalLayoutSize
 import moe.styx.styx2m.misc.pushMediaView
 import moe.styx.styx2m.views.misc.LoginView
 import moe.styx.styx2m.views.misc.OutdatedView

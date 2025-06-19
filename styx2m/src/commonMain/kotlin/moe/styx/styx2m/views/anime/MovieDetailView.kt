@@ -28,7 +28,9 @@ import moe.styx.common.compose.http.login
 import moe.styx.common.compose.settings
 import moe.styx.common.compose.threads.DownloadQueue
 import moe.styx.common.compose.threads.RequestQueue
+import moe.styx.common.compose.utils.LayoutSizes
 import moe.styx.common.compose.utils.LocalGlobalNavigator
+import moe.styx.common.compose.utils.LocalLayoutSize
 import moe.styx.common.compose.viewmodels.MainDataViewModel
 import moe.styx.common.compose.viewmodels.MediaStorage
 import moe.styx.common.data.MediaEntry
@@ -38,8 +40,6 @@ import moe.styx.common.extension.eqI
 import moe.styx.common.util.SYSTEMFILES
 import moe.styx.common.util.launchThreaded
 import moe.styx.styx2m.components.AboutView
-import moe.styx.styx2m.misc.LayoutSizes
-import moe.styx.styx2m.misc.LocalLayoutSize
 import moe.styx.styx2m.misc.getProgress
 import moe.styx.styx2m.misc.pushMediaView
 import moe.styx.styx2m.player.PlayerView

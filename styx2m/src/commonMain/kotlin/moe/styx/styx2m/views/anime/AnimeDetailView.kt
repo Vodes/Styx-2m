@@ -27,10 +27,10 @@ import moe.styx.common.compose.components.buttons.FavouriteIconButton
 import moe.styx.common.compose.components.layout.MainScaffold
 import moe.styx.common.compose.settings
 import moe.styx.common.compose.utils.LocalGlobalNavigator
+import moe.styx.common.compose.utils.LocalLayoutSize
 import moe.styx.common.compose.viewmodels.MainDataViewModel
 import moe.styx.common.extension.eqI
 import moe.styx.styx2m.components.MetadataArea
-import moe.styx.styx2m.misc.LocalLayoutSize
 import moe.styx.styx2m.misc.getProgress
 import moe.styx.styx2m.player.PlayerView
 

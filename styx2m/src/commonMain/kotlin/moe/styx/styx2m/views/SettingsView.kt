@@ -22,7 +22,7 @@ import moe.styx.common.compose.components.misc.ExpandableSettings
 import moe.styx.common.compose.components.settings.MetadataSettings
 import moe.styx.common.compose.components.settings.TrackingSettings
 import moe.styx.common.compose.utils.LocalGlobalNavigator
-import moe.styx.styx2m.misc.LocalLayoutSize
+import moe.styx.common.compose.utils.LocalLayoutSize
 import moe.styx.styx2m.views.settings.AppSettings
 import moe.styx.styx2m.views.settings.AppearanceSettings
 import moe.styx.styx2m.views.settings.MpvSettings

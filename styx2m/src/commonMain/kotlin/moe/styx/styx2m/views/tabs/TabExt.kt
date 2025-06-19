@@ -20,15 +20,15 @@ import moe.styx.common.compose.components.anime.AnimeListItem
 import moe.styx.common.compose.components.misc.ScrollToTopContainer
 import moe.styx.common.compose.components.search.MediaSearch
 import moe.styx.common.compose.settings
+import moe.styx.common.compose.utils.LayoutSizes
 import moe.styx.common.compose.utils.LocalGlobalNavigator
+import moe.styx.common.compose.utils.LocalLayoutSize
 import moe.styx.common.compose.utils.SearchState
 import moe.styx.common.compose.viewmodels.ListPosViewModel
 import moe.styx.common.compose.viewmodels.MainDataViewModelStorage
 import moe.styx.common.data.Favourite
 import moe.styx.common.data.Media
 import moe.styx.common.extension.eqI
-import moe.styx.styx2m.misc.LayoutSizes
-import moe.styx.styx2m.misc.LocalLayoutSize
 import moe.styx.styx2m.misc.pushMediaView
 
 object Tabs {

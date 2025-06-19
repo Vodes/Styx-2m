@@ -26,10 +26,10 @@ import moe.styx.common.compose.threads.DownloadQueue
 import moe.styx.common.compose.threads.Heartbeats
 import moe.styx.common.compose.threads.RequestQueue
 import moe.styx.common.compose.utils.LocalGlobalNavigator
+import moe.styx.common.compose.utils.LocalLayoutSize
 import moe.styx.common.compose.utils.LocalToaster
+import moe.styx.common.compose.utils.fetchWindowSize
 import moe.styx.common.util.Log
-import moe.styx.styx2m.misc.LocalLayoutSize
-import moe.styx.styx2m.misc.fetchWindowSize
 import moe.styx.styx2m.player.PlayerView
 import moe.styx.styx2m.theme.AppTheme
 import moe.styx.styx2m.theme.LocalThemeIsDark

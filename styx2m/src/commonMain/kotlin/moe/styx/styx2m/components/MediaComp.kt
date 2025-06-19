@@ -18,9 +18,9 @@ import moe.styx.common.compose.components.anime.StupidImageNameArea
 import moe.styx.common.compose.components.misc.ExpandableText
 import moe.styx.common.compose.extensions.removeSomeHTMLTags
 import moe.styx.common.compose.settings
+import moe.styx.common.compose.utils.LayoutSizes
 import moe.styx.common.compose.viewmodels.MediaStorage
 import moe.styx.common.data.Media
-import moe.styx.styx2m.misc.LayoutSizes
 import moe.styx.styx2m.misc.pushMediaView
 
 

@@ -16,7 +16,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.IntSize
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import moe.styx.styx2m.misc.LocalLayoutSize
+import moe.styx.common.compose.utils.LocalLayoutSize
 
 @Composable
 fun PlayerControlsSurface(
