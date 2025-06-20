@@ -19,22 +19,26 @@ iOS should technically be working already (besides the player), but I haven't fo
 	<br>Leveraging [these](https://github.com/jarnedemeulemeester/libmpv-android) bindings by the findroid author
 
 
-## Screenshots
+## Screenshots / Videos
+<img src="https://github.com/user-attachments/assets/51a6f2e2-24bf-4f8d-b6bd-268b1471b3e6" title="about view" height="500"/>
+
 <details>
-	<summary>Click here</summary>
+	<summary><h3>More (Phone)</h3></summary>
 
-  #### Search & Detail view
-  <img src="https://i.ibb.co/wCzf1qj/Screenshot-20240325-235619.webp" title="search" height="450"/>
-  <img src="https://i.ibb.co/CBTJMDp/Screenshot-20240325-235453.webp" title="detail view" height="450"/>
+  ### Search
+  
+https://github.com/user-attachments/assets/f7f39b50-9dde-4752-a299-7323d5bf09fb
 
+ ### Detail view & tracking
+ 
+https://github.com/user-attachments/assets/56445f56-bb18-442c-8eb6-5e253c132568
 
-  #### Settings
-  <img src="https://i.ibb.co/kJcLwWv/Screenshot-20240325-235756.webp" title="general settings" height="450"/>
-  <img src="https://i.ibb.co/rFCyDF3/Screenshot-20240325-235808.webp" title="player settings" height="450"/>
+  ### Settings
 
+https://github.com/user-attachments/assets/90cf1bef-f77f-48a6-9335-5d52bc3f8524
 
   #### Player view
-  <img src="https://i.ibb.co/vhhDZ2h/Screenshot-20240325-235545.webp" title="player view" height="260" />
+  <img src="https://github.com/user-attachments/assets/08a04653-baab-4b4b-9a00-d393c13b8355" title="player view" height="300" />
 </details>
 
 ## How do I use this?
