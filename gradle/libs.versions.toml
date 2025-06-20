@@ -1,10 +1,10 @@
 [versions]
 kotlin = "2.1.21"
-compose = "1.8.1"
+compose = "1.8.2"
 agp = "8.7.3"
-androidx-appcompat = "1.7.0"
+androidx-appcompat = "1.7.1"
 androidx-activityCompose = "1.10.1"
-compose-uitooling = "1.8.2"
+compose-uitooling = "1.8.3"
 buildConfig = "5.4.0"
 kotlinx-coroutines = "1.10.2"
 moko-permissions = "0.17.0"
