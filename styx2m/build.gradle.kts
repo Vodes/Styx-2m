@@ -74,7 +74,7 @@ android {
         targetSdk = 35
 
         applicationId = "moe.styx.styx2m"
-        versionCode = 7
+        versionCode = 8
         versionName = "${project.version}"
         base.archivesName = "$applicationId-v$versionName"
     }
