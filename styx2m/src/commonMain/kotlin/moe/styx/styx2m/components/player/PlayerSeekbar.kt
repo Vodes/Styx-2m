@@ -14,6 +14,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import moe.styx.common.compose.components.AppShapes
+import moe.styx.common.compose.components.darkScheme
 import moe.styx.common.extension.containsAny
 import moe.styx.styx2m.misc.Chapter
 import moe.styx.styx2m.misc.ifInvalid
@@ -22,7 +23,6 @@ import moe.styx.styx2m.player.MediaPlayer
 import moe.styx.styx2m.player.seeker.Seeker
 import moe.styx.styx2m.player.seeker.Segment
 import moe.styx.styx2m.player.seeker.rememberSeekerState
-import moe.styx.styx2m.theme.darkScheme
 import kotlin.math.max
 import kotlin.math.min
 

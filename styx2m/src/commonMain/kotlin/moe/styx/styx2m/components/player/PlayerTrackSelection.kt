@@ -13,10 +13,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.unit.dp
+import moe.styx.common.compose.components.darkScheme
 import moe.styx.common.extension.eqI
 import moe.styx.styx2m.misc.Track
 import moe.styx.styx2m.player.MediaPlayer
-import moe.styx.styx2m.theme.darkScheme
 
 @Composable
 fun TrackDropdownItem(track: Track, mediaPlayer: MediaPlayer, border: Boolean) {

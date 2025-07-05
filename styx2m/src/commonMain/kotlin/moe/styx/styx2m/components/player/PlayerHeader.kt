@@ -20,12 +20,12 @@ import cafe.adriel.voyager.navigator.Navigator
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import moe.styx.common.compose.components.buttons.IconButtonWithTooltip
+import moe.styx.common.compose.components.darkScheme
 import moe.styx.common.data.Media
 import moe.styx.common.data.MediaEntry
 import moe.styx.common.extension.eqI
 import moe.styx.styx2m.misc.Track
 import moe.styx.styx2m.player.MediaPlayer
-import moe.styx.styx2m.theme.darkScheme
 
 
 @Composable

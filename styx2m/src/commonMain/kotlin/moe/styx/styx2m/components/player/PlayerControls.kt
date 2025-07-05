@@ -26,11 +26,11 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
+import moe.styx.common.compose.components.darkScheme
 import moe.styx.common.data.MediaEntry
 import moe.styx.styx2m.misc.Chapter
 import moe.styx.styx2m.player.MediaPlayer
 import moe.styx.styx2m.player.PlaybackStatus
-import moe.styx.styx2m.theme.darkScheme
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
