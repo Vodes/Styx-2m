@@ -15,7 +15,7 @@ repositories {
     mavenLocal()
 }
 
-version = "0.2.1"
+version = "0.2.2-beta1"
 
 kotlin {
     jvmToolchain(17)
@@ -44,7 +44,7 @@ kotlin {
             implementation(compose.components.resources)
             implementation(libs.moko.permissions)
             implementation(libs.multiplatform.insets)
-            implementation("moe.styx:styx-common-compose:0.3.1") {
+            implementation("moe.styx:styx-common-compose:0.3.2") {
                 exclude(group = "com.github.luben")
             }
         }
@@ -74,7 +74,7 @@ android {
         targetSdk = 35
 
         applicationId = "moe.styx.styx2m"
-        versionCode = 9
+        versionCode = 10
         versionName = "${project.version}"
         base.archivesName = "$applicationId-v$versionName"
     }
