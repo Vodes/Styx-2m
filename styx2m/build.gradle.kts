@@ -44,7 +44,7 @@ kotlin {
             implementation(compose.components.resources)
             implementation(libs.moko.permissions)
             implementation(libs.multiplatform.insets)
-            implementation("moe.styx:styx-common-compose:0.3.2") {
+            implementation("moe.styx:styx-common-compose:0.4.0") {
                 exclude(group = "com.github.luben")
             }
         }
@@ -67,11 +67,12 @@ kotlin {
 
 android {
     namespace = "moe.styx.styx2m"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         minSdk = 28
-        targetSdk = 35
+        //noinspection EditedTargetSdkVersion
+        targetSdk = 36
 
         applicationId = "moe.styx.styx2m"
         versionCode = 10
