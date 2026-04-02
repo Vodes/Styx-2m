@@ -3,6 +3,7 @@ package moe.styx.styx2m
 import Styx2m.styx2m.BuildConfig
 import android.app.Application
 import android.content.Context
+import android.content.pm.PackageManager
 import android.os.Bundle
 import android.view.WindowManager
 import androidx.activity.ComponentActivity
@@ -11,9 +12,11 @@ import androidx.activity.enableEdgeToEdge
 import androidx.core.view.WindowCompat
 import com.multiplatform.lifecycle.LifecycleTracker
 import com.multiplatform.lifecyle.AndroidLifecycleEventObserver
+import com.russhwolf.settings.set
 import moe.styx.common.compose.AppConfig
 import moe.styx.common.compose.AppContextImpl
 import moe.styx.common.compose.AppContextImpl.appConfig
+import moe.styx.common.compose.settings
 import moe.styx.common.http.getHttpClient
 import moe.styx.common.util.Log
 
@@ -39,7 +42,9 @@ class AppActivity : ComponentActivity() {
             WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES
         enableEdgeToEdge()
         lifecycle.addObserver(observer)
-        getHttpClient("${BuildConfig.APP_NAME} (Android) - ${BuildConfig.APP_VERSION}", enableZstd = true)
+        val isTv = packageManager.hasSystemFeature(PackageManager.FEATURE_LEANBACK)
+        getHttpClient("${BuildConfig.APP_NAME} (Android${if (isTv) "-TV" else ""}) - ${BuildConfig.APP_VERSION}", enableZstd = !isTv)
+        settings["is-tv"] = isTv
         appConfig = { fetchDeviceAppConfig(this) }
         Log.debugEnabled = true
         setContent {

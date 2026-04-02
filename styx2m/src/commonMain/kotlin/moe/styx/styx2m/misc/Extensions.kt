@@ -3,12 +3,12 @@ package moe.styx.styx2m.misc
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.navigator.Navigator
+import com.russhwolf.settings.get
 import com.russhwolf.settings.set
 import io.islandtime.measures.hours
 import io.islandtime.measures.seconds
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
-import kotlinx.serialization.encodeToString
 import moe.styx.common.compose.http.login
 import moe.styx.common.compose.settings
 import moe.styx.common.compose.threads.RequestQueue
@@ -22,6 +22,7 @@ import moe.styx.common.extension.toBoolean
 import moe.styx.common.json
 import moe.styx.styx2m.views.anime.AnimeDetailView
 import moe.styx.styx2m.views.anime.MovieDetailView
+import moe.styx.styx2m.views.tv.TvMediaDetailView
 
 inline fun Float.ifInvalid(newValue: Float): Float {
     if (this.isNaN() || this.isInfinite())
@@ -40,7 +41,10 @@ fun Long.secondsDurationString(): String {
 }
 
 fun Navigator.pushMediaView(media: Media, replace: Boolean = false) {
-    val view = if (media.isSeries.toBoolean()) AnimeDetailView(media.GUID) else MovieDetailView(media.GUID)
+    val view = if (settings["is-tv", false])
+        TvMediaDetailView(media.GUID)
+    else
+        if (media.isSeries.toBoolean()) AnimeDetailView(media.GUID) else MovieDetailView(media.GUID)
     if (replace)
         this.replace(view)
     else

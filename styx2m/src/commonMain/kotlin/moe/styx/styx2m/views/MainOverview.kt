@@ -145,7 +145,7 @@ class MainOverview : Screen {
     }
 
     @Composable
-    private fun BottomNavBar() {
+    fun BottomNavBar() {
         NavigationBar(tonalElevation = 10.dp) {
             TabNavItem(Tabs.seriesTab)
             TabNavItem(Tabs.moviesTab)
@@ -153,28 +153,28 @@ class MainOverview : Screen {
             TabNavItem(Tabs.scheduleTab)
         }
     }
+}
 
-    @Composable
-    private fun SideNavRail(parentNav: Navigator, isLandscape: Boolean) {
-        NavigationRail(
-            Modifier.fillMaxHeight().padding(7.dp, 6.dp, 3.dp, 8.dp).shadow(2.dp, AppShapes.large)
-                .clip(AppShapes.large),
-            containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(1.dp)
-        ) {
-            RailNavItem(Tabs.seriesTab)
-            RailNavItem(Tabs.moviesTab)
-            RailNavItem(Tabs.favsTab)
-            RailNavItem(Tabs.scheduleTab)
-            if (isLandscape)
-                Spacer(Modifier.weight(1f))
-            else
-                Spacer(Modifier.height(50.dp))
-            NavigationRailItem(
-                selected = false, onClick = { parentNav.push(SettingsView()) },
-                icon = { Icon(Icons.Filled.Settings, "Settings") },
-                label = { Text("Settings") }, alwaysShowLabel = true,
-            )
-        }
+@Composable
+fun SideNavRail(parentNav: Navigator, isLandscape: Boolean) {
+    NavigationRail(
+        Modifier.fillMaxHeight().padding(7.dp, 6.dp, 3.dp, 8.dp).shadow(2.dp, AppShapes.large)
+            .clip(AppShapes.large),
+        containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(1.dp)
+    ) {
+        RailNavItem(Tabs.seriesTab)
+        RailNavItem(Tabs.moviesTab)
+        RailNavItem(Tabs.favsTab)
+        RailNavItem(Tabs.scheduleTab)
+        if (isLandscape)
+            Spacer(Modifier.weight(1f))
+        else
+            Spacer(Modifier.height(50.dp))
+        NavigationRailItem(
+            selected = false, onClick = { parentNav.push(SettingsView()) },
+            icon = { Icon(Icons.Filled.Settings, "Settings") },
+            label = { Text("Settings") }, alwaysShowLabel = true,
+        )
     }
 }
 

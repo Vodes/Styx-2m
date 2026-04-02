@@ -18,6 +18,7 @@ import com.dokar.sonner.rememberToasterState
 import com.multiplatform.lifecycle.LifecycleEvent
 import com.multiplatform.lifecycle.LifecycleListener
 import com.multiplatform.lifecycle.LifecycleTracker
+import com.russhwolf.settings.get
 import com.russhwolf.settings.set
 import io.kamel.image.config.LocalKamelConfig
 import moe.styx.common.compose.extensions.kamelConfig
@@ -34,6 +35,7 @@ import moe.styx.styx2m.player.PlayerView
 import moe.styx.styx2m.theme.AppTheme
 import moe.styx.styx2m.theme.LocalThemeIsDark
 import moe.styx.styx2m.views.MainOverview
+import moe.styx.styx2m.views.tv.TvAnimeOverview
 
 @Composable
 internal fun App() = AppTheme {
@@ -44,7 +46,7 @@ internal fun App() = AppTheme {
         val darkState = LocalThemeIsDark.current
         val toasterState = rememberToasterState()
         Toaster(toasterState, modifier = Modifier.padding(0.dp, 0.dp, 0.dp, 38.dp), darkTheme = darkState.value, richColors = true)
-        Navigator(MainOverview()) { navigator ->
+        Navigator(if (settings["is-tv", false]) TvAnimeOverview() else MainOverview()) { navigator ->
             CompositionLocalProvider(
                 LocalGlobalNavigator provides navigator,
                 LocalKamelConfig provides kamelConfig,
