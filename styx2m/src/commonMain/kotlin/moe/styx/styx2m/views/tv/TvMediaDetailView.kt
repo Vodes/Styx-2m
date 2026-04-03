@@ -165,10 +165,10 @@ class TvMediaDetailView(private val mediaID: String) : Screen {
             StupidImageNameArea(
                 mediaStorage,
                 modifier = Modifier.fillMaxWidth(),
-                dynamicMaxWidth = 1200.dp,
-                requiredMinHeight = 180.dp,
-                requiredMaxHeight = 280.dp,
-                requiredMaxWidth = 180.dp,
+                dynamicMaxWidth = 1600.dp,
+                requiredMinHeight = 320.dp,
+                requiredMaxHeight = 520.dp,
+                requiredMaxWidth = 360.dp,
                 enforceConstraints = true,
                 showMappingIcons = false
             ) {
