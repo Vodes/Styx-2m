@@ -9,6 +9,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.navigator.Navigator
@@ -40,6 +42,13 @@ import moe.styx.styx2m.views.tv.TvAnimeOverview
 @Composable
 internal fun App() = AppTheme {
     val currentSizes = fetchWindowSize()
+    val baseDensity = LocalDensity.current
+    val isTv = settings["is-tv", false]
+    val appDensity = if (isTv) {
+        Density(baseDensity.density * 0.9f, baseDensity.fontScale * 0.92f)
+    } else {
+        baseDensity
+    }
     settings["is-tablet"] = currentSizes.isProbablyTablet
     InitLifeCycleListener()
     Surface(modifier = Modifier.fillMaxSize()) {
@@ -48,6 +57,7 @@ internal fun App() = AppTheme {
         Toaster(toasterState, modifier = Modifier.padding(0.dp, 0.dp, 0.dp, 38.dp), darkTheme = darkState.value, richColors = true)
         Navigator(if (settings["is-tv", false]) TvAnimeOverview() else MainOverview()) { navigator ->
             CompositionLocalProvider(
+                LocalDensity provides appDensity,
                 LocalGlobalNavigator provides navigator,
                 LocalKamelConfig provides kamelConfig,
                 LocalLayoutSize provides currentSizes,

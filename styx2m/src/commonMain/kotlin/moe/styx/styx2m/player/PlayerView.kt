@@ -18,9 +18,11 @@ import com.moriatsushi.insetsx.rememberWindowInsetsController
 import com.multiplatform.lifecycle.LifecycleEvent
 import com.multiplatform.lifecycle.LifecycleListener
 import com.multiplatform.lifecycle.LifecycleTracker
+import com.russhwolf.settings.get
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.combine
 import moe.styx.common.compose.extensions.joinAndSyncProgress
+import moe.styx.common.compose.settings
 import moe.styx.common.compose.threads.Heartbeats
 import moe.styx.common.compose.utils.LocalGlobalNavigator
 import moe.styx.common.compose.viewmodels.MainDataViewModel
@@ -31,6 +33,7 @@ import moe.styx.styx2m.components.player.NameRow
 import moe.styx.styx2m.components.player.PlayerControlsSurface
 import moe.styx.styx2m.components.player.TimelineControls
 import moe.styx.styx2m.misc.*
+import moe.styx.styx2m.player.tv.TvPlayerContent
 import kotlin.jvm.Transient
 
 class PlayerView(val entryID: String, startAt: Long = 0L) : Screen {
@@ -111,66 +114,79 @@ class PlayerView(val entryID: String, startAt: Long = 0L) : Screen {
             mediaPlayer.releaseRotationLock()
         }
 
-        PlayerControlsSurface(Modifier.fillMaxSize(), onTap = {
-            controlsTimeout = if (controlsTimeout > 0) 0 else 3
-        }, onSeekForward = {
-            if (playerState.progress < playerState.fileLength - 15) {
-                mediaPlayer.seek(playerState.progress + 10)
-                controlsTimeout = 2
-                return@PlayerControlsSurface true
-            }
-            return@PlayerControlsSurface false
-        }, onSeekBackward = {
-            if (playerState.progress > 7) {
-                mediaPlayer.seek(playerState.progress - 5)
-                controlsTimeout = 2
-                return@PlayerControlsSurface true
-            }
-            return@PlayerControlsSurface false
-        }, onChapterSkipForward = {
-            val validChapter = playerState.chapters.sortedBy { it.time }.find { it.time > playerState.progress }
-            if (playerState.chapters.isEmpty() || validChapter == null)
-                return@PlayerControlsSurface false
-            mediaPlayer.seek(validChapter.time.toLong())
-            return@PlayerControlsSurface true
-        }, onChapterSkipBackward = {
-            val validChapter = playerState.chapters.sortedBy { it.time }.findLast { it.time < (playerState.progress - 2) }
-            if (playerState.chapters.isEmpty() || validChapter == null)
-                return@PlayerControlsSurface false
-            mediaPlayer.seek(validChapter.time.toLong())
-            return@PlayerControlsSurface true
-        }) {
-            Row(Modifier.zIndex(0F).fillMaxSize()) {
-                mediaPlayer.PlayerComponent(mediaStorage.entries, mediaStorage.preferences)
-            }
-            AnimatedVisibility(controlsTimeout != 0, enter = fadeIn(), exit = fadeOut()) {
-                LaunchedEffect(key1 = "") {
-                    while (controlsTimeout != 0) {
-                        controlsTimeout--
-                        if (controlsTimeout < 0)
-                            controlsTimeout = 0
-                        delay(1000)
-                    }
+        if (settings["is-tv", false]) {
+            TvPlayerContent(
+                nav = nav,
+                mediaPlayer = mediaPlayer,
+                mediaStorage = mediaStorage,
+                playerState = playerState,
+                playbackStatus = playbackStatus,
+                currentEntry = currentEntry,
+                nextEntry = next,
+                previousEntry = prev
+            )
+        } else {
+            PlayerControlsSurface(Modifier.fillMaxSize(), onTap = {
+                controlsTimeout = if (controlsTimeout > 0) 0 else 3
+            }, onSeekForward = {
+                if (playerState.progress < playerState.fileLength - 15) {
+                    mediaPlayer.seek(playerState.progress + 10)
+                    controlsTimeout = 2
+                    return@PlayerControlsSurface true
                 }
+                return@PlayerControlsSurface false
+            }, onSeekBackward = {
+                if (playerState.progress > 7) {
+                    mediaPlayer.seek(playerState.progress - 5)
+                    controlsTimeout = 2
+                    return@PlayerControlsSurface true
+                }
+                return@PlayerControlsSurface false
+            }, onChapterSkipForward = {
+                val validChapter = playerState.chapters.sortedBy { it.time }.find { it.time > playerState.progress }
+                if (playerState.chapters.isEmpty() || validChapter == null)
+                    return@PlayerControlsSurface false
+                mediaPlayer.seek(validChapter.time.toLong())
+                return@PlayerControlsSurface true
+            }, onChapterSkipBackward = {
+                val validChapter = playerState.chapters.sortedBy { it.time }.findLast { it.time < (playerState.progress - 2) }
+                if (playerState.chapters.isEmpty() || validChapter == null)
+                    return@PlayerControlsSurface false
+                mediaPlayer.seek(validChapter.time.toLong())
+                return@PlayerControlsSurface true
+            }) {
+                Row(Modifier.zIndex(0F).fillMaxSize()) {
+                    mediaPlayer.PlayerComponent(mediaStorage.entries, mediaStorage.preferences)
+                }
+                AnimatedVisibility(controlsTimeout != 0, enter = fadeIn(), exit = fadeOut()) {
+                    LaunchedEffect(key1 = "") {
+                        while (controlsTimeout != 0) {
+                            controlsTimeout--
+                            if (controlsTimeout < 0)
+                                controlsTimeout = 0
+                            delay(1000)
+                        }
+                    }
 
-                Column(Modifier.zIndex(1F).fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
-                    NameRow(
-                        playerState.mediaTitle,
-                        mediaStorage.media,
-                        currentEntry,
-                        nav,
-                        playerState.trackList,
-                        mediaPlayer,
-                        isRotationLocked,
-                        { isRotationLocked = !isRotationLocked }) { controlsTimeout = 3 }
-                    ControlsRow(mediaPlayer, playbackStatus, playerState.progress, playerState.chapters, next, prev) { controlsTimeout = 4 }
-                    TimelineControls(
-                        mediaPlayer,
-                        playerState.progress,
-                        playerState.cacheEnd,
-                        playerState.fileLength,
-                        playerState.chapters
-                    ) { controlsTimeout = 4 }
+                    Column(Modifier.zIndex(1F).fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
+                        NameRow(
+                            playerState.mediaTitle,
+                            mediaStorage.media,
+                            currentEntry,
+                            nav,
+                            playerState.trackList,
+                            mediaPlayer,
+                            isRotationLocked,
+                            { isRotationLocked = !isRotationLocked }) { controlsTimeout = 3 }
+                        ControlsRow(mediaPlayer, playbackStatus, playerState.progress, playerState.chapters, next, prev) { controlsTimeout = 4 }
+                        TimelineControls(
+                            mediaPlayer,
+                            playerState.progress,
+                            playerState.cacheEnd,
+                            playerState.fileLength,
+                            playerState.chapters
+                        ) { controlsTimeout = 4 }
+                    }
                 }
             }
         }

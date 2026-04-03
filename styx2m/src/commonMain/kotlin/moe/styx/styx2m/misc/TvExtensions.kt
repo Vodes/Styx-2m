@@ -43,14 +43,14 @@ fun Modifier.handleDPadKeyEvents(
         Key.DirectionUp -> {
             onUp?.apply {
                 onActionUp(::invoke)
-                return@onPreviewKeyEvent false
+                return@onPreviewKeyEvent true
             }
         }
 
         Key.DirectionDown -> {
             onDown?.apply {
                 onActionUp(::invoke)
-                return@onPreviewKeyEvent false
+                return@onPreviewKeyEvent true
             }
         }
 

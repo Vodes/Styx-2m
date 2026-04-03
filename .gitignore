@@ -2,6 +2,7 @@
 .kotlin
 build/
 release/
+context/
 composeApp/release/
 !gradle/wrapper/gradle-wrapper.jar
 !**/src/main/**/build/

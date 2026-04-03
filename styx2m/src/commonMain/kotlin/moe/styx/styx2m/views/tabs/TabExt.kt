@@ -12,6 +12,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.navigator.tab.Tab
@@ -56,10 +57,10 @@ internal fun Tab.barWithListComp(
 ) {
     val sizes = LocalLayoutSize.current
     val flow by mediaSearch.stateEmitter.debounce(150L).collectAsState(initialState)
-    val processedMedia = flow.filterMedia(filtered, favourites)
+    val processedMedia = remember(flow, filtered, favourites) { flow.filterMedia(filtered, favourites) }
     Column(Modifier.fillMaxSize()) {
         if (settings["is-tv", false]) {
-            TvMediaBrowser(mediaSearch, storage, processedMedia, listPosViewModel)
+            TvMediaBrowser(mediaSearch, storage, processedMedia, listPosViewModel, showUnseen)
         } else {
             Column(Modifier.fillMaxSize()) {
                 mediaSearch.Component(Modifier.fillMaxWidth().padding(10.dp))
