@@ -20,12 +20,9 @@ import androidx.compose.material.icons.filled.KeyboardDoubleArrowLeft
 import androidx.compose.material.icons.filled.KeyboardDoubleArrowRight
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -314,7 +311,7 @@ internal fun TvPlayerContent(
             targetPosition = seekPreviewPosition ?: playerState.progress
         )
 
-        AnimatedVisibility(controlsVisible && !showTrackSelect, enter = fadeIn(), exit = fadeOut()) {
+        if (controlsVisible && !showTrackSelect) {
             Column(
                 Modifier.fillMaxSize().padding(horizontal = 12.dp, vertical = 10.dp),
                 verticalArrangement = Arrangement.SpaceBetween
@@ -362,11 +359,11 @@ internal fun TvPlayerContent(
                     }
                 }
 
-                ElevatedCard(
+                Surface(
                     modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.elevatedCardColors(
-                        MaterialTheme.colorScheme.surfaceColorAtElevation(8.dp).copy(alpha = 0.95f)
-                    )
+                    shape = AppShapes.extraLarge,
+                    color = darkScheme.background.copy(alpha = 0.84f),
+                    tonalElevation = 2.dp
                 ) {
                     Column(
                         Modifier.fillMaxWidth().padding(horizontal = 10.dp, vertical = 8.dp),

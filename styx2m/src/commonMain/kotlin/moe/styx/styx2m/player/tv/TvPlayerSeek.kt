@@ -1,10 +1,6 @@
 package moe.styx.styx2m.player.tv
 
 import SeekerDefaults
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.focusable
@@ -17,8 +13,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -30,7 +24,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.scale
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
@@ -52,12 +45,12 @@ internal fun TvSeekPreviewOverlay(
     delta: Long,
     targetPosition: Long
 ) {
-    AnimatedVisibility(visible, enter = fadeIn(), exit = fadeOut()) {
-        ElevatedCard(
+    if (visible) {
+        Surface(
             modifier = Modifier.padding(bottom = 88.dp),
-            colors = CardDefaults.elevatedCardColors(
-                MaterialTheme.colorScheme.surfaceColorAtElevation(10.dp).copy(alpha = 0.96f)
-            )
+            shape = AppShapes.extraLarge,
+            color = MaterialTheme.colorScheme.surfaceColorAtElevation(6.dp).copy(alpha = 0.96f),
+            tonalElevation = 2.dp
         ) {
             Column(
                 Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
@@ -100,7 +93,6 @@ internal fun TvPlayerSeekBar(
     onSeekForward: () -> Unit
 ) {
     var isFocused by remember { mutableStateOf(false) }
-    val scale by animateFloatAsState(if (isFocused) 1.005f else 1f, label = "tv-player-seek-scale")
     val interactionSource = remember { MutableInteractionSource() }
     val seekerState = rememberSeekerState()
     val safeDuration = duration.coerceAtLeast(1)
@@ -119,7 +111,6 @@ internal fun TvPlayerSeekBar(
 
     Surface(
         modifier = Modifier.fillMaxWidth()
-            .scale(scale)
             .focusRequester(focusRequester)
             .onFocusChanged {
                 isFocused = it.isFocused
@@ -140,8 +131,7 @@ internal fun TvPlayerSeekBar(
             ),
         shape = AppShapes.large,
         color = darkScheme.surface.copy(alpha = 0.82f),
-        tonalElevation = if (isFocused) 5.dp else 1.dp,
-        shadowElevation = if (isFocused) 6.dp else 0.dp
+        tonalElevation = if (isFocused) 3.dp else 1.dp
     ) {
         Column(
             Modifier.fillMaxWidth().padding(horizontal = 10.dp, vertical = 6.dp),
@@ -201,7 +191,7 @@ internal fun TvPlayerSeekBar(
                 )
             )
 
-            AnimatedVisibility(displayDelta != 0L, enter = fadeIn(), exit = fadeOut()) {
+            if (displayDelta != 0L) {
                 Row(
                     Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.Center

@@ -13,11 +13,10 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.SubtitlesOff
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
@@ -80,11 +79,11 @@ internal fun TvTrackSelectionOverlay(
             },
         contentAlignment = Alignment.Center
     ) {
-        ElevatedCard(
+        Surface(
             modifier = Modifier.fillMaxWidth(0.5f).heightIn(max = 520.dp),
-            colors = CardDefaults.elevatedCardColors(
-                MaterialTheme.colorScheme.surfaceColorAtElevation(10.dp)
-            )
+            shape = moe.styx.common.compose.components.AppShapes.extraLarge,
+            color = MaterialTheme.colorScheme.surfaceColorAtElevation(4.dp),
+            tonalElevation = 2.dp
         ) {
             Column(
                 Modifier.fillMaxWidth().padding(14.dp),

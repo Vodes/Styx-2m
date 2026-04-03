@@ -1,7 +1,5 @@
 package moe.styx.styx2m.views.tv.comp
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.focusable
@@ -15,7 +13,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.scale
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
@@ -28,7 +25,6 @@ import io.kamel.image.KamelImage
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import moe.styx.common.compose.components.AppShapes
-import moe.styx.common.compose.components.anime.MediaGenreListing
 import moe.styx.common.compose.components.search.MediaSearch
 import moe.styx.common.compose.extensions.clickableNoIndicator
 import moe.styx.common.compose.extensions.getPainter
@@ -59,6 +55,7 @@ fun TvMediaBrowser(
     val scope = rememberCoroutineScope()
     var focusedIndex by remember(mediaList.size) { mutableStateOf<Int?>(null) }
     val searchFocusRequester = remember { FocusRequester() }
+    val mediaIds = remember(mediaList) { mediaList.map(Media::GUID) }
     val imageById = remember(storage.updated, storage.imageList.size) {
         storage.imageList.associateBy { it.GUID.lowercase() }
     }
@@ -68,7 +65,16 @@ fun TvMediaBrowser(
     val watchedByEntryId = remember(storage.updated, storage.watchedList.size) {
         storage.watchedList.associateBy { it.entryID.lowercase() }
     }
-    val focusRequesters = remember(mediaList.map { it.GUID }) {
+    val unseenCountByMediaId = remember(showUnseen, entriesByMediaId, watchedByEntryId) {
+        if (!showUnseen) {
+            emptyMap()
+        } else {
+            entriesByMediaId.mapValues { (_, entries) ->
+                entries.count { (watchedByEntryId[it.GUID.lowercase()]?.maxProgress ?: 0F) < 85F }
+            }
+        }
+    }
+    val focusRequesters = remember(mediaIds) {
         List(mediaList.size) { FocusRequester() }
     }
 
@@ -88,7 +94,7 @@ fun TvMediaBrowser(
         }
     }
 
-    LaunchedEffect(mediaList.map { it.GUID }) {
+    LaunchedEffect(mediaIds) {
         if (mediaList.isEmpty()) {
             focusedIndex = null
             return@LaunchedEffect
@@ -150,9 +156,11 @@ fun TvMediaBrowser(
 
         Spacer(Modifier.height(2.dp))
 
-        ElevatedCard(
+        Surface(
             Modifier.fillMaxSize().padding(10.dp, 0.dp, 10.dp, 10.dp),
-            colors = CardDefaults.elevatedCardColors(MaterialTheme.colorScheme.surfaceColorAtElevation(1.dp))
+            shape = AppShapes.extraLarge,
+            color = MaterialTheme.colorScheme.surfaceColorAtElevation(1.dp),
+            tonalElevation = 1.dp
         ) {
             LazyColumn(
                 state = listState,
@@ -163,20 +171,13 @@ fun TvMediaBrowser(
                 itemsIndexed(mediaList, key = { _, media -> media.GUID }) { index, media ->
                     val mediaId = media.GUID.lowercase()
                     val entries = entriesByMediaId[mediaId].orEmpty()
-                    val unseenCount = remember(showUnseen, entries, watchedByEntryId) {
-                        if (!showUnseen) {
-                            0
-                        } else {
-                            entries.count { (watchedByEntryId[it.GUID.lowercase()]?.maxProgress ?: 0F) < 85F }
-                        }
-                    }
                     TvMediaListItem(
                         media = media,
                         image = imageById[media.thumbID?.lowercase()],
                         entries = entries,
                         isFocused = focusedIndex == index,
                         focusRequester = focusRequesters[index],
-                        unseenCount = unseenCount,
+                        unseenCount = unseenCountByMediaId[mediaId] ?: 0,
                         onFocused = {
                             focusedIndex = index
                             listPosViewModel.scrollIndex = index
@@ -225,8 +226,16 @@ private fun TvMediaListItem(
             media.synopsisEN
         }?.removeSomeHTMLTags()
     }
+    val genresLabel = remember(media.genres) {
+        media.genres?.split(",")
+            ?.asSequence()
+            ?.map(String::trim)
+            ?.filter(String::isNotEmpty)
+            ?.take(3)
+            ?.joinToString("  •  ")
+            .orEmpty()
+    }
     val painter = image?.getPainter()
-    val scale by animateFloatAsState(if (isFocused) 1.015f else 1f, label = "tv-media-row-scale")
     val interactionSource = remember { MutableInteractionSource() }
     val progressLabel = remember(media, entries, unseenCount) {
         if (media.isSeries.toBoolean()) {
@@ -243,7 +252,6 @@ private fun TvMediaListItem(
 
     Box(
         Modifier.fillMaxWidth()
-            .scale(scale)
             .focusRequester(focusRequester)
             .onFocusChanged {
                 if (it.isFocused) {
@@ -257,14 +265,13 @@ private fun TvMediaListItem(
         Surface(
             modifier = Modifier.fillMaxWidth()
                 .border(
-                    3.dp,
+                    2.dp,
                     if (isFocused) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline.copy(alpha = 0.25f),
                     AppShapes.large
                 ),
             shape = AppShapes.large,
-            shadowElevation = if (isFocused) 14.dp else 3.dp,
-            tonalElevation = if (isFocused) 10.dp else 1.dp,
-            color = MaterialTheme.colorScheme.surfaceColorAtElevation(if (isFocused) 7.dp else 1.dp)
+            tonalElevation = if (isFocused) 4.dp else 1.dp,
+            color = MaterialTheme.colorScheme.surfaceColorAtElevation(if (isFocused) 4.dp else 1.dp)
         ) {
             Row(
                 Modifier.fillMaxWidth().padding(12.dp),
@@ -278,7 +285,11 @@ private fun TvMediaListItem(
                             contentDescription = media.name,
                             contentScale = ContentScale.Crop,
                             modifier = Modifier.fillMaxSize().padding(2.dp).clip(AppShapes.medium),
-                            onLoading = { CircularProgressIndicator(progress = { it }, modifier = Modifier.padding(16.dp)) }
+                            onLoading = {
+                                Box(
+                                    Modifier.fillMaxSize().background(MaterialTheme.colorScheme.surfaceVariant)
+                                )
+                            }
                         )
                     } else {
                         Box(
@@ -306,7 +317,13 @@ private fun TvMediaListItem(
                         style = MaterialTheme.typography.headlineSmall,
                         fontWeight = if (isFocused) FontWeight.SemiBold else FontWeight.Medium
                     )
-                    MediaGenreListing(media)
+                    if (genresLabel.isNotBlank()) {
+                        Text(
+                            genresLabel,
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                    }
                     Text(
                         progressLabel,
                         style = MaterialTheme.typography.bodyMedium,
@@ -333,11 +350,12 @@ private fun TvMediaListItem(
             }
         }
 
-        AnimatedVisibility(unseenCount > 0, modifier = Modifier.align(Alignment.TopEnd).padding(10.dp)) {
+        if (unseenCount > 0) {
             Surface(
+                modifier = Modifier.align(Alignment.TopEnd).padding(10.dp),
                 shape = AppShapes.large,
                 color = MaterialTheme.colorScheme.secondary,
-                tonalElevation = 6.dp
+                tonalElevation = 3.dp
             ) {
                 Text(
                     unseenCount.toString(),

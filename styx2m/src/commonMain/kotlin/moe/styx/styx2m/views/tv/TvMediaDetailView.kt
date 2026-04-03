@@ -5,12 +5,10 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.border
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.scale
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -64,9 +62,11 @@ class TvMediaDetailView(private val mediaID: String) : Screen {
                 val showSelection = remember { mutableStateOf(false) }
                 val listState = rememberLazyListState()
 
-                ElevatedCard(
+                Surface(
                     Modifier.fillMaxSize().padding(12.dp),
-                    colors = CardDefaults.elevatedCardColors(MaterialTheme.colorScheme.surfaceColorAtElevation(1.dp))
+                    shape = AppShapes.extraLarge,
+                    color = MaterialTheme.colorScheme.surfaceColorAtElevation(1.dp),
+                    tonalElevation = 1.dp
                 ) {
                     EpisodeList(
                         storage,
@@ -96,9 +96,11 @@ class TvMediaDetailView(private val mediaID: String) : Screen {
                     Modifier.fillMaxSize().padding(12.dp),
                     verticalArrangement = Arrangement.spacedBy(18.dp)
                 ) {
-                    ElevatedCard(
+                    Surface(
                         Modifier.fillMaxWidth().weight(1f),
-                        colors = CardDefaults.elevatedCardColors(MaterialTheme.colorScheme.surfaceColorAtElevation(2.dp))
+                        shape = AppShapes.extraLarge,
+                        color = MaterialTheme.colorScheme.surfaceColorAtElevation(2.dp),
+                        tonalElevation = 1.dp
                     ) {
                         TvDetailSidebar(
                             mediaStorage = mediaStorage,
@@ -182,8 +184,10 @@ class TvMediaDetailView(private val mediaID: String) : Screen {
             }
 
             if (mediaStorage.prequel != null || mediaStorage.sequel != null) {
-                ElevatedCard(
-                    colors = CardDefaults.elevatedCardColors(MaterialTheme.colorScheme.surfaceColorAtElevation(4.dp))
+                Surface(
+                    shape = AppShapes.large,
+                    color = MaterialTheme.colorScheme.surfaceColorAtElevation(3.dp),
+                    tonalElevation = 1.dp
                 ) {
                     Column(Modifier.fillMaxWidth().padding(14.dp)) {
                         Text(
@@ -212,21 +216,19 @@ class TvMediaDetailView(private val mediaID: String) : Screen {
     @Composable
     private fun TvPrimaryActionButton(text: String, onClick: () -> Unit) {
         var isFocused by remember { mutableStateOf(false) }
-        val scale by animateFloatAsState(if (isFocused) 1.025f else 1f, label = "tv-primary-action-scale")
 
         Button(
             onClick = onClick,
             modifier = Modifier.fillMaxWidth()
-                .scale(scale)
                 .onFocusChanged { isFocused = it.isFocused }
                 .border(
-                    3.dp,
+                    2.dp,
                     if (isFocused) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.primary.copy(alpha = 0.35f),
                     AppShapes.large
                 )
                 .heightIn(min = 48.dp),
             shape = AppShapes.large,
-            elevation = ButtonDefaults.buttonElevation(defaultElevation = if (isFocused) 8.dp else 1.dp)
+            elevation = ButtonDefaults.buttonElevation(defaultElevation = 0.dp, focusedElevation = 0.dp, pressedElevation = 0.dp)
         ) {
             Text(text, fontWeight = FontWeight.SemiBold)
         }
@@ -235,21 +237,19 @@ class TvMediaDetailView(private val mediaID: String) : Screen {
     @Composable
     private fun TvSecondaryActionButton(text: String, onClick: () -> Unit) {
         var isFocused by remember { mutableStateOf(false) }
-        val scale by animateFloatAsState(if (isFocused) 1.02f else 1f, label = "tv-secondary-action-scale")
 
         FilledTonalButton(
             onClick = onClick,
             modifier = Modifier.fillMaxWidth()
-                .scale(scale)
                 .onFocusChanged { isFocused = it.isFocused }
                 .border(
-                    3.dp,
+                    2.dp,
                     if (isFocused) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.outline.copy(alpha = 0.35f),
                     AppShapes.large
                 )
                 .heightIn(min = 48.dp),
             shape = AppShapes.large,
-            elevation = ButtonDefaults.filledTonalButtonElevation(defaultElevation = if (isFocused) 6.dp else 0.dp)
+            elevation = ButtonDefaults.filledTonalButtonElevation(defaultElevation = 0.dp, focusedElevation = 0.dp, pressedElevation = 0.dp)
         ) {
             Text(text, fontWeight = if (isFocused) FontWeight.SemiBold else FontWeight.Medium)
         }
@@ -258,15 +258,13 @@ class TvMediaDetailView(private val mediaID: String) : Screen {
     @Composable
     private fun TvOutlinedActionButton(text: String, onClick: () -> Unit) {
         var isFocused by remember { mutableStateOf(false) }
-        val scale by animateFloatAsState(if (isFocused) 1.02f else 1f, label = "tv-outline-action-scale")
 
         OutlinedButton(
             onClick = onClick,
             modifier = Modifier.fillMaxWidth()
-                .scale(scale)
                 .onFocusChanged { isFocused = it.isFocused }
                 .border(
-                    3.dp,
+                    2.dp,
                     if (isFocused) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline.copy(alpha = 0.5f),
                     AppShapes.large
                 )

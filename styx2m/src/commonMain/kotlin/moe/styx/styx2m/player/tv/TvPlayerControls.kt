@@ -1,6 +1,5 @@
 package moe.styx.styx2m.player.tv
 
-import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.border
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -26,7 +25,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.scale
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
@@ -140,13 +138,11 @@ internal fun TvPlayerActionSurface(
     content: @Composable (Boolean) -> Unit
 ) {
     var isFocused by remember { mutableStateOf(false) }
-    val scale by animateFloatAsState(if (isFocused) 1.02f else 1f, label = "tv-player-control-scale")
     val interactionSource = remember { MutableInteractionSource() }
     val baseModifier = if (focusRequester != null) modifier.focusRequester(focusRequester) else modifier
 
     Surface(
         modifier = baseModifier
-            .scale(scale)
             .onFocusChanged {
                 isFocused = it.isFocused
                 if (it.isFocused) onFocused?.invoke()
@@ -170,8 +166,7 @@ internal fun TvPlayerActionSurface(
             ),
         shape = AppShapes.large,
         color = darkScheme.surface.copy(alpha = if (enabled) 0.82f else 0.44f),
-        tonalElevation = if (isFocused) 5.dp else 1.dp,
-        shadowElevation = if (isFocused) 6.dp else 0.dp
+        tonalElevation = if (isFocused) 3.dp else 1.dp
     ) {
         Box(
             modifier = if (fillWidth) Modifier.fillMaxWidth().padding(horizontal = 1.dp) else Modifier.wrapContentSize(),
