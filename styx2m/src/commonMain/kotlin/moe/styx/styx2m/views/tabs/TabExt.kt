@@ -26,6 +26,7 @@ import moe.styx.common.compose.components.search.MediaSearch
 import moe.styx.common.compose.settings
 import moe.styx.common.compose.utils.LayoutSizes
 import moe.styx.common.compose.utils.LocalGlobalNavigator
+import moe.styx.common.compose.utils.LocalIsTv
 import moe.styx.common.compose.utils.LocalLayoutSize
 import moe.styx.common.compose.utils.SearchState
 import moe.styx.common.compose.viewmodels.ListPosViewModel
@@ -56,10 +57,11 @@ internal fun Tab.barWithListComp(
     favourites: List<Favourite> = emptyList()
 ) {
     val sizes = LocalLayoutSize.current
+    val isTv = LocalIsTv.current
     val flow by mediaSearch.stateEmitter.debounce(150L).collectAsState(initialState)
     val processedMedia = remember(flow, filtered, favourites) { flow.filterMedia(filtered, favourites) }
     Column(Modifier.fillMaxSize()) {
-        if (settings["is-tv", false]) {
+        if (isTv) {
             TvMediaBrowser(mediaSearch, storage, processedMedia, listPosViewModel, showUnseen)
         } else {
             Column(Modifier.fillMaxSize()) {

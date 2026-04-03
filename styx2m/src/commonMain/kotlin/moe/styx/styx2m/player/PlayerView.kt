@@ -25,6 +25,7 @@ import moe.styx.common.compose.extensions.joinAndSyncProgress
 import moe.styx.common.compose.settings
 import moe.styx.common.compose.threads.Heartbeats
 import moe.styx.common.compose.utils.LocalGlobalNavigator
+import moe.styx.common.compose.utils.LocalIsTv
 import moe.styx.common.compose.viewmodels.MainDataViewModel
 import moe.styx.common.data.MediaActivity
 import moe.styx.common.extension.eqI
@@ -51,6 +52,7 @@ class PlayerView(val entryID: String, startAt: Long = 0L) : Screen {
     @Composable
     override fun Content() {
         val nav = LocalGlobalNavigator.current
+        val isTv = LocalIsTv.current
         val insets = rememberWindowInsetsController()
         val sm = nav.rememberNavigatorScreenModel("main-vm") { MainDataViewModel() }
         val storage by sm.storageFlow.collectAsState()
@@ -114,7 +116,7 @@ class PlayerView(val entryID: String, startAt: Long = 0L) : Screen {
             mediaPlayer.releaseRotationLock()
         }
 
-        if (settings["is-tv", false]) {
+        if (isTv) {
             TvPlayerContent(
                 nav = nav,
                 mediaPlayer = mediaPlayer,

@@ -29,6 +29,7 @@ import moe.styx.common.compose.threads.DownloadQueue
 import moe.styx.common.compose.threads.Heartbeats
 import moe.styx.common.compose.threads.RequestQueue
 import moe.styx.common.compose.utils.LocalGlobalNavigator
+import moe.styx.common.compose.utils.LocalIsTv
 import moe.styx.common.compose.utils.LocalLayoutSize
 import moe.styx.common.compose.utils.LocalToaster
 import moe.styx.common.compose.utils.fetchWindowSize
@@ -55,10 +56,11 @@ internal fun App() = AppTheme {
         val darkState = LocalThemeIsDark.current
         val toasterState = rememberToasterState()
         Toaster(toasterState, modifier = Modifier.padding(0.dp, 0.dp, 0.dp, 38.dp), darkTheme = darkState.value, richColors = true)
-        Navigator(if (settings["is-tv", false]) TvAnimeOverview() else MainOverview()) { navigator ->
+        Navigator(if (isTv) TvAnimeOverview() else MainOverview()) { navigator ->
             CompositionLocalProvider(
                 LocalDensity provides appDensity,
                 LocalGlobalNavigator provides navigator,
+                LocalIsTv provides isTv,
                 LocalKamelConfig provides kamelConfig,
                 LocalLayoutSize provides currentSizes,
                 LocalToaster provides toasterState

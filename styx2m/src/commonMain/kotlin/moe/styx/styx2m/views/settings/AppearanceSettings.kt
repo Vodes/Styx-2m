@@ -12,6 +12,7 @@ import com.russhwolf.settings.get
 import com.russhwolf.settings.set
 import moe.styx.common.compose.components.misc.Toggles
 import moe.styx.common.compose.settings
+import moe.styx.common.compose.utils.LocalIsTv
 import moe.styx.styx2m.theme.LocalThemeIsDark
 
 private val themeChoices = listOf("System", "Light", "Dark")
@@ -19,6 +20,7 @@ private val themeChoices = listOf("System", "Light", "Dark")
 @Composable
 fun AppearanceSettings() {
     val systemIsDark = isSystemInDarkTheme()
+    val isTv = LocalIsTv.current
     var currentlyDarkSelected by LocalThemeIsDark.current
 
     Toggles.ContainerRadioSelect(
@@ -35,7 +37,15 @@ fun AppearanceSettings() {
         }
         currentlyDarkSelected = requestedDark
     }
-    Toggles.ContainerSwitch("Favourites tab on start-up", value = settings["favs-startup", false]) { settings["favs-startup"] = it }
-    Toggles.ContainerSwitch("Show names on cards", value = settings["display-names", false]) { settings["display-names"] = it }
+    Toggles.ContainerSwitch(
+        "Favourites tab on start-up",
+        value = settings["favs-startup", isTv]
+    ) { settings["favs-startup"] = it }
+    if (!isTv) {
+        Toggles.ContainerSwitch(
+            "Show names on cards",
+            value = settings["display-names", false]
+        ) { settings["display-names"] = it }
+    }
     Spacer(Modifier.height(3.dp))
 }
