@@ -17,6 +17,7 @@ import cafe.adriel.voyager.core.model.rememberNavigatorScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.core.screen.ScreenKey
+import moe.styx.common.compose.viewmodels.ListPosViewModel
 import com.russhwolf.settings.get
 import kotlinx.coroutines.launch
 import moe.styx.common.compose.components.AppShapes
@@ -49,6 +50,7 @@ class TvMediaDetailView(private val mediaID: String) : Screen {
     override fun Content() {
         val nav = LocalGlobalNavigator.current
         val sm = nav.rememberNavigatorScreenModel("main-vm") { MainDataViewModel() }
+        val episodeListPosModel = nav.rememberNavigatorScreenModel("tv-episode-pos-$mediaID") { ListPosViewModel() }
         val storage by sm.storageFlow.collectAsState()
         val mediaStorage = remember(storage) { sm.getMediaStorageForID(mediaID, storage) }
 
@@ -60,7 +62,15 @@ class TvMediaDetailView(private val mediaID: String) : Screen {
         ) {
             if (mediaStorage.media.isSeries.toBoolean()) {
                 val showSelection = remember { mutableStateOf(false) }
-                val listState = rememberLazyListState()
+                val restoreEntryId = remember(episodeListPosModel.restoreFocus, episodeListPosModel.focusedKey) {
+                    episodeListPosModel.focusedKey.takeIf { episodeListPosModel.restoreFocus && it.isNotBlank() }
+                }
+                val initialEpisodeIndex = remember(mediaStorage.entries, restoreEntryId) {
+                    restoreEntryId?.let { targetId ->
+                        mediaStorage.entries.indexOfFirst { it.GUID.equals(targetId, true) }.takeIf { it != null && it >= 0 }
+                    } ?: 0
+                }
+                val listState = rememberLazyListState(initialFirstVisibleItemIndex = if (restoreEntryId != null) initialEpisodeIndex + 1 else 0)
 
                 Surface(
                     Modifier.fillMaxSize().padding(12.dp),
@@ -75,7 +85,18 @@ class TvMediaDetailView(private val mediaID: String) : Screen {
                         null,
                         listState,
                         canShowMediaInfo = false,
+                        focusedEntryId = restoreEntryId,
+                        onEntryFocused = { entry, index ->
+                            episodeListPosModel.focusedKey = entry.GUID
+                            episodeListPosModel.scrollIndex = index
+                            episodeListPosModel.scrollOffset = 0
+                            if (restoreEntryId != null && entry.GUID.equals(restoreEntryId, true)) {
+                                episodeListPosModel.restoreFocus = false
+                            }
+                        },
                         onPlay = { entry ->
+                            episodeListPosModel.focusedKey = entry.GUID
+                            episodeListPosModel.restoreFocus = true
                             nav.push(PlayerView(entry.GUID, storage.progressFor(entry)))
                             ""
                         }
