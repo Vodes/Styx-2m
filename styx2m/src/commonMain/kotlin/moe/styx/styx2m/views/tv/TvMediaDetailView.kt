@@ -70,7 +70,9 @@ class TvMediaDetailView(private val mediaID: String) : Screen {
                         mediaStorage.entries.indexOfFirst { it.GUID.equals(targetId, true) }.takeIf { it != null && it >= 0 }
                     } ?: 0
                 }
-                val listState = rememberLazyListState(initialFirstVisibleItemIndex = if (restoreEntryId != null) initialEpisodeIndex + 1 else 0)
+                val episodeListResetKey = remember(mediaStorage.entries, restoreEntryId) {
+                    "${mediaStorage.entries.firstOrNull()?.GUID.orEmpty()}-${mediaStorage.entries.size}-${restoreEntryId.orEmpty()}"
+                }
 
                 Surface(
                     Modifier.fillMaxSize().padding(12.dp),
@@ -78,38 +80,43 @@ class TvMediaDetailView(private val mediaID: String) : Screen {
                     color = MaterialTheme.colorScheme.surfaceColorAtElevation(1.dp),
                     tonalElevation = 1.dp
                 ) {
-                    EpisodeList(
-                        storage,
-                        mediaStorage,
-                        showSelection,
-                        null,
-                        listState,
-                        canShowMediaInfo = false,
-                        focusedEntryId = restoreEntryId,
-                        onEntryFocused = { entry, index ->
-                            episodeListPosModel.focusedKey = entry.GUID
-                            episodeListPosModel.scrollIndex = index
-                            episodeListPosModel.scrollOffset = 0
-                            if (restoreEntryId != null && entry.GUID.equals(restoreEntryId, true)) {
-                                episodeListPosModel.restoreFocus = false
-                            }
-                        },
-                        onPlay = { entry ->
-                            episodeListPosModel.focusedKey = entry.GUID
-                            episodeListPosModel.restoreFocus = true
-                            nav.push(PlayerView(entry.GUID, storage.progressFor(entry)))
-                            ""
-                        }
-                    ) {
-                        TvDetailSidebar(
-                            mediaStorage = mediaStorage,
-                            storage = storage,
-                            sm = sm,
-                            modifier = Modifier.fillMaxWidth(),
-                            scrollable = false,
-                            footerText = "Continue down for episodes."
+                    key(episodeListResetKey) {
+                        val listState = rememberLazyListState(
+                            initialFirstVisibleItemIndex = if (restoreEntryId != null) initialEpisodeIndex + 1 else 0
                         )
-                        HorizontalDivider(Modifier.fillMaxWidth().padding(18.dp, 0.dp, 18.dp, 8.dp))
+                        EpisodeList(
+                            storage,
+                            mediaStorage,
+                            showSelection,
+                            null,
+                            listState,
+                            canShowMediaInfo = false,
+                            focusedEntryId = restoreEntryId,
+                            onEntryFocused = { entry, index ->
+                                episodeListPosModel.focusedKey = entry.GUID
+                                episodeListPosModel.scrollIndex = index
+                                episodeListPosModel.scrollOffset = 0
+                                if (restoreEntryId != null && entry.GUID.equals(restoreEntryId, true)) {
+                                    episodeListPosModel.restoreFocus = false
+                                }
+                            },
+                            onPlay = { entry ->
+                                episodeListPosModel.focusedKey = entry.GUID
+                                episodeListPosModel.restoreFocus = true
+                                nav.push(PlayerView(entry.GUID, storage.progressFor(entry)))
+                                ""
+                            }
+                        ) {
+                            TvDetailSidebar(
+                                mediaStorage = mediaStorage,
+                                storage = storage,
+                                sm = sm,
+                                modifier = Modifier.fillMaxWidth(),
+                                scrollable = false,
+                                footerText = "Continue down for episodes."
+                            )
+                            HorizontalDivider(Modifier.fillMaxWidth().padding(18.dp, 0.dp, 18.dp, 8.dp))
+                        }
                     }
                 }
             } else {
@@ -154,7 +161,7 @@ class TvMediaDetailView(private val mediaID: String) : Screen {
                 mediaStorage.media.synopsisEN
             }?.removeSomeHTMLTags()
         }
-        val playLabel = remember(mediaStorage, storage.updated) { storage.playLabel(mediaStorage) }
+        val playLabel = remember(mediaStorage, storage.watchedList) { storage.playLabel(mediaStorage) }
 
         Column(
             modifier

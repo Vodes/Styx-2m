@@ -72,13 +72,13 @@ fun TvMediaBrowser(
         }
     }
     val listState = rememberLazyListState(initialListItemIndex, listPosViewModel.scrollOffset)
-    val imageById = remember(storage.updated, storage.imageList.size) {
+    val imageById = remember(storage.imageList) {
         storage.imageList.associateBy { it.GUID.lowercase() }
     }
-    val entriesByMediaId = remember(storage.updated, storage.entryList.size) {
+    val entriesByMediaId = remember(storage.entryList) {
         storage.entryList.groupBy { it.mediaID.lowercase() }
     }
-    val watchedByEntryId = remember(storage.updated, storage.watchedList.size) {
+    val watchedByEntryId = remember(storage.watchedList) {
         storage.watchedList.associateBy { it.entryID.lowercase() }
     }
     val unseenCountByMediaId = remember(showUnseen, entriesByMediaId, watchedByEntryId) {
