@@ -117,7 +117,12 @@ class MpvAndroidBackend(
 
             override fun eventProperty(property: String, value: String) {
                 when (property) {
-                    "media-title" -> sink.onMediaTitle(value)
+                    "metadata/by-key/title" -> {
+                        val title = value.trim()
+                        if (title.isNotBlank()) {
+                            sink.onMediaTitle(title)
+                        }
+                    }
                     "track-list" -> {
                         runCatching {
                             sink.onTracks(json.decodeFromString<List<Track>>(value).map(Track::toPlayerTrack))
@@ -247,7 +252,7 @@ class MpvAndroidBackend(
             Property("pause", MPVLib.MPV_FORMAT_FLAG),
             Property("seeking", MPVLib.MPV_FORMAT_FLAG),
             Property("demuxer-cache-time", MPVLib.MPV_FORMAT_INT64),
-            Property("media-title", MPVLib.MPV_FORMAT_STRING)
+            Property("metadata/by-key/title", MPVLib.MPV_FORMAT_STRING)
         ).forEach { (name, format) ->
             MPVLib.observeProperty(name, format)
         }

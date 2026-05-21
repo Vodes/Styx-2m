@@ -55,6 +55,10 @@ kotlin {
             implementation(libs.compose.uitooling)
             implementation(libs.kotlinx.coroutines.android)
             implementation(libs.android.libmpv)
+            implementation(libs.androidx.media3.exoplayer)
+            implementation(libs.androidx.media3.ui)
+            implementation(libs.jellyfin.media3.ffmpeg.decoder)
+            implementation(libs.android.libass.media)
             //noinspection UseTomlInstead
             implementation("com.github.luben:zstd-jni:1.5.6-9@aar")
         }
@@ -117,6 +121,12 @@ android {
         manifest.srcFile("src/androidMain/AndroidManifest.xml")
         res.srcDirs("src/androidMain/res")
         resources.srcDirs("src/commonMain/resources")
+    }
+
+    packaging {
+        jniLibs {
+            pickFirsts += "**/libc++_shared.so"
+        }
     }
 
     compileOptions {

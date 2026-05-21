@@ -4,7 +4,7 @@ import moe.styx.styx2m.misc.Chapter
 
 enum class PlayerBackendId {
     MPV,
-    VLC
+    MEDIA3
 }
 
 data class PlayerBackendCapabilities(

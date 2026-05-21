@@ -11,6 +11,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.russhwolf.settings.get
 import com.russhwolf.settings.set
+import moe.styx.common.Platform
 import moe.styx.common.compose.components.misc.Toggles
 import moe.styx.common.compose.components.misc.Toggles.settingsContainer
 import moe.styx.common.compose.settings
@@ -23,6 +24,11 @@ val hwDecoding = """
         Leave on if at all possible and not causing issues.
         Copy is the same as yes but with copying the frame back to ram first.
         This may (will) work more reliably but will use more ram.
+    """.trimIndent()
+
+private val backendDescription = """
+        Selects the playback engine used when opening the player.
+        Auto currently uses mpv. Media3 is experimental.
     """.trimIndent()
 
 @Composable
@@ -46,6 +52,19 @@ fun MpvSettings() {
                 "Prefer English dub", value = preferences.preferEnDub,
             ) { preferences = preferences.copy(preferEnDub = it).save() }
             Spacer(Modifier.height(3.dp))
+        }
+
+        if (Platform.current == Platform.ANDROID) {
+            Column(Modifier.settingsContainer()) {
+                Text("Playback Backend", Modifier.padding(10.dp, 7.dp), style = MaterialTheme.typography.titleLarge)
+                Toggles.ContainerRadioSelect(
+                    "Backend",
+                    backendDescription,
+                    value = settings["player-backend", "auto"],
+                    choices = listOf("auto", "mpv", "media3"),
+                ) { settings["player-backend"] = it }
+                Spacer(Modifier.height(3.dp))
+            }
         }
 
         Column(Modifier.settingsContainer()) {

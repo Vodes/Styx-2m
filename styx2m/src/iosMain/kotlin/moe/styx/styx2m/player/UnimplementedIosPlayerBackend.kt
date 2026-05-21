@@ -5,7 +5,7 @@ import androidx.compose.ui.Modifier
 import moe.styx.common.data.MediaPreferences
 
 class UnimplementedIosPlayerBackend : PlayerBackendWithSurface {
-    override val id = PlayerBackendId.VLC
+    override val id = PlayerBackendId.MPV
     override val capabilities = PlayerBackendCapabilities(
         supportsCacheEnd = false,
         supportsChapters = false,
