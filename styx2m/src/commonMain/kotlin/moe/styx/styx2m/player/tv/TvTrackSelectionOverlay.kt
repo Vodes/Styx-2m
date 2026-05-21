@@ -36,26 +36,26 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.delay
 import moe.styx.common.compose.components.darkScheme
-import moe.styx.styx2m.misc.Track
 import moe.styx.styx2m.player.MediaPlayer
+import moe.styx.styx2m.player.PlayerTrack
 
 @Composable
 internal fun TvTrackSelectionOverlay(
-    audioTracks: List<Track>,
-    subtitleTracks: List<Track>,
+    audioTracks: List<PlayerTrack>,
+    subtitleTracks: List<PlayerTrack>,
     mediaPlayer: MediaPlayer,
     onDismiss: () -> Unit
 ) {
     val optionCount = audioTracks.size + 1 + subtitleTracks.size
     val focusRequesters = remember(optionCount) { List(optionCount) { FocusRequester() } }
-    val subtitleDisabled = subtitleTracks.none { it.selected }
+    val subtitleDisabled = subtitleTracks.none { it.isSelected }
     val initialFocusIndex = remember(audioTracks, subtitleTracks) {
-        val selectedAudio = audioTracks.indexOfFirst { it.selected }
+        val selectedAudio = audioTracks.indexOfFirst { it.isSelected }
         when {
             selectedAudio >= 0 -> selectedAudio
             subtitleDisabled -> audioTracks.size
             else -> {
-                val selectedSubtitle = subtitleTracks.indexOfFirst { it.selected }.coerceAtLeast(0)
+                val selectedSubtitle = subtitleTracks.indexOfFirst { it.isSelected }.coerceAtLeast(0)
                 audioTracks.size + 1 + selectedSubtitle
             }
         }
@@ -109,11 +109,11 @@ internal fun TvTrackSelectionOverlay(
                     audioTracks.forEachIndexed { index, track ->
                         TvTrackOptionRow(
                             focusRequester = focusRequesters[index],
-                            label = "${track.lang ?: "Unknown"}${if (track.title.isNullOrBlank()) "" else " | ${track.title}"}",
-                            selected = track.selected,
+                            label = "${track.language ?: "Unknown"}${if (track.title.isNullOrBlank()) "" else " | ${track.title}"}",
+                            selected = track.isSelected,
                             enabled = true,
                             onSelect = {
-                                if (!track.selected) {
+                                if (!track.isSelected) {
                                     mediaPlayer.setAudioTrack(track.id)
                                     onDismiss()
                                 }
@@ -139,11 +139,11 @@ internal fun TvTrackSelectionOverlay(
                 subtitleTracks.forEachIndexed { index, track ->
                     TvTrackOptionRow(
                         focusRequester = focusRequesters[audioTracks.size + 1 + index],
-                        label = "${track.lang ?: "Unknown"}${if (track.title.isNullOrBlank()) "" else " | ${track.title}"}",
-                            selected = track.selected,
+                        label = "${track.language ?: "Unknown"}${if (track.title.isNullOrBlank()) "" else " | ${track.title}"}",
+                            selected = track.isSelected,
                             enabled = true,
                             onSelect = {
-                                if (!track.selected) {
+                                if (!track.isSelected) {
                                     mediaPlayer.setSubtitleTrack(track.id)
                                     onDismiss()
                                 }

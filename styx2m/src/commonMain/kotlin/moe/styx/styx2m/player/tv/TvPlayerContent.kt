@@ -49,11 +49,10 @@ import moe.styx.common.compose.components.darkScheme
 import moe.styx.common.compose.navigation.Navigator
 import moe.styx.common.compose.viewmodels.MediaStorage
 import moe.styx.common.data.MediaEntry
-import moe.styx.common.extension.eqI
 import moe.styx.styx2m.misc.Chapter
-import moe.styx.styx2m.misc.Track
 import moe.styx.styx2m.player.MediaPlayer
 import moe.styx.styx2m.player.PlaybackStatus
+import moe.styx.styx2m.player.PlayerTrackType
 import moe.styx.styx2m.player.PlayerState
 import kotlin.time.TimeSource
 
@@ -75,8 +74,8 @@ internal fun TvPlayerContent(
     val backButtonFocusRequester = remember { FocusRequester() }
     val trackButtonFocusRequester = remember { FocusRequester() }
     val sortedChapters = remember(playerState.chapters) { playerState.chapters.sortedBy(Chapter::time) }
-    val audioTracks = remember(playerState.trackList) { playerState.trackList.filter { it.type eqI "audio" } }
-    val subtitleTracks = remember(playerState.trackList) { playerState.trackList.filter { it.type eqI "sub" } }
+    val audioTracks = remember(playerState.trackList) { playerState.trackList.filter { it.type == PlayerTrackType.AUDIO } }
+    val subtitleTracks = remember(playerState.trackList) { playerState.trackList.filter { it.type == PlayerTrackType.SUBTITLE } }
     val hasTracks = audioTracks.isNotEmpty() || subtitleTracks.isNotEmpty()
     val topRowFocusRequester = if (hasTracks) trackButtonFocusRequester else backButtonFocusRequester
     val previousChapter = remember(sortedChapters, playerState.progress) {

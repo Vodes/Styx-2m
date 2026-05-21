@@ -83,7 +83,15 @@ class PlayerView(val entryID: String, private val startAt: Long = 0L) : Screen {
             mediaPlayer.trackList,
             mediaPlayer.chapters
         ) {
-            PlayerState(it[0] as String, it[1] as Long, it[2] as Long, it[3] as Long, it[4] as List<Track>, it[5] as List<Chapter>)
+            @Suppress("UNCHECKED_CAST")
+            PlayerState(
+                it[0] as String,
+                it[1] as Long,
+                it[2] as Long,
+                it[3] as Long,
+                it[4] as List<PlayerTrack>,
+                it[5] as List<Chapter>
+            )
         }.collectAsState(PlayerState())
 
         val currentEntry = remember(currentEntryState) { mediaStorage.entries.find { it.GUID eqI currentEntryState } }

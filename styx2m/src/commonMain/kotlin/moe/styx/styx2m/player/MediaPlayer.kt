@@ -9,7 +9,6 @@ import moe.styx.common.data.MediaEntry
 import moe.styx.common.data.MediaPreferences
 import moe.styx.common.util.Log
 import moe.styx.styx2m.misc.Chapter
-import moe.styx.styx2m.misc.Track
 import moe.styx.styx2m.misc.updateWatchedForID
 
 abstract class AMediaPlayer(val initialEntryID: String, val startAt: Long = 0L) {
@@ -18,7 +17,7 @@ abstract class AMediaPlayer(val initialEntryID: String, val startAt: Long = 0L) 
     val cacheEnd = MutableStateFlow(0L)
     val progress = MutableStateFlow(0L)
     val fileLength = MutableStateFlow(0L)
-    val trackList = MutableStateFlow(emptyList<Track>())
+    val trackList = MutableStateFlow(emptyList<PlayerTrack>())
     val chapters = MutableStateFlow(emptyList<Chapter>())
     val playbackStatus = MutableStateFlow<PlaybackStatus>(PlaybackStatus.Idle)
     var playbackPercent = 0.0F
@@ -69,7 +68,7 @@ data class PlayerState(
     val cacheEnd: Long = 0L,
     val progress: Long = 0L,
     val fileLength: Long = 0L,
-    val trackList: List<Track> = emptyList(),
+    val trackList: List<PlayerTrack> = emptyList(),
     val chapters: List<Chapter> = emptyList()
 )
 

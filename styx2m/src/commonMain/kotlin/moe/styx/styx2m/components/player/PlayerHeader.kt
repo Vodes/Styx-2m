@@ -23,9 +23,9 @@ import moe.styx.common.compose.components.darkScheme
 import moe.styx.common.compose.navigation.Navigator
 import moe.styx.common.data.Media
 import moe.styx.common.data.MediaEntry
-import moe.styx.common.extension.eqI
-import moe.styx.styx2m.misc.Track
 import moe.styx.styx2m.player.MediaPlayer
+import moe.styx.styx2m.player.PlayerTrack
+import moe.styx.styx2m.player.PlayerTrackType
 
 
 @Composable
@@ -34,7 +34,7 @@ fun NameRow(
     media: Media?,
     entry: MediaEntry?,
     nav: Navigator,
-    trackList: List<Track>,
+    trackList: List<PlayerTrack>,
     mediaPlayer: MediaPlayer,
     isLocked: Boolean,
     onLockKeyPressed: () -> Unit,
@@ -115,7 +115,7 @@ fun NameRow(
                         style = MaterialTheme.typography.titleMedium,
                         color = darkScheme.onSurface
                     )
-                    trackList.filter { it.type eqI "audio" }.forEachIndexed { index, track ->
+                    trackList.filter { it.type == PlayerTrackType.AUDIO }.forEachIndexed { index, track ->
                         TrackDropdownItem(track, mediaPlayer, index != 0)
                     }
                     Text(
@@ -124,7 +124,7 @@ fun NameRow(
                         style = MaterialTheme.typography.titleMedium,
                         color = darkScheme.onSurface
                     )
-                    trackList.filter { it.type eqI "sub" }.forEachIndexed { index, track ->
+                    trackList.filter { it.type == PlayerTrackType.SUBTITLE }.forEachIndexed { index, track ->
                         TrackDropdownItem(track, mediaPlayer, index != 0)
                     }
                 }
