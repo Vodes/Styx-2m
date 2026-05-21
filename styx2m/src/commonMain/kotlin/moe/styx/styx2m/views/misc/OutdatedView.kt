@@ -10,14 +10,17 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import cafe.adriel.voyager.core.screen.Screen
 import moe.styx.common.Platform
 import moe.styx.common.compose.components.layout.MainScaffold
 import moe.styx.common.compose.http.Endpoints
 import moe.styx.common.compose.http.login
+import moe.styx.common.compose.navigation.Screen
+import moe.styx.common.compose.navigation.ScreenKey
 import moe.styx.common.compose.utils.openURI
 
 class OutdatedView(private val requestedVersion: String? = null) : Screen {
+    override val key: ScreenKey
+        get() = requestedVersion?.let { "outdated-$it" } ?: "outdated"
 
     @Composable
     override fun Content() {

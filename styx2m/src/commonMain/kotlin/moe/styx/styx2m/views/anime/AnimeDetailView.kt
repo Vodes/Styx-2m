@@ -10,9 +10,6 @@ import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import cafe.adriel.voyager.core.model.rememberNavigatorScreenModel
-import cafe.adriel.voyager.core.screen.Screen
-import cafe.adriel.voyager.core.screen.ScreenKey
 import com.moriatsushi.insetsx.SystemBarsBehavior
 import com.moriatsushi.insetsx.rememberWindowInsetsController
 import com.moriatsushi.insetsx.safeAreaPadding
@@ -25,6 +22,9 @@ import moe.styx.common.compose.components.anime.EpisodeList
 import moe.styx.common.compose.components.anime.MediaPreferencesIconButton
 import moe.styx.common.compose.components.buttons.FavouriteIconButton
 import moe.styx.common.compose.components.layout.MainScaffold
+import moe.styx.common.compose.navigation.Screen
+import moe.styx.common.compose.navigation.ScreenKey
+import moe.styx.common.compose.navigation.rememberNavigatorScreenModel
 import moe.styx.common.compose.settings
 import moe.styx.common.compose.utils.LocalGlobalNavigator
 import moe.styx.common.compose.utils.LocalLayoutSize

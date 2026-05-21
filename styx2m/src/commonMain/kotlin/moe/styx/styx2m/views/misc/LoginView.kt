@@ -12,11 +12,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import cafe.adriel.voyager.core.screen.Screen
 import kotlinx.coroutines.delay
 import moe.styx.common.compose.http.checkLogin
 import moe.styx.common.compose.http.generateCode
 import moe.styx.common.compose.http.isLoggedIn
+import moe.styx.common.compose.navigation.Screen
 import moe.styx.common.compose.utils.LocalGlobalNavigator
 import moe.styx.common.compose.utils.openURI
 import moe.styx.styx2m.views.MainOverview

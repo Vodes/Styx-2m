@@ -29,7 +29,6 @@ import moe.styx.common.extension.eqI
 import moe.styx.common.json
 import moe.styx.common.util.Log
 import moe.styx.common.util.SYSTEMFILES
-import moe.styx.styx2m.R
 import moe.styx.styx2m.misc.findActivity
 import okio.Path.Companion.toPath
 import java.io.FileOutputStream
@@ -321,7 +320,9 @@ private fun MediaPlayer.setMPVOptions(context: Context, preferences: MediaPrefer
     SYSTEMFILES.createDirectory(configDir)
     if ((SYSTEMFILES.listOrNull(configDir) ?: emptyList()).find { it.name eqI "subfont.ttf" } == null) {
         runCatching {
-            val fontStream = context.resources.openRawResource(R.raw.subfont)
+            val fontResource = context.resources.getIdentifier("subfont", "raw", context.packageName)
+            require(fontResource != 0) { "Missing raw resource: subfont" }
+            val fontStream = context.resources.openRawResource(fontResource)
             val outputFile = configDir / "subfont.ttf"
             fontStream.copyTo(FileOutputStream(outputFile.toFile()))
         }.onFailure {

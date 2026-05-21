@@ -1,8 +1,5 @@
 package moe.styx.styx2m
 
-import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.VisibilityThreshold
-import androidx.compose.animation.core.spring
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
@@ -11,10 +8,7 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Density
-import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
-import cafe.adriel.voyager.navigator.Navigator
-import cafe.adriel.voyager.transitions.SlideTransition
 import com.dokar.sonner.Toaster
 import com.dokar.sonner.rememberToasterState
 import com.multiplatform.lifecycle.LifecycleEvent
@@ -24,6 +18,8 @@ import com.russhwolf.settings.get
 import com.russhwolf.settings.set
 import io.kamel.image.config.LocalKamelConfig
 import moe.styx.common.compose.extensions.kamelConfig
+import moe.styx.common.compose.navigation.Navigator
+import moe.styx.common.compose.navigation.StyxCurrentScreenPredictiveBack
 import moe.styx.common.compose.settings
 import moe.styx.common.compose.threads.DownloadQueue
 import moe.styx.common.compose.threads.Heartbeats
@@ -65,19 +61,13 @@ internal fun App() = AppTheme {
                 LocalLayoutSize provides currentSizes,
                 LocalToaster provides toasterState
             ) {
-                SlideTransition(
-                    navigator, animationSpec = spring(
-                        stiffness = Spring.StiffnessMedium,
-                        visibilityThreshold = IntOffset.VisibilityThreshold
-                    ),
-                    content = {
-                        val mod = if (it is PlayerView) Modifier.fillMaxSize()
-                        else Modifier.fillMaxSize().windowInsetsPadding(WindowInsets.safeDrawing)
-                        Surface(mod) {
-                            it.Content()
-                        }
+                StyxCurrentScreenPredictiveBack(navigator) {
+                    val mod = if (it is PlayerView) Modifier.fillMaxSize()
+                    else Modifier.fillMaxSize().windowInsetsPadding(WindowInsets.safeDrawing)
+                    Surface(mod) {
+                        it.Content()
                     }
-                )
+                }
             }
         }
     }

@@ -13,10 +13,6 @@ import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import cafe.adriel.voyager.core.model.rememberNavigatorScreenModel
-import cafe.adriel.voyager.core.model.screenModelScope
-import cafe.adriel.voyager.core.screen.Screen
-import cafe.adriel.voyager.core.screen.ScreenKey
 import moe.styx.common.compose.viewmodels.ListPosViewModel
 import com.russhwolf.settings.get
 import kotlinx.coroutines.launch
@@ -28,6 +24,10 @@ import moe.styx.common.compose.components.anime.StupidImageNameArea
 import moe.styx.common.compose.components.buttons.FavouriteIconButton
 import moe.styx.common.compose.components.layout.MainScaffold
 import moe.styx.common.compose.extensions.removeSomeHTMLTags
+import moe.styx.common.compose.navigation.Screen
+import moe.styx.common.compose.navigation.ScreenKey
+import moe.styx.common.compose.navigation.rememberNavigatorScreenModel
+import moe.styx.common.compose.navigation.screenModelScope
 import moe.styx.common.compose.settings
 import moe.styx.common.compose.threads.RequestQueue
 import moe.styx.common.compose.utils.LocalGlobalNavigator

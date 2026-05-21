@@ -15,7 +15,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import cafe.adriel.voyager.navigator.tab.Tab
 import com.russhwolf.settings.get
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.debounce
@@ -23,6 +22,7 @@ import moe.styx.common.compose.components.anime.AnimeCard
 import moe.styx.common.compose.components.anime.AnimeListItem
 import moe.styx.common.compose.components.misc.ScrollToTopContainer
 import moe.styx.common.compose.components.search.MediaSearch
+import moe.styx.common.compose.navigation.Tab
 import moe.styx.common.compose.settings
 import moe.styx.common.compose.utils.LayoutSizes
 import moe.styx.common.compose.utils.LocalGlobalNavigator

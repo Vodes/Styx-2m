@@ -10,13 +10,13 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import cafe.adriel.voyager.navigator.Navigator
 import com.russhwolf.settings.get
 import moe.styx.common.compose.components.anime.MediaGenreListing
 import moe.styx.common.compose.components.anime.MediaRelations
 import moe.styx.common.compose.components.anime.StupidImageNameArea
 import moe.styx.common.compose.components.misc.ExpandableText
 import moe.styx.common.compose.extensions.removeSomeHTMLTags
+import moe.styx.common.compose.navigation.Navigator
 import moe.styx.common.compose.settings
 import moe.styx.common.compose.utils.LayoutSizes
 import moe.styx.common.compose.viewmodels.MediaStorage

@@ -2,13 +2,13 @@ package moe.styx.styx2m.misc
 
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.unit.dp
-import cafe.adriel.voyager.navigator.Navigator
 import com.russhwolf.settings.get
 import com.russhwolf.settings.set
 import io.islandtime.measures.hours
 import io.islandtime.measures.seconds
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
+import moe.styx.common.compose.navigation.Navigator
 import moe.styx.common.compose.http.login
 import moe.styx.common.compose.settings
 import moe.styx.common.compose.threads.RequestQueue

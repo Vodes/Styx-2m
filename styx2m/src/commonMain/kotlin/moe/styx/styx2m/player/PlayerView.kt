@@ -11,8 +11,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.zIndex
-import cafe.adriel.voyager.core.model.rememberNavigatorScreenModel
-import cafe.adriel.voyager.core.screen.Screen
 import com.moriatsushi.insetsx.SystemBarsBehavior
 import com.moriatsushi.insetsx.rememberWindowInsetsController
 import com.multiplatform.lifecycle.LifecycleEvent
@@ -22,6 +20,9 @@ import com.russhwolf.settings.get
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.combine
 import moe.styx.common.compose.extensions.joinAndSyncProgress
+import moe.styx.common.compose.navigation.Screen
+import moe.styx.common.compose.navigation.ScreenKey
+import moe.styx.common.compose.navigation.rememberNavigatorScreenModel
 import moe.styx.common.compose.settings
 import moe.styx.common.compose.threads.Heartbeats
 import moe.styx.common.compose.utils.LocalGlobalNavigator
@@ -37,7 +38,10 @@ import moe.styx.styx2m.misc.*
 import moe.styx.styx2m.player.tv.TvPlayerContent
 import kotlin.jvm.Transient
 
-class PlayerView(val entryID: String, startAt: Long = 0L) : Screen {
+class PlayerView(val entryID: String, private val startAt: Long = 0L) : Screen {
+    override val key: ScreenKey
+        get() = "player-$entryID-$startAt"
+
     @Transient
     var mediaPlayer: MediaPlayer = MediaPlayer(entryID, startAt)
 

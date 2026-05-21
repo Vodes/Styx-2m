@@ -42,11 +42,11 @@ import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import cafe.adriel.voyager.navigator.Navigator
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import moe.styx.common.compose.components.AppShapes
 import moe.styx.common.compose.components.darkScheme
+import moe.styx.common.compose.navigation.Navigator
 import moe.styx.common.compose.viewmodels.MediaStorage
 import moe.styx.common.data.MediaEntry
 import moe.styx.common.extension.eqI

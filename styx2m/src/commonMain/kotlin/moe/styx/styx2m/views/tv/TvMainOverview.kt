@@ -14,12 +14,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import cafe.adriel.voyager.core.model.rememberNavigatorScreenModel
-import cafe.adriel.voyager.core.model.rememberScreenModel
-import cafe.adriel.voyager.core.model.screenModelScope
-import cafe.adriel.voyager.core.screen.Screen
-import cafe.adriel.voyager.navigator.tab.CurrentTab
-import cafe.adriel.voyager.navigator.tab.TabNavigator
 import com.dokar.sonner.TextToastAction
 import com.dokar.sonner.Toast
 import com.dokar.sonner.ToasterDefaults
@@ -30,6 +24,13 @@ import moe.styx.common.compose.components.buttons.IconButtonWithTooltip
 import moe.styx.common.compose.components.layout.MainScaffold
 import moe.styx.common.compose.components.misc.OnlineUsersIcon
 import moe.styx.common.compose.http.login
+import moe.styx.common.compose.navigation.CurrentTab
+import moe.styx.common.compose.navigation.LaunchedEffectWhenCurrentScreen
+import moe.styx.common.compose.navigation.Screen
+import moe.styx.common.compose.navigation.TabNavigator
+import moe.styx.common.compose.navigation.rememberNavigatorScreenModel
+import moe.styx.common.compose.navigation.rememberScreenModel
+import moe.styx.common.compose.navigation.screenModelScope
 import moe.styx.common.compose.settings
 import moe.styx.common.compose.utils.LocalGlobalNavigator
 import moe.styx.common.compose.utils.LocalToaster
@@ -52,12 +53,12 @@ class TvAnimeOverview : Screen {
         val overviewSm = rememberScreenModel { MobileOverviewModel() }
         val nav = LocalGlobalNavigator.current
 
-        if (overviewSm.isOutdated == true) {
-            nav.replaceAll(OutdatedView())
-        }
-
-        if (overviewSm.isLoggedIn == false && ServerStatus.lastKnown == ServerStatus.UNAUTHORIZED) {
-            nav.replaceAll(LoginView())
+        LaunchedEffectWhenCurrentScreen(overviewSm.isOutdated, overviewSm.isLoggedIn, ServerStatus.lastKnown) {
+            if (overviewSm.isOutdated == true) {
+                nav.replaceAll(OutdatedView())
+            } else if (overviewSm.isLoggedIn == false && ServerStatus.lastKnown == ServerStatus.UNAUTHORIZED) {
+                nav.replaceAll(LoginView())
+            }
         }
 
         LaunchedEffect(overviewSm.availablePreRelease) {

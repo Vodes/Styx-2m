@@ -16,11 +16,11 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import cafe.adriel.voyager.navigator.Navigator
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import moe.styx.common.compose.components.buttons.IconButtonWithTooltip
 import moe.styx.common.compose.components.darkScheme
+import moe.styx.common.compose.navigation.Navigator
 import moe.styx.common.data.Media
 import moe.styx.common.data.MediaEntry
 import moe.styx.common.extension.eqI
