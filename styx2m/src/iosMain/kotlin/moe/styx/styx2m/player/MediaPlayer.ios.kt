@@ -27,12 +27,6 @@ actual class MediaPlayer actual constructor(initialEntryID: String, startAt: Lon
     }
 
     @Composable
-    actual override fun requestRotationLock() = Unit
-
-    @Composable
-    actual override fun releaseRotationLock() = Unit
-
-    @Composable
     actual override fun PlayerComponent(entryList: List<MediaEntry>, preferences: MediaPreferences?) {
         TODO("Not yet implemented")
     }

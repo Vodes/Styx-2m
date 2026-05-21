@@ -1,13 +1,10 @@
 package moe.styx.styx2m.player
 
-import android.content.pm.ActivityInfo
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -16,15 +13,13 @@ import moe.styx.common.data.MediaEntry
 import moe.styx.common.data.MediaPreferences
 import moe.styx.common.util.Log
 import moe.styx.styx2m.misc.Chapter
-import moe.styx.styx2m.misc.findActivity
-import moe.styx.styx2m.player.mpv.MpvAndroidBackend
 
 actual class MediaPlayer actual constructor(initialEntryID: String, startAt: Long) :
     AMediaPlayer(initialEntryID, startAt),
     PlayerBackendSink {
 
     private val sinkScope = CoroutineScope(Dispatchers.Main)
-    private val backend: PlayerBackend = MpvAndroidBackend(this)
+    private val backend: PlayerBackendWithSurface = createPlayerBackend(this)
     private var shouldApplyInitialStart = true
 
     actual override fun setPlaying(playing: Boolean) {
@@ -33,32 +28,6 @@ actual class MediaPlayer actual constructor(initialEntryID: String, startAt: Lon
 
     actual override fun seek(position: Long) {
         backend.seek(position)
-    }
-
-    @Composable
-    actual override fun requestRotationLock() {
-        val context = LocalContext.current
-        val activity = context.findActivity()
-        LaunchedEffect(Unit) {
-            activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LOCKED
-            Log.d { "Requesting locked rotation: ${activity != null}" }
-        }
-        DisposableEffect(Unit) {
-            onDispose {
-                activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
-                Log.d { "Releasing locked rotation: ${activity != null}" }
-            }
-        }
-    }
-
-    @Composable
-    actual override fun releaseRotationLock() {
-        val context = LocalContext.current
-        val activity = context.findActivity()
-        LaunchedEffect(Unit) {
-            activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
-            Log.d { "Releasing locked rotation: ${activity != null}" }
-        }
     }
 
     actual override fun setSubtitleTrack(id: Int) {

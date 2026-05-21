@@ -1,8 +1,5 @@
 package moe.styx.styx2m.player
 
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import moe.styx.common.data.MediaPreferences
 import moe.styx.styx2m.misc.Chapter
 
 enum class PlayerBackendId {
@@ -30,9 +27,6 @@ interface PlayerBackend {
     fun setSubtitleTrack(id: Int)
     fun showMessage(message: String, durationMillis: Int = 5000)
     fun release()
-
-    @Composable
-    fun RenderSurface(modifier: Modifier, preferences: MediaPreferences?)
 }
 
 interface PlayerBackendSink {

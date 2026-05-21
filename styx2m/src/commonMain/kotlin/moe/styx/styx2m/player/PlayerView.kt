@@ -122,11 +122,7 @@ class PlayerView(val entryID: String, private val startAt: Long = 0L) : Screen {
 
         var isRotationLocked by rememberSaveable { mutableStateOf(false) }
 
-        if (isRotationLocked) {
-            mediaPlayer.requestRotationLock()
-        } else {
-            mediaPlayer.releaseRotationLock()
-        }
+        RequestPlayerRotationLock(isRotationLocked)
 
         if (isTv) {
             TvPlayerContent(

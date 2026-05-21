@@ -23,16 +23,16 @@ import moe.styx.styx2m.misc.Track
 import moe.styx.styx2m.misc.toPlayerTrack
 import moe.styx.styx2m.player.PlaybackSource
 import moe.styx.styx2m.player.PlaybackStatus
-import moe.styx.styx2m.player.PlayerBackend
 import moe.styx.styx2m.player.PlayerBackendCapabilities
 import moe.styx.styx2m.player.PlayerBackendId
 import moe.styx.styx2m.player.PlayerBackendSink
+import moe.styx.styx2m.player.PlayerBackendWithSurface
 import okio.Path.Companion.toPath
 import java.io.FileOutputStream
 
 class MpvAndroidBackend(
     private val sink: PlayerBackendSink
-) : PlayerBackend {
+) : PlayerBackendWithSurface {
     override val id = PlayerBackendId.MPV
     override val capabilities = PlayerBackendCapabilities(
         supportsCacheEnd = true,
