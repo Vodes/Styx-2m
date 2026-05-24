@@ -51,4 +51,8 @@ bin/
 ### Mac OS ###
 .DS_Store
 local.properties
+/iosApp/Config/Local.xcconfig
 /.idea
+/styx2m/.idea
+/iosApp/iosApp.xcodeproj/xcuserdata
+/iosApp/iosApp.xcodeproj/project.xcworkspace

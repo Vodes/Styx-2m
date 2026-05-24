@@ -28,44 +28,48 @@ import moe.styx.common.compose.utils.LocalGlobalNavigator
 import moe.styx.common.compose.utils.LocalIsTv
 import moe.styx.common.compose.utils.LocalLayoutSize
 import moe.styx.common.compose.utils.LocalToaster
-import moe.styx.common.compose.utils.fetchWindowSize
+import moe.styx.common.compose.utils.LayoutSizes
 import moe.styx.common.util.Log
 import moe.styx.styx2m.player.PlayerView
 import moe.styx.styx2m.theme.AppTheme
 import moe.styx.styx2m.theme.LocalThemeIsDark
 import moe.styx.styx2m.views.MainOverview
 import moe.styx.styx2m.views.tv.TvAnimeOverview
+import kotlin.math.roundToInt
 
 @Composable
 internal fun App() = AppTheme {
-    val currentSizes = fetchWindowSize()
     val baseDensity = LocalDensity.current
     val isTv = settings["is-tv", false]
-    val appDensity = if (isTv) {
-        Density(baseDensity.density * 0.9f, baseDensity.fontScale * 0.92f)
-    } else {
-        baseDensity
-    }
-    settings["is-tablet"] = currentSizes.isProbablyTablet
     InitLifeCycleListener()
     Surface(modifier = Modifier.fillMaxSize()) {
-        val darkState = LocalThemeIsDark.current
-        val toasterState = rememberToasterState()
-        Toaster(toasterState, modifier = Modifier.padding(0.dp, 0.dp, 0.dp, 38.dp), darkTheme = darkState.value, richColors = true)
-        Navigator(if (isTv) TvAnimeOverview() else MainOverview()) { navigator ->
-            CompositionLocalProvider(
-                LocalDensity provides appDensity,
-                LocalGlobalNavigator provides navigator,
-                LocalIsTv provides isTv,
-                LocalKamelConfig provides kamelConfig,
-                LocalLayoutSize provides currentSizes,
-                LocalToaster provides toasterState
-            ) {
-                StyxCurrentScreenPredictiveBack(navigator) {
-                    val mod = if (it is PlayerView) Modifier.fillMaxSize()
-                    else Modifier.fillMaxSize().windowInsetsPadding(WindowInsets.safeDrawing)
-                    Surface(mod) {
-                        it.Content()
+        BoxWithConstraints(Modifier.fillMaxSize()) {
+            val currentSizes = LayoutSizes(maxWidth.value.roundToInt(), maxHeight.value.roundToInt())
+            val appDensity = if (isTv) {
+                Density(baseDensity.density * 0.9f, baseDensity.fontScale * 0.92f)
+            } else {
+                baseDensity
+            }
+            settings["is-tablet"] = currentSizes.isProbablyTablet
+
+            val darkState = LocalThemeIsDark.current
+            val toasterState = rememberToasterState()
+            Toaster(toasterState, modifier = Modifier.padding(0.dp, 0.dp, 0.dp, 38.dp), darkTheme = darkState.value, richColors = true)
+            Navigator(if (isTv) TvAnimeOverview() else MainOverview()) { navigator ->
+                CompositionLocalProvider(
+                    LocalDensity provides appDensity,
+                    LocalGlobalNavigator provides navigator,
+                    LocalIsTv provides isTv,
+                    LocalKamelConfig provides kamelConfig,
+                    LocalLayoutSize provides currentSizes,
+                    LocalToaster provides toasterState
+                ) {
+                    StyxCurrentScreenPredictiveBack(navigator) {
+                        val mod = if (it is PlayerView) Modifier.fillMaxSize()
+                        else Modifier.fillMaxSize().windowInsetsPadding(WindowInsets.safeDrawing)
+                        Surface(mod) {
+                            it.Content()
+                        }
                     }
                 }
             }

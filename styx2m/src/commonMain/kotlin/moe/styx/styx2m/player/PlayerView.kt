@@ -11,8 +11,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.zIndex
-import com.moriatsushi.insetsx.SystemBarsBehavior
-import com.moriatsushi.insetsx.rememberWindowInsetsController
 import com.multiplatform.lifecycle.LifecycleEvent
 import com.multiplatform.lifecycle.LifecycleListener
 import com.multiplatform.lifecycle.LifecycleTracker
@@ -57,14 +55,10 @@ class PlayerView(val entryID: String, private val startAt: Long = 0L) : Screen {
     override fun Content() {
         val nav = LocalGlobalNavigator.current
         val isTv = LocalIsTv.current
-        val insets = rememberWindowInsetsController()
         val sm = nav.rememberNavigatorScreenModel("main-vm") { MainDataViewModel() }
         val storage by sm.storageFlow.collectAsState()
         val (_, mediaStorage) = remember(storage) { sm.getMediaStorageForEntryID(entryID, storage) }
 
-        insets?.setIsNavigationBarsVisible(false)
-        insets?.setIsStatusBarsVisible(false)
-        insets?.setSystemBarsBehavior(SystemBarsBehavior.Immersive)
         KeepScreenOn()
 
         LaunchedEffect(Unit) {
@@ -103,9 +97,6 @@ class PlayerView(val entryID: String, private val startAt: Long = 0L) : Screen {
         DisposableEffect(Unit) {
             onDispose {
                 LifecycleTracker.removeListener(listener)
-                insets?.setIsNavigationBarsVisible(true)
-                insets?.setIsStatusBarsVisible(true)
-                insets?.setSystemBarsBehavior(SystemBarsBehavior.Default)
                 mediaPlayer.releasePlayer()
                 Heartbeats.mediaActivity = null
                 updateWatchedForID(currentEntryState, playerState.progress, mediaPlayer.playbackPercent)

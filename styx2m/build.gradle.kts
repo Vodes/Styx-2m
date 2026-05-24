@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.multiplatform)
     alias(libs.plugins.compose)
@@ -17,6 +19,31 @@ repositories {
 
 version = "0.2.2-beta3"
 
+val localProperties by lazy {
+    Properties().apply {
+        listOf(
+            rootProject.file("iosApp/Config/Local.xcconfig"),
+            rootProject.file("local.properties"),
+        ).filter { it.isFile }.forEach { file ->
+            file.inputStream().use(::load)
+        }
+    }
+}
+
+fun localConfig(name: String): String? =
+    providers.environmentVariable(name)
+        .orElse(providers.gradleProperty(name))
+        .orNull
+        ?: localProperties.getProperty(name)
+
+fun requiredLocalConfig(name: String) =
+    providers.environmentVariable(name)
+        .orElse(providers.gradleProperty(name))
+        .orElse(providers.provider {
+            localProperties.getProperty(name)
+                ?: error("Missing $name. Add it to local.properties, ~/.gradle/gradle.properties, -P$name=..., or ORG_GRADLE_PROJECT_$name.")
+        })
+
 kotlin {
     jvmToolchain(17)
     androidTarget()
@@ -28,6 +55,7 @@ kotlin {
         it.binaries.framework {
             baseName = "ComposeApp"
             isStatic = true
+            binaryOption("bundleId", "moe.styx.styx2m.ComposeApp")
         }
     }
 
@@ -43,7 +71,6 @@ kotlin {
             implementation(compose.materialIconsExtended)
             implementation(compose.components.resources)
             implementation(libs.moko.permissions)
-            implementation(libs.multiplatform.insets)
             implementation("moe.styx:styx-common-compose:0.4.1") {
                 exclude(group = "com.github.luben")
             }
@@ -86,11 +113,11 @@ android {
 
     signingConfigs {
         create("release") {
-            storeFile = System.getenv("KEY_FILE_PATH").let { it ?: "" }
+            storeFile = localConfig("KEY_FILE_PATH").orEmpty()
                 .let { if (it.isBlank()) file("../styx2m.jks") else File(it) }
-            storePassword = System.getenv("STYX_SIGNING_KEY_PASS")
-            keyAlias = System.getenv("STYX_SIGNING_ALIAS")
-            keyPassword = System.getenv("STYX_SIGNING_KEY_PASS")
+            storePassword = localConfig("STYX_SIGNING_KEY_PASS")
+            keyAlias = localConfig("STYX_SIGNING_ALIAS")
+            keyPassword = localConfig("STYX_SIGNING_KEY_PASS")
         }
     }
 
@@ -143,15 +170,15 @@ android {
 }
 
 buildConfig {
-    val siteURL = System.getenv("STYX_SITEURL")
-    buildConfigField("DEBUG_TOKEN", System.getenv("STYX_DEBUGTOKEN"))
+    val siteURL = requiredLocalConfig("STYX_SITEURL")
+    buildConfigField("DEBUG_TOKEN", requiredLocalConfig("STYX_DEBUGTOKEN"))
     buildConfigField("APP_NAME", "Styx2m")
     buildConfigField("APP_VERSION", provider { "${project.version}" })
-    buildConfigField("APP_SECRET", System.getenv("STYX_SECRET"))
-    buildConfigField("BASE_URL", System.getenv("STYX_BASEURL")) // Example: https://api.company.com
+    buildConfigField("APP_SECRET", requiredLocalConfig("STYX_SECRET"))
+    buildConfigField("BASE_URL", requiredLocalConfig("STYX_BASEURL")) // Example: https://api.company.com
     buildConfigField("SITE_URL", siteURL) // Example: https://company.com
-    buildConfigField("IMAGE_URL", System.getenv("STYX_IMAGEURL")) // Example: https://images.company.com
-    buildConfigField("SITE", siteURL.split("https://").getOrElse(1) { siteURL })
+    buildConfigField("IMAGE_URL", requiredLocalConfig("STYX_IMAGEURL")) // Example: https://images.company.com
+    buildConfigField("SITE", siteURL.map { it.removePrefix("https://").removePrefix("http://").trimEnd('/') })
     buildConfigField("BUILD_TIME", (System.currentTimeMillis() / 1000))
     buildConfigField("VERSION_CHECK_URL", "https://api.github.com/repos/Vodes/Styx-2m/tags")
 }

@@ -10,9 +10,6 @@ import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.moriatsushi.insetsx.SystemBarsBehavior
-import com.moriatsushi.insetsx.rememberWindowInsetsController
-import com.moriatsushi.insetsx.safeAreaPadding
 import com.russhwolf.settings.get
 import com.russhwolf.settings.set
 import kotlinx.coroutines.FlowPreview
@@ -43,16 +40,11 @@ class AnimeDetailView(private val mediaID: String) : Screen {
     @Composable
     override fun Content() {
         val nav = LocalGlobalNavigator.current
-        val insets = rememberWindowInsetsController()
-        insets?.setIsNavigationBarsVisible(true)
-        insets?.setIsStatusBarsVisible(true)
-        insets?.setSystemBarsBehavior(SystemBarsBehavior.Default)
-
         val sm = nav.rememberNavigatorScreenModel("main-vm") { MainDataViewModel() }
         val storage by sm.storageFlow.collectAsState()
         val mediaStorage = remember(storage) { sm.getMediaStorageForID(mediaID, storage) }
 
-        MainScaffold(Modifier.safeAreaPadding(), title = mediaStorage.media.name, actions = {
+        MainScaffold(Modifier, title = mediaStorage.media.name, actions = {
             MediaPreferencesIconButton(mediaStorage.preferences, mediaStorage.media, sm)
             FavouriteIconButton(mediaStorage.media, sm, storage)
         }) {
