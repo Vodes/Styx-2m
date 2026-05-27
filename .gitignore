@@ -56,3 +56,4 @@ local.properties
 /styx2m/.idea
 /iosApp/iosApp.xcodeproj/xcuserdata
 /iosApp/iosApp.xcodeproj/project.xcworkspace
+/iosApp/Pods

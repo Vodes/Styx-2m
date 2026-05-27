@@ -4,6 +4,12 @@ import ComposeApp
 
 @main
 struct iosApp: App {
+    init() {
+        VlcKitBridgeKt.instantiateVlcKitBridge = {
+            VlcKitBridgeImpl()
+        }
+    }
+
     var body: some Scene {
         WindowGroup {
             ContentView()
@@ -35,9 +41,19 @@ final class ComposeContainerViewController: UIViewController {
     override var prefersHomeIndicatorAutoHidden: Bool { false }
     override var childForHomeIndicatorAutoHidden: UIViewController? { nil }
     override var preferredScreenEdgesDeferringSystemGestures: UIRectEdge { [] }
+    override var supportedInterfaceOrientations: UIInterfaceOrientationMask {
+        UserDefaults.standard.bool(forKey: "styx.forceLandscape") ? .landscape : .allButUpsideDown
+    }
 
     override func viewDidLoad() {
         super.viewDidLoad()
+
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(orientationLockChanged),
+            name: Notification.Name("styx.orientationLockChanged"),
+            object: nil
+        )
 
         addChild(composeViewController)
         view.addSubview(composeViewController.view)
@@ -49,5 +65,35 @@ final class ComposeContainerViewController: UIViewController {
             composeViewController.view.bottomAnchor.constraint(equalTo: view.bottomAnchor)
         ])
         composeViewController.didMove(toParent: self)
+
+        applyOrientationLock()
+    }
+
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        applyOrientationLock()
+    }
+
+    deinit {
+        NotificationCenter.default.removeObserver(self)
+    }
+
+    @objc private func orientationLockChanged() {
+        applyOrientationLock()
+    }
+
+    private func applyOrientationLock() {
+        let orientationMask: UIInterfaceOrientationMask =
+            UserDefaults.standard.bool(forKey: "styx.forceLandscape") ? .landscape : .allButUpsideDown
+
+        setNeedsUpdateOfSupportedInterfaceOrientations()
+
+        guard let windowScene = view.window?.windowScene else { return }
+
+        if #available(iOS 16.0, *) {
+            windowScene.requestGeometryUpdate(.iOS(interfaceOrientations: orientationMask)) { error in
+                print("[Orientation] requestGeometryUpdate failed: \(error.localizedDescription)")
+            }
+        }
     }
 }

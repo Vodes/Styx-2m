@@ -3,6 +3,7 @@ package moe.styx.styx2m.player
 import moe.styx.styx2m.misc.Chapter
 
 enum class PlayerBackendId {
+    VLC,
     MPV,
     MEDIA3
 }

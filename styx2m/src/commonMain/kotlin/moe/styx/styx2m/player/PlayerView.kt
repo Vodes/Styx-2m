@@ -15,6 +15,7 @@ import com.multiplatform.lifecycle.LifecycleEvent
 import com.multiplatform.lifecycle.LifecycleListener
 import com.multiplatform.lifecycle.LifecycleTracker
 import com.russhwolf.settings.get
+import io.github.hristogochev.vortex.screen.ScreenTransition
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.combine
 import moe.styx.common.compose.extensions.joinAndSyncProgress
@@ -36,7 +37,8 @@ import moe.styx.styx2m.misc.*
 import moe.styx.styx2m.player.tv.TvPlayerContent
 import kotlin.jvm.Transient
 
-class PlayerView(val entryID: String, private val startAt: Long = 0L) : Screen {
+class PlayerView(val entryID: String, private val startAt: Long = 0L,
+                 override val onAppearTransition: ScreenTransition? = null) : Screen {
     override val key: ScreenKey
         get() = "player-$entryID-$startAt"
 

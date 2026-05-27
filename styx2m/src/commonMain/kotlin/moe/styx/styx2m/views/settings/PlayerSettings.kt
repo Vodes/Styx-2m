@@ -67,41 +67,46 @@ fun MpvSettings() {
             }
         }
 
-        Column(Modifier.settingsContainer()) {
-            Text("Performance / Quality", Modifier.padding(10.dp, 7.dp), style = MaterialTheme.typography.titleLarge)
-            Toggles.ContainerSwitch(
-                "Deband",
-                MpvDesc.deband,
-                value = preferences.deband,
-            ) { preferences = preferences.copy(deband = it).save() }
-            Toggles.ContainerRadioSelect(
-                "Deband Iterations",
-                "Higher = better (& slower)",
-                value = preferences.debandIterations,
-                choices = debandIterationsChoices,
-            ) { preferences = preferences.copy(debandIterations = it).save() }
+        if (Platform.current == Platform.ANDROID) {
+            Column(Modifier.settingsContainer()) {
+                Text("Performance / Quality", Modifier.padding(10.dp, 7.dp), style = MaterialTheme.typography.titleLarge)
+                Toggles.ContainerSwitch(
+                    "Deband",
+                    MpvDesc.deband,
+                    value = preferences.deband,
+                ) { preferences = preferences.copy(deband = it).save() }
+                Toggles.ContainerRadioSelect(
+                    "Deband Iterations",
+                    "Higher = better (& slower)",
+                    value = preferences.debandIterations,
+                    choices = debandIterationsChoices,
+                ) { preferences = preferences.copy(debandIterations = it).save() }
 
-            Toggles.ContainerRadioSelect(
-                "Profile", MpvDesc.profileDescription, value = preferences.profile, choices = profileChoices,
-            ) { preferences = preferences.copy(profile = it).save() }
+                Toggles.ContainerRadioSelect(
+                    "Profile", MpvDesc.profileDescription, value = preferences.profile, choices = profileChoices,
+                ) { preferences = preferences.copy(profile = it).save() }
 
-            Toggles.ContainerRadioSelect(
-                "Hardware Decoding", hwDecoding, value = settings["hwdec", "copy"], choices = listOf("no", "yes", "copy"),
-            ) { settings["hwdec"] = it }
+                Toggles.ContainerRadioSelect(
+                    "Hardware Decoding", hwDecoding, value = settings["hwdec", "copy"], choices = listOf("no", "yes", "copy"),
+                ) { settings["hwdec"] = it }
 
-            Toggles.ContainerRadioSelect(
-                "GPU-API", MpvDesc.gpuAPI, value = preferences.gpuAPI, choices = gpuApiChoices,
-            ) { preferences = preferences.copy(gpuAPI = it).save() }
-            Toggles.ContainerRadioSelect(
-                "Video Output Driver", MpvDesc.outputDriver, value = preferences.videoOutputDriver, choices = videoOutputDriverChoices,
-            ) { preferences = preferences.copy(videoOutputDriver = it).save() }
-            Toggles.ContainerSwitch(
-                "Force 10bit Dithering", MpvDesc.dither10bit, value = preferences.dither10bit,
-            ) { preferences = preferences.copy(dither10bit = it).save() }
-            Toggles.ContainerSwitch(
-                "Blend Subtitles", MpvDesc.blendSubs, value = preferences.blendSubs,
-            ) { preferences = preferences.copy(blendSubs = it).save() }
-            Spacer(Modifier.height(3.dp))
+                Toggles.ContainerRadioSelect(
+                    "GPU-API", MpvDesc.gpuAPI, value = preferences.gpuAPI, choices = gpuApiChoices,
+                ) { preferences = preferences.copy(gpuAPI = it).save() }
+                Toggles.ContainerRadioSelect(
+                    "Video Output Driver",
+                    MpvDesc.outputDriver,
+                    value = preferences.videoOutputDriver,
+                    choices = videoOutputDriverChoices,
+                ) { preferences = preferences.copy(videoOutputDriver = it).save() }
+                Toggles.ContainerSwitch(
+                    "Force 10bit Dithering", MpvDesc.dither10bit, value = preferences.dither10bit,
+                ) { preferences = preferences.copy(dither10bit = it).save() }
+                Toggles.ContainerSwitch(
+                    "Blend Subtitles", MpvDesc.blendSubs, value = preferences.blendSubs,
+                ) { preferences = preferences.copy(blendSubs = it).save() }
+                Spacer(Modifier.height(3.dp))
+            }
         }
     }
 }

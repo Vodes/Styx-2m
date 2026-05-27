@@ -4,8 +4,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import moe.styx.common.data.MediaPreferences
 
-class UnimplementedIosPlayerBackend : PlayerBackendWithSurface {
-    override val id = PlayerBackendId.MPV
+class UnimplementedIosPlayerBackend(
+    override val id: PlayerBackendId
+) : PlayerBackendWithSurface {
     override val capabilities = PlayerBackendCapabilities(
         supportsCacheEnd = false,
         supportsChapters = false,
