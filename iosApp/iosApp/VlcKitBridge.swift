@@ -7,7 +7,19 @@ private struct VlcTrack {
     let id: Int32
     let type: String
     let title: String?
+    let language: String?
+    let codec: String?
     let selected: Bool
+}
+
+private struct VlcTrackKey: Hashable {
+    let id: Int32
+    let type: String
+}
+
+private struct VlcTrackMetadata {
+    let language: String?
+    let codec: String?
 }
 
 final class VlcRenderView: UIView {
@@ -111,7 +123,7 @@ final class VlcKitBridgeImpl: VlcKitPlayerBridge, VLCMediaPlayerDelegate {
     }
 
     override func getTrackLang(index: Int32) -> String? {
-        nil
+        track(at: index)?.language
     }
 
     override func getTrackTitle(index: Int32) -> String? {
@@ -119,7 +131,7 @@ final class VlcKitBridgeImpl: VlcKitPlayerBridge, VLCMediaPlayerDelegate {
     }
 
     override func getTrackCodec(index: Int32) -> String? {
-        nil
+        track(at: index)?.codec
     }
 
     override func isTrackDefault(index: Int32) -> Bool {
@@ -210,37 +222,100 @@ final class VlcKitBridgeImpl: VlcKitPlayerBridge, VLCMediaPlayerDelegate {
     }
 
     private func refreshTracks() {
+        let metadata = buildTrackMetadata()
         var updated: [VlcTrack] = []
         updated.append(contentsOf: buildTracks(
             ids: player.audioTrackIndexes,
             names: player.audioTrackNames,
             type: "audio",
-            selectedId: player.currentAudioTrackIndex
+            selectedId: player.currentAudioTrackIndex,
+            metadata: metadata
         ))
         updated.append(contentsOf: buildTracks(
             ids: player.videoSubTitlesIndexes,
             names: player.videoSubTitlesNames,
             type: "sub",
-            selectedId: player.currentVideoSubTitleIndex
+            selectedId: player.currentVideoSubTitleIndex,
+            metadata: metadata
         ))
 
         tracks = updated
     }
 
-    private func buildTracks(ids: [Any]?, names: [Any]?, type: String, selectedId: Int32) -> [VlcTrack] {
+    private func buildTracks(
+        ids: [Any]?,
+        names: [Any]?,
+        type: String,
+        selectedId: Int32,
+        metadata: [VlcTrackKey: VlcTrackMetadata]
+    ) -> [VlcTrack] {
         let trackIds = ids ?? []
         let trackNames = names ?? []
 
         return trackIds.enumerated().compactMap { offset, rawId in
             guard let id = rawId as? NSNumber else { return nil }
+            guard id.int32Value >= 0 else { return nil }
             let title = offset < trackNames.count ? trackNames[offset] as? String : nil
+            let trackMetadata = metadata[VlcTrackKey(id: id.int32Value, type: type)]
             return VlcTrack(
                 id: id.int32Value,
                 type: type,
                 title: title,
+                language: trackMetadata?.language,
+                codec: trackMetadata?.codec,
                 selected: id.int32Value == selectedId
             )
         }
+    }
+
+    private func buildTrackMetadata() -> [VlcTrackKey: VlcTrackMetadata] {
+        guard let trackInfo = player.media?.tracksInformation as? [[AnyHashable: Any]] else {
+            return [:]
+        }
+
+        var metadata: [VlcTrackKey: VlcTrackMetadata] = [:]
+        for info in trackInfo {
+            guard
+                let id = info[VLCMediaTracksInformationId] as? NSNumber,
+                let rawType = info[VLCMediaTracksInformationType] as? String,
+                let type = appTrackType(from: rawType)
+            else {
+                continue
+            }
+
+            metadata[VlcTrackKey(id: id.int32Value, type: type)] = VlcTrackMetadata(
+                language: nonBlankString(info[VLCMediaTracksInformationLanguage]),
+                codec: codecString(info[VLCMediaTracksInformationCodec])
+            )
+        }
+        return metadata
+    }
+
+    private func appTrackType(from vlcType: String) -> String? {
+        switch vlcType {
+        case VLCMediaTracksInformationTypeAudio:
+            return "audio"
+        case VLCMediaTracksInformationTypeText:
+            return "sub"
+        default:
+            return nil
+        }
+    }
+
+    private func nonBlankString(_ value: Any?) -> String? {
+        guard let string = value as? String else { return nil }
+        let trimmed = string.trimmingCharacters(in: .whitespacesAndNewlines)
+        return trimmed.isEmpty ? nil : trimmed
+    }
+
+    private func codecString(_ value: Any?) -> String? {
+        if let string = nonBlankString(value) {
+            return string
+        }
+        if let number = value as? NSNumber {
+            return number.stringValue
+        }
+        return nil
     }
 
     private func track(at index: Int32) -> VlcTrack? {
