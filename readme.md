@@ -71,7 +71,12 @@ To build the application bundle:
 
 #### iOS
 To run the application on iPhone device/simulator:
- - Open `iosApp/iosApp.xcproject` in Xcode and run standard configuration
+ - Open `iosApp/iosApp.xcworkspace` in Xcode and run standard configuration
  - Or use [Kotlin Multiplatform Mobile plugin](https://plugins.jetbrains.com/plugin/14936-kotlin-multiplatform-mobile) for Android Studio
+
+To build a sideloadable IPA for self-signing with tools like Sideloadly or AltStore:
+ - run `./scripts/build-ios-unsigned-ipa.sh`
+ - the output lands in `build/ios-sideload/<version>/Styx2m.ipa`
+ - `release-ios-sideload.yml` does the same build in GitHub Actions and uploads the IPA to your own server instead of publishing a release
 
 [^1]: ##### I realize this may be infeasible when working with a huge library but this is not a concern for me and I'm building this just for me. With my current library of ~10TB I'm sitting at around 30MB of cached images and ~7MB of other data on the clientside.
