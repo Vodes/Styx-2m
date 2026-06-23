@@ -8,6 +8,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.platform.LocalContext
+import moe.styx.common.util.Log
 
 fun Context.findActivity(): Activity? {
     var context = this
@@ -23,10 +24,12 @@ actual fun KeepScreenOn() {
     val context = LocalContext.current
     val window = context.findActivity()?.window
     LaunchedEffect(Unit) {
+        Log.d { "Blocking screen timeout"}
         window?.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
     }
     DisposableEffect(Unit) {
         onDispose {
+            Log.d { "Clearing screen timeout block" }
             window?.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         }
     }

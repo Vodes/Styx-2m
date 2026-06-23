@@ -116,6 +116,7 @@ class PlayerView(val entryID: String, private val startAt: Long = 0L,
         var isRotationLocked by rememberSaveable { mutableStateOf(false) }
 
         RequestPlayerRotationLock(isRotationLocked)
+        HandlePlayerInsets()
 
         if (isTv) {
             TvPlayerContent(
