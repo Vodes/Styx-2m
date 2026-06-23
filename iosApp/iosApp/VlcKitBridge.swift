@@ -9,6 +9,8 @@ private struct VlcTrack {
     let title: String?
     let language: String?
     let codec: String?
+    let isDefault: Bool
+    let isForced: Bool
     let selected: Bool
 }
 
@@ -20,6 +22,7 @@ private struct VlcTrackKey: Hashable {
 private struct VlcTrackMetadata {
     let language: String?
     let codec: String?
+    let description: String?
 }
 
 final class VlcRenderView: UIView {
@@ -40,13 +43,18 @@ final class VlcRenderView: UIView {
 final class VlcKitBridgeImpl: VlcKitPlayerBridge, VLCMediaPlayerDelegate {
     private let player = VLCMediaPlayer()
     private let renderView = VlcRenderView()
+    private let logger = VLCConsoleLogger()
     private var slang = ""
     private var alang = ""
+    private var hardwareDecoding = true
     private var tracks: [VlcTrack] = []
 
-    override func create(slang: String, alang: String) {
+    override func create(slang: String, alang: String, hardwareDecoding: Bool) {
         self.slang = slang
         self.alang = alang
+        self.hardwareDecoding = hardwareDecoding
+        logger.level = .debug
+        player.libraryInstance.loggers = [logger]
         player.delegate = self
         player.drawable = renderView
     }
@@ -135,11 +143,11 @@ final class VlcKitBridgeImpl: VlcKitPlayerBridge, VLCMediaPlayerDelegate {
     }
 
     override func isTrackDefault(index: Int32) -> Bool {
-        false
+        track(at: index)?.isDefault ?? false
     }
 
     override func isTrackForced(index: Int32) -> Bool {
-        false
+        track(at: index)?.isForced ?? false
     }
 
     override func isTrackSelected(index: Int32) -> Bool {
@@ -200,6 +208,7 @@ final class VlcKitBridgeImpl: VlcKitPlayerBridge, VLCMediaPlayerDelegate {
         var options: [String: Any] = [
             "network-caching": 1000,
             "clock-jitter": 0,
+            "avcodec-hw": hardwareDecoding ? "any" : "none",
         ]
         if startAt > 0 {
             options["start-time"] = startAt
@@ -257,12 +266,19 @@ final class VlcKitBridgeImpl: VlcKitPlayerBridge, VLCMediaPlayerDelegate {
             guard id.int32Value >= 0 else { return nil }
             let title = offset < trackNames.count ? trackNames[offset] as? String : nil
             let trackMetadata = metadata[VlcTrackKey(id: id.int32Value, type: type)]
+            let cleanedTitle = cleanedTrackTitle(title: title, language: trackMetadata?.language)
+            let searchableTitle = combinedTrackTitle(title: cleanedTitle, description: trackMetadata?.description)
             return VlcTrack(
                 id: id.int32Value,
                 type: type,
-                title: title,
+                title: searchableTitle,
                 language: trackMetadata?.language,
                 codec: trackMetadata?.codec,
+                isDefault: isProbablyDefaultTrack(title: searchableTitle, description: trackMetadata?.description),
+                isForced: type == "sub" && isProbablyForcedSubtitleTrack(
+                    title: searchableTitle,
+                    description: trackMetadata?.description
+                ),
                 selected: id.int32Value == selectedId
             )
         }
@@ -285,7 +301,8 @@ final class VlcKitBridgeImpl: VlcKitPlayerBridge, VLCMediaPlayerDelegate {
 
             metadata[VlcTrackKey(id: id.int32Value, type: type)] = VlcTrackMetadata(
                 language: nonBlankString(info[VLCMediaTracksInformationLanguage]),
-                codec: codecString(info[VLCMediaTracksInformationCodec])
+                codec: codecString(info[VLCMediaTracksInformationCodec]),
+                description: nonBlankString(info[VLCMediaTracksInformationDescription])
             )
         }
         return metadata
@@ -316,6 +333,67 @@ final class VlcKitBridgeImpl: VlcKitPlayerBridge, VLCMediaPlayerDelegate {
             return number.stringValue
         }
         return nil
+    }
+
+    private func cleanedTrackTitle(title: String?, language: String?) -> String? {
+        guard var result = nonBlankString(title) else { return nil }
+        if let language = nonBlankString(language) {
+            for alias in languageAliases(language) {
+                let suffix = "[\(alias)]"
+                if result.lowercased().hasSuffix(suffix.lowercased()) {
+                    result = String(result.dropLast(suffix.count)).trimmingCharacters(in: .whitespacesAndNewlines)
+                    break
+                }
+            }
+        }
+        return result.isEmpty ? nil : result
+    }
+
+    private func combinedTrackTitle(title: String?, description: String?) -> String? {
+        let parts = [title, description]
+            .compactMap { $0?.trimmingCharacters(in: .whitespacesAndNewlines) }
+            .filter { !$0.isEmpty }
+        guard !parts.isEmpty else { return nil }
+        return parts.reduce(into: [String]()) { result, part in
+            let normalizedPart = part.lowercased()
+            let isDuplicate = result.contains { existing in
+                let normalizedExisting = existing.lowercased()
+                return normalizedExisting == normalizedPart
+                    || normalizedExisting.contains(normalizedPart)
+                    || normalizedPart.contains(normalizedExisting)
+            }
+            if !isDuplicate {
+                result.append(part)
+            }
+        }.joined(separator: " ")
+    }
+
+    private func languageAliases(_ language: String) -> [String] {
+        switch language.trimmingCharacters(in: .whitespacesAndNewlines).lowercased() {
+        case "ja", "jp", "jpn", "japanese", "japanisch":
+            return ["ja", "jp", "jpn", "japanese", "japanisch"]
+        case "de", "deu", "ger", "german", "deutsch":
+            return ["de", "deu", "ger", "german", "deutsch"]
+        case "en", "eng", "english":
+            return ["en", "eng", "english"]
+        default:
+            return [language]
+        }
+    }
+
+    private func isProbablyDefaultTrack(title: String?, description: String?) -> Bool {
+        containsAnyTrackFlag(title: title, description: description, flags: ["default"])
+    }
+
+    private func isProbablyForcedSubtitleTrack(title: String?, description: String?) -> Bool {
+        containsAnyTrackFlag(title: title, description: description, flags: ["force", "sign"])
+    }
+
+    private func containsAnyTrackFlag(title: String?, description: String?, flags: [String]) -> Bool {
+        let searchable = [title, description]
+            .compactMap { $0?.trimmingCharacters(in: .whitespacesAndNewlines).lowercased() }
+            .joined(separator: " ")
+        return flags.contains { searchable.contains($0) }
     }
 
     private func track(at index: Int32) -> VlcTrack? {

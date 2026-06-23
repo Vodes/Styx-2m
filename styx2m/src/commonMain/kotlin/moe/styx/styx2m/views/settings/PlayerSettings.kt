@@ -108,5 +108,17 @@ fun MpvSettings() {
                 Spacer(Modifier.height(3.dp))
             }
         }
+
+        if (Platform.current == Platform.IOS) {
+            Column(Modifier.settingsContainer()) {
+                Text("Performance / Quality", Modifier.padding(10.dp, 7.dp), style = MaterialTheme.typography.titleLarge)
+                Toggles.ContainerSwitch(
+                    "Hardware Decoding",
+                    hwDecoding,
+                    value = preferences.hwDecoding,
+                ) { preferences = preferences.copy(hwDecoding = it).save() }
+                Spacer(Modifier.height(3.dp))
+            }
+        }
     }
 }

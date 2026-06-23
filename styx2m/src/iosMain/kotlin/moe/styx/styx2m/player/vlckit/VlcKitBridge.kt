@@ -8,7 +8,7 @@ abstract class VlcKitPlayerBridge {
     var onPropertyChange: ((name: String, value: Any?) -> Unit)? = null
     var onEvent: ((eventName: String) -> Unit)? = null
 
-    abstract fun create(slang: String, alang: String)
+    abstract fun create(slang: String, alang: String, hardwareDecoding: Boolean)
     abstract fun destroy()
     abstract fun getPlayerView(): UIView
     abstract fun resizeSurface(width: Int, height: Int)

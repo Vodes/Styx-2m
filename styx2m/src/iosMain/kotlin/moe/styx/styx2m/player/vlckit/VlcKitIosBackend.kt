@@ -38,6 +38,8 @@ class VlcKitIosBackend(
     private var isPaused = false
     private var playbackStatus: PlaybackStatus = PlaybackStatus.Idle
     private var pendingLoad: Pair<PlaybackSource, Long>? = null
+    private var pendingAudioTrackId: Int? = null
+    private var pendingSubtitleTrackId: Int? = null
     private var lastProgressSeconds = 0L
     private var lastDurationSeconds = 0L
 
@@ -63,11 +65,19 @@ class VlcKitIosBackend(
     }
 
     override fun setAudioTrack(id: Int) {
-        if (canChangeTrack()) bridge.setAudioTrack(id)
+        if (canChangeTrack()) {
+            bridge.setAudioTrack(id)
+        } else {
+            pendingAudioTrackId = id
+        }
     }
 
     override fun setSubtitleTrack(id: Int) {
-        if (canChangeTrack()) bridge.setSubtitleTrack(id)
+        if (canChangeTrack()) {
+            bridge.setSubtitleTrack(id)
+        } else {
+            pendingSubtitleTrackId = id
+        }
     }
 
     override fun showMessage(message: String, durationMillis: Int) {
@@ -86,6 +96,8 @@ class VlcKitIosBackend(
         playerInitialized = false
         playbackStatus = PlaybackStatus.Idle
         pendingLoad = null
+        pendingAudioTrackId = null
+        pendingSubtitleTrackId = null
         lastProgressSeconds = 0L
         lastDurationSeconds = 0L
     }
@@ -134,8 +146,9 @@ class VlcKitIosBackend(
             when (eventName) {
                 "playing" -> {
                     playerInitialized = true
-                    updateTracks()
                     updateStatus(PlaybackStatus.Playing)
+                    applyPendingTrackSelection()
+                    updateTracks()
                 }
                 "paused" -> updateStatus(PlaybackStatus.Paused)
                 "buffering" -> updateStatus(PlaybackStatus.Buffering)
@@ -150,6 +163,7 @@ class VlcKitIosBackend(
         bridge.create(
             slang = options.slang,
             alang = options.alang,
+            hardwareDecoding = options.hardwareDecoding,
         )
         libWasLoaded = true
         pendingLoad?.let { (source, startAt) ->
@@ -201,18 +215,31 @@ class VlcKitIosBackend(
     private fun canChangeTrack(): Boolean {
         return playerInitialized && playbackStatus in arrayOf(PlaybackStatus.Playing, PlaybackStatus.Paused)
     }
+
+    private fun applyPendingTrackSelection() {
+        pendingAudioTrackId?.let { id ->
+            pendingAudioTrackId = null
+            bridge.setAudioTrack(id)
+        }
+        pendingSubtitleTrackId?.let { id ->
+            pendingSubtitleTrackId = null
+            bridge.setSubtitleTrack(id)
+        }
+    }
 }
 
 private data class VlcKitOptions(
     val slang: String,
     val alang: String,
+    val hardwareDecoding: Boolean,
 ) {
     companion object {
         fun from(mediaPreferences: MediaPreferences?): VlcKitOptions {
             val pref = MpvPreferences.getOrDefault()
             return VlcKitOptions(
-                slang = pref.getSlangArg(mediaPreferences),
-                alang = pref.getAlangArg(mediaPreferences),
+                slang = "",
+                alang = "",
+                hardwareDecoding = pref.hwDecoding,
             )
         }
     }
