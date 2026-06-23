@@ -1,0 +1,67 @@
+name: "Release iOS sideload build"
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Mostly just the version folder it will be uploaded to."
+        required: true
+        type: string
+
+jobs:
+  build:
+    runs-on: macos-latest
+    env:
+      STYX_BASEURL: ${{ secrets.STYX_BASEURL }}
+      STYX_IMAGEURL: ${{ secrets.STYX_IMAGEURL }}
+      STYX_SITEURL: ${{ secrets.STYX_SITEURL }}
+      STYX_SECRET: ${{ secrets.STYX_SECRET }}
+      U2C_SCRIPT: https://raw.githubusercontent.com/9001/copyparty/refs/heads/hovudstraum/bin/u2c.py
+
+    steps:
+      - name: "Checkout"
+        uses: actions/checkout@v6
+
+      - name: "Setup JDK"
+        id: java
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: 17
+          cache: "gradle"
+
+      - name: "Setup Android"
+        uses: android-actions/setup-android@v3.2.2
+
+      - name: "Setup uv"
+        uses: astral-sh/setup-uv@cec208311dfd045dd5311c1add060b2062131d57 # v8.0.0
+
+      - name: "Ensure CocoaPods is available"
+        run: |
+          if ! command -v pod >/dev/null 2>&1; then
+            sudo gem install cocoapods -N
+          fi
+
+      - name: "Build unsigned iOS IPA"
+        env:
+          JAVA_HOME: ${{ steps.java.outputs.path }}
+          OUTPUT_DIR: ${{ github.workspace }}/build/ios-sideload/${{ inputs.version }}
+          DERIVED_DATA_DIR: ${{ github.workspace }}/build/ios-derived-data/${{ inputs.version }}
+        run: |
+          chmod u+x ./gradlew
+          chmod u+x ./scripts/build-ios-unsigned-ipa.sh
+          ./scripts/build-ios-unsigned-ipa.sh "${{ inputs.version }}"
+
+      - name: "Upload checksum file"
+        uses: actions/upload-artifact@v6
+        with:
+          name: ios-sideload-checksums-${{ inputs.version }}
+          path: build/ios-sideload/${{ inputs.version }}/checksums.sha384
+
+      - name: "Upload IPA to copyparty"
+        env:
+          COPYPARTY_PASS: ${{ secrets.COPYPARTY_PASS }}
+          COPYPARTY_STYX_ROOT: ${{ secrets.COPYPARTY_STYX_ROOT }}
+        run: |
+          set -euo pipefail
+
+          uv run -p 3.12 "${U2C_SCRIPT}" -a "${COPYPARTY_PASS}" "${COPYPARTY_STYX_ROOT}/builds/${{ inputs.version }}/ios/ipa" "./build/ios-sideload/${{ inputs.version }}/"
