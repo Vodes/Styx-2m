@@ -170,7 +170,7 @@ android {
 
 buildConfig {
     val siteURL = requiredLocalConfig("STYX_SITEURL")
-    buildConfigField("DEBUG_TOKEN", requiredLocalConfig("STYX_DEBUGTOKEN"))
+    buildConfigField("DEBUG_TOKEN", localConfig("STYX_DEBUGTOKEN"))
     buildConfigField("APP_NAME", "Styx2m")
     buildConfigField("APP_VERSION", provider { "${project.version}" })
     buildConfigField("APP_SECRET", requiredLocalConfig("STYX_SECRET"))
