@@ -30,6 +30,7 @@ import moe.styx.common.compose.utils.LocalLayoutSize
 import moe.styx.common.compose.utils.LocalToaster
 import moe.styx.common.compose.utils.LayoutSizes
 import moe.styx.common.util.Log
+import moe.styx.styx2m.misc.appContentWindowInsetsPadding
 import moe.styx.styx2m.player.PlayerView
 import moe.styx.styx2m.theme.AppTheme
 import moe.styx.styx2m.theme.LocalThemeIsDark
@@ -65,10 +66,15 @@ internal fun App() = AppTheme {
                     LocalToaster provides toasterState
                 ) {
                     StyxCurrentScreenPredictiveBack(navigator) {
-                        val mod = if (it is PlayerView) Modifier.fillMaxSize()
-                        else Modifier.fillMaxSize().windowInsetsPadding(WindowInsets.safeDrawing)
-                        Surface(mod) {
-                            it.Content()
+                        Surface(Modifier.fillMaxSize()) {
+                            val contentModifier = if (it is PlayerView) {
+                                Modifier.fillMaxSize()
+                            } else {
+                                Modifier.fillMaxSize().appContentWindowInsetsPadding()
+                            }
+                            Box(contentModifier) {
+                                it.Content()
+                            }
                         }
                     }
                 }
