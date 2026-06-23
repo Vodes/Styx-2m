@@ -30,7 +30,7 @@ jobs:
           cache: "gradle"
 
       - name: "Setup Android"
-        uses: android-actions/setup-android@v3.2.2
+        uses: android-actions/setup-android@v4.0.1
 
       - name: "Setup uv"
         uses: astral-sh/setup-uv@cec208311dfd045dd5311c1add060b2062131d57 # v8.0.0
@@ -52,7 +52,7 @@ jobs:
           ./scripts/build-ios-unsigned-ipa.sh "${{ inputs.version }}"
 
       - name: "Upload checksum file"
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: ios-sideload-checksums-${{ inputs.version }}
           path: build/ios-sideload/${{ inputs.version }}/checksums.sha384
@@ -64,4 +64,4 @@ jobs:
         run: |
           set -euo pipefail
 
-          uv run -p 3.12 "${U2C_SCRIPT}" -a "${COPYPARTY_PASS}" "${COPYPARTY_STYX_ROOT}/builds/${{ inputs.version }}/ios/ipa" "./build/ios-sideload/${{ inputs.version }}/"
+          uv run -p 3.12 "${U2C_SCRIPT}" -a "${COPYPARTY_PASS}" "${COPYPARTY_STYX_ROOT}/builds-android/${{ inputs.version }}/ios" "./build/ios-sideload/${{ inputs.version }}/"

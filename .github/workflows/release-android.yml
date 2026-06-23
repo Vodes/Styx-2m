@@ -17,10 +17,11 @@ jobs:
       STYX_SECRET: ${{ secrets.STYX_SECRET }}
       STYX_SIGNING_ALIAS: ${{ secrets.STYX_SIGNING_ALIAS }}
       STYX_SIGNING_KEY_PASS: ${{ secrets.STYX_SIGNING_KEY_PASS }}
+      U2C_SCRIPT: https://raw.githubusercontent.com/9001/copyparty/refs/heads/hovudstraum/bin/u2c.py
 
     steps:
       - name: "Checkout"
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
       - name: "Setup JDK"
         id: java
         uses: actions/setup-java@v5
@@ -29,9 +30,11 @@ jobs:
           java-version: 17
           cache: "gradle"
       - name: "Setup Android"
-        uses: android-actions/setup-android@v3.2.2
+        uses: android-actions/setup-android@v4.0.1
+      - name: "Setup uv"
+        uses: astral-sh/setup-uv@cec208311dfd045dd5311c1add060b2062131d57 # v8.0.0
       - name: "Decode secret to keystore file"
-        uses: timheuer/base64-to-file@v1.2.4
+        uses: timheuer/base64-to-file@dfa5a5dd38803cb4f5c3a081eeb28e8362d43e9c # v2.0.0
         id: keyfile_writer
         with:
           fileName: styx2m.jks
@@ -47,16 +50,10 @@ jobs:
       - name: "Print and save sha384 for apks"
         run: find ./styx2m/build/outputs/apk -type f -iname 'moe.styx.styx2m*-release.apk' -exec shasum -a 384 {} \; | tee checksums.sha384
       - name: "Upload checksum file"
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: checksums.sha384
           path: checksums.sha384
-      - name: "Upload apks to (s)FTP"
-        uses: "wangyucode/sftp-upload-action@v3"
-        with:
-          host: ${{ secrets.FTP_HOST }}
-          port: ${{ secrets.FTP_PORT }}
-          username: ${{ secrets.FTP_USER }}
-          password: ${{ secrets.FTP_PASS }}
-          localDir: "./styx2m/build/outputs/apk/release/"
-          remoteDir: "/${{ inputs.version }}/"
+      - name: "Upload apks to copyparty"
+        run: |
+          uv run -p 3.12 ${{ env.U2C_SCRIPT }} -a ${{ secrets.COPYPARTY_PASS }} "${{ secrets.COPYPARTY_STYX_ROOT }}/builds-android/${{ inputs.version }}/android" "./styx2m/build/outputs/apk/release/"
