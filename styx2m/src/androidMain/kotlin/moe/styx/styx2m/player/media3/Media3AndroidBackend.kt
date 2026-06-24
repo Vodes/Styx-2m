@@ -73,6 +73,8 @@ class Media3AndroidBackend(
     private var playbackStatus: PlaybackStatus = PlaybackStatus.Idle
     private val scope = CoroutineScope(Dispatchers.Main.immediate)
     private val trackRefsById = mutableMapOf<Int, TrackRef>()
+    private var pendingAudioTrackId: Int? = null
+    private var pendingSubtitleTrackId: Int? = null
 
     override fun load(source: PlaybackSource, startAt: Long) {
         val player = player
@@ -104,15 +106,13 @@ class Media3AndroidBackend(
     }
 
     override fun setAudioTrack(id: Int) {
-        selectTrack(id)
+        pendingAudioTrackId = id
+        applyPendingTrackSelection()
     }
 
     override fun setSubtitleTrack(id: Int) {
-        if (id == -1) {
-            clearTrackOverrides(C.TRACK_TYPE_TEXT)
-        } else {
-            selectTrack(id)
-        }
+        pendingSubtitleTrackId = id
+        applyPendingTrackSelection()
     }
 
     override fun showMessage(message: String, durationMillis: Int) {
@@ -135,6 +135,8 @@ class Media3AndroidBackend(
         pendingLoad = null
         playbackStatus = PlaybackStatus.Idle
         trackRefsById.clear()
+        pendingAudioTrackId = null
+        pendingSubtitleTrackId = null
     }
 
     @Composable
@@ -198,6 +200,8 @@ class Media3AndroidBackend(
 
     private fun loadUri(player: ExoPlayer, uri: Uri, startAt: Long, readLocalMetadataFallback: Boolean) {
         trackRefsById.clear()
+        pendingAudioTrackId = null
+        pendingSubtitleTrackId = null
         loadEmbeddedTitle(uri, readLocalMetadataFallback)
         updateStatus(PlaybackStatus.Buffering)
         player.setMediaItem(MediaItem.fromUri(uri), startAt.coerceAtLeast(0) * 1000)
@@ -301,6 +305,8 @@ class Media3AndroidBackend(
                             type = type,
                             title = format.label,
                             language = format.language,
+                            isDefault = format.selectionFlags.hasFlag(C.SELECTION_FLAG_DEFAULT),
+                            isForced = format.selectionFlags.hasFlag(C.SELECTION_FLAG_FORCED),
                             isSelected = group.isTrackSelected(trackIndex),
                             codec = format.codecs,
                             channels = if (type == PlayerTrackType.AUDIO) format.channelCount.takeIf { it != -1 } else null
@@ -310,6 +316,7 @@ class Media3AndroidBackend(
             }
         }
         sink.onTracks(normalizedTracks)
+        applyPendingTrackSelection()
     }
 
     private fun PlayerView.applyBlackLetterboxBackground() {
@@ -382,22 +389,44 @@ class Media3AndroidBackend(
         }
     }
 
-    private fun selectTrack(id: Int) {
-        val player = player ?: return
-        val ref = trackRefsById[id] ?: return
+    private fun selectTrack(id: Int): Boolean {
+        val player = player ?: return false
+        val ref = trackRefsById[id] ?: return false
         val override = TrackSelectionOverride(ref.group, ref.trackIndex)
         player.trackSelectionParameters = player.trackSelectionParameters
             .buildUpon()
+            .setTrackTypeDisabled(ref.group.type, false)
             .setOverrideForType(override)
             .build()
+        return true
     }
 
-    private fun clearTrackOverrides(trackType: Int) {
-        val player = player ?: return
+    private fun disableTrackType(trackType: Int): Boolean {
+        val player = player ?: return false
         player.trackSelectionParameters = player.trackSelectionParameters
             .buildUpon()
             .clearOverridesOfType(trackType)
+            .setTrackTypeDisabled(trackType, true)
             .build()
+        return true
+    }
+
+    private fun applyPendingTrackSelection() {
+        pendingAudioTrackId?.let { id ->
+            if (selectTrack(id)) {
+                pendingAudioTrackId = null
+            }
+        }
+
+        pendingSubtitleTrackId?.let { id ->
+            if (id == -1) {
+                if (disableTrackType(C.TRACK_TYPE_TEXT)) {
+                    pendingSubtitleTrackId = null
+                }
+            } else if (selectTrack(id)) {
+                pendingSubtitleTrackId = null
+            }
+        }
     }
 
     private fun Int.toPlayerTrackType(): PlayerTrackType = when (this) {
@@ -414,6 +443,8 @@ class Media3AndroidBackend(
         Player.STATE_IDLE -> PlaybackStatus.Idle
         else -> PlaybackStatus.Idle
     }
+
+    private fun Int.hasFlag(flag: Int): Boolean = this and flag == flag
 
     private fun CharSequence?.quoteForLog(): String = this?.toString()?.let { "'$it'" } ?: "<null>"
 
