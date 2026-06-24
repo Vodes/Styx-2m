@@ -17,9 +17,9 @@ repositories {
     mavenLocal()
 }
 
-version = "0.2.2-beta5"
+version = "0.2.2-beta6"
 
-val appVersionCode = 14
+val appVersionCode = 15
 val iosMarketingVersion = project.version.toString().substringBefore('-')
 
 val localProperties by lazy {
@@ -70,7 +70,7 @@ kotlin {
             implementation(compose.materialIconsExtended)
             implementation(compose.components.resources)
             implementation(libs.moko.permissions)
-            implementation("moe.styx:styx-common-compose:0.5.1") {
+            implementation("moe.styx:styx-common-compose:0.5.2") {
                 exclude(group = "com.github.luben")
             }
         }
