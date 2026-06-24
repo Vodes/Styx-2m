@@ -79,4 +79,6 @@ To build a sideloadable IPA for self-signing with tools like Sideloadly or AltSt
  - the output lands in `build/ios-sideload/<version>/Styx2m.ipa`
  - `release-ios-sideload.yml` does the same build in GitHub Actions and uploads the IPA to your own server instead of publishing a release
 
+##### You may have to do a `sudo xcode-select -s /Applications/Xcode.app/Contents/Developer` ([see this StackOverflow post](https://stackoverflow.com/a/17980786))
+
 [^1]: ##### I realize this may be infeasible when working with a huge library but this is not a concern for me and I'm building this just for me. With my current library of ~10TB I'm sitting at around 30MB of cached images and ~7MB of other data on the clientside.
