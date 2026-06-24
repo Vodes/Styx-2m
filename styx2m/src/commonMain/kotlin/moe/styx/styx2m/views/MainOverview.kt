@@ -22,6 +22,7 @@ import com.dokar.sonner.ToasterDefaults
 import com.russhwolf.settings.get
 import com.russhwolf.settings.set
 import kotlinx.coroutines.launch
+import moe.styx.common.Platform
 import moe.styx.common.compose.components.AppShapes
 import moe.styx.common.compose.components.buttons.IconButtonWithTooltip
 import moe.styx.common.compose.components.layout.MainScaffold
@@ -45,13 +46,13 @@ import moe.styx.common.compose.utils.LocalToaster
 import moe.styx.common.compose.utils.ServerStatus
 import moe.styx.common.compose.viewmodels.MainDataViewModel
 import moe.styx.common.compose.viewmodels.OverviewViewModel
-import moe.styx.common.Platform
 import moe.styx.styx2m.misc.pushMediaView
 import moe.styx.styx2m.views.misc.LoginView
 import moe.styx.styx2m.views.misc.OutdatedView
 import moe.styx.styx2m.views.tabs.Tabs
 
-internal val FloatingBottomNavContentPadding = 112.dp
+internal val FloatingBottomNavContentPadding = 128.dp
+private val FloatingBottomNavBottomPadding = 42.dp
 
 class MainOverview : Screen {
 
@@ -119,7 +120,10 @@ class MainOverview : Screen {
                     }
 
                     if (overviewSm.isLoggedIn == false) {
-                        IconButtonWithTooltip(Icons.Filled.NoAccounts, "You are not logged in!\nClick to retry.") {
+                        IconButtonWithTooltip(
+                            Icons.Filled.NoAccounts,
+                            "You are not logged in!\nClick to retry."
+                        ) {
                             overviewSm.screenModelScope.launch {
                                 val loginJob = overviewSm.runLoginAndChecks()
                                 loginJob.join()
@@ -131,8 +135,13 @@ class MainOverview : Screen {
                     }
                     OnlineUsersIcon { nav.pushMediaView(it) }
                     if (!useRail)
-                        IconButtonWithTooltip(Icons.Filled.Settings, "Settings") { nav.push(SettingsView()) }
-                }, bottomBarContent = if (!useRail && !useFloatingBottomNav) {
+                        IconButtonWithTooltip(Icons.Filled.Settings, "Settings") {
+                            nav.push(
+                                SettingsView()
+                            )
+                        }
+                },
+                bottomBarContent = if (!useRail && !useFloatingBottomNav) {
                     {
                         BottomNavBar()
                     }
@@ -164,7 +173,9 @@ class MainOverview : Screen {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 18.dp, vertical = 10.dp),
+                    .padding(
+                        start = 18.dp, top = 10.dp, end = 18.dp, bottom = FloatingBottomNavBottomPadding
+                    ),
                 contentAlignment = Alignment.Center
             ) {
                 NavigationBar(
@@ -173,7 +184,8 @@ class MainOverview : Screen {
                         .shadow(8.dp, AppShapes.extraLarge)
                         .clip(AppShapes.extraLarge),
                     tonalElevation = 8.dp,
-                    containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(3.dp)
+                    containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(3.dp),
+                    windowInsets = WindowInsets(0, 0, 0, 0)
                 ) {
                     TabNavItem(Tabs.seriesTab)
                     TabNavItem(Tabs.moviesTab)

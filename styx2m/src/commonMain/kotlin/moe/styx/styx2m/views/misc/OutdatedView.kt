@@ -1,7 +1,11 @@
 package moe.styx.styx2m.views.misc
 
 import Styx2m.styx2m.BuildConfig
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
@@ -33,6 +37,13 @@ class OutdatedView(private val requestedVersion: String? = null) : Screen {
                 )
                 if (Platform.current == Platform.ANDROID)
                     AndroidDownloadButtons()
+                else {
+                    Button({
+                        openURI(Endpoints.DOWNLOAD_BUILD_BASE.url() + "/ios" + (if (requestedVersion != null) "/$requestedVersion" else "") + "?token=${login?.accessToken}")
+                    }, modifier = Modifier.padding(12.dp)) {
+                        Text("IPA")
+                    }
+                }
                 Button(
                     {
                         openURI("${BuildConfig.SITE_URL}/user")

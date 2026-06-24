@@ -112,7 +112,11 @@ private fun MediaGrid(
             listPosViewModel.scrollOffset = listState.firstVisibleItemScrollOffset
         }
     }
-    ScrollToTopContainer(Modifier.fillMaxSize(), scrollableState = listState) {
+    ScrollToTopContainer(
+        Modifier.fillMaxSize(),
+        scrollableState = listState,
+        fabPadding = mainScrollToTopFabPadding(sizes)
+    ) {
         if (showUnseen) {
             LazyVerticalGrid(
                 columns = getGridCells(sizes),
@@ -161,7 +165,11 @@ private fun MediaList(
             listPosViewModel.scrollOffset = listState.firstVisibleItemScrollOffset
         }
     }
-    ScrollToTopContainer(Modifier.fillMaxSize(), scrollableState = listState) {
+    ScrollToTopContainer(
+        Modifier.fillMaxSize(),
+        scrollableState = listState,
+        fabPadding = mainScrollToTopFabPadding(sizes)
+    ) {
         LazyColumn(
             state = listState,
             contentPadding = PaddingValues(bottom = mainBottomScrollPadding(sizes))
@@ -177,3 +185,10 @@ private fun MediaList(
 
 private fun mainBottomScrollPadding(sizes: LayoutSizes, default: Dp = 0.dp) =
     if (!sizes.isWide && Platform.current == Platform.IOS) FloatingBottomNavContentPadding else default
+
+private fun mainScrollToTopFabPadding(sizes: LayoutSizes) =
+    if (!sizes.isWide && Platform.current == Platform.IOS) {
+        PaddingValues(start = 20.dp, top = 20.dp, end = 20.dp, bottom = FloatingBottomNavContentPadding)
+    } else {
+        PaddingValues(20.dp)
+    }
