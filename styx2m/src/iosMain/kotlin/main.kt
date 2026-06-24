@@ -16,7 +16,7 @@ fun MainViewController(): UIViewController {
         }
     ) {
         val baseDensity = LocalDensity.current
-        val newDensity = Density(baseDensity.density * 0.955F, baseDensity.fontScale * 0.98F)
+        val newDensity = Density(baseDensity.density * 0.975F, baseDensity.fontScale * 0.99F)
         CompositionLocalProvider(
             LocalDensity provides newDensity
         ) {
