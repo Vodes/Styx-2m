@@ -19,6 +19,9 @@ repositories {
 
 version = "0.2.2-beta3"
 
+val appVersionCode = 12
+val iosMarketingVersion = project.version.toString().substringBefore('-')
+
 val localProperties by lazy {
     Properties().apply {
         listOf(
@@ -105,7 +108,7 @@ android {
         targetSdk = 36
 
         applicationId = "moe.styx.styx2m"
-        versionCode = 12
+        versionCode = appVersionCode
         versionName = "${project.version}"
         base.archivesName = "$applicationId-v$versionName"
     }
@@ -180,4 +183,15 @@ buildConfig {
     buildConfigField("SITE", siteURL.map { it.removePrefix("https://").removePrefix("http://").trimEnd('/') })
     buildConfigField("BUILD_TIME", (System.currentTimeMillis() / 1000))
     buildConfigField("VERSION_CHECK_URL", "https://api.github.com/repos/Vodes/Styx-2m/tags")
+}
+
+tasks.register("printIosBundleVersion") {
+    group = "versioning"
+    description = "Prints iOS bundle version settings derived from the Gradle project version."
+    notCompatibleWithConfigurationCache("This print-only helper is consumed by Xcode build scripts.")
+
+    doLast {
+        println("MARKETING_VERSION=$iosMarketingVersion")
+        println("CURRENT_PROJECT_VERSION=$appVersionCode")
+    }
 }
