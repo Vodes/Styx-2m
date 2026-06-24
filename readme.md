@@ -76,7 +76,7 @@ To run the application on iPhone device/simulator:
 
 To build a sideloadable IPA for self-signing with tools like Sideloadly or AltStore:
  - run `./scripts/build-ios-unsigned-ipa.sh`
- - the output lands in `build/ios-sideload/<version>/Styx2m.ipa`
+ - the output lands in `build/ios-sideload/<version>/Styx2m-<version>-ios.ipa`
  - `release-ios-sideload.yml` does the same build in GitHub Actions and uploads the IPA to your own server instead of publishing a release
 
 ##### You may have to do a `sudo xcode-select -s /Applications/Xcode.app/Contents/Developer` ([see this StackOverflow post](https://stackoverflow.com/a/17980786))

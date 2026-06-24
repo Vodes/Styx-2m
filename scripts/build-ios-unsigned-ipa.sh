@@ -5,10 +5,11 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 IOS_DIR="$ROOT_DIR/iosApp"
 VERSION="${1:-dev}"
+SAFE_VERSION="${VERSION//[^A-Za-z0-9._-]/-}"
 OUT_DIR="${OUTPUT_DIR:-$ROOT_DIR/build/ios-sideload/$VERSION}"
 DERIVED_DATA_DIR="${DERIVED_DATA_DIR:-$ROOT_DIR/build/ios-derived-data/$VERSION}"
 APP_NAME="Styx2m.app"
-IPA_NAME="Styx2m.ipa"
+IPA_NAME="Styx2m-${SAFE_VERSION}-ios.ipa"
 
 if [[ -z "${ANDROID_HOME:-}" && -d "$HOME/Library/Android/sdk" ]]; then
   export ANDROID_HOME="$HOME/Library/Android/sdk"
