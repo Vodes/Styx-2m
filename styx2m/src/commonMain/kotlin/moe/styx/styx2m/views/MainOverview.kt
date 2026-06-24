@@ -45,10 +45,13 @@ import moe.styx.common.compose.utils.LocalToaster
 import moe.styx.common.compose.utils.ServerStatus
 import moe.styx.common.compose.viewmodels.MainDataViewModel
 import moe.styx.common.compose.viewmodels.OverviewViewModel
+import moe.styx.common.Platform
 import moe.styx.styx2m.misc.pushMediaView
 import moe.styx.styx2m.views.misc.LoginView
 import moe.styx.styx2m.views.misc.OutdatedView
 import moe.styx.styx2m.views.tabs.Tabs
+
+internal val FloatingBottomNavContentPadding = 112.dp
 
 class MainOverview : Screen {
 
@@ -93,6 +96,7 @@ class MainOverview : Screen {
 
         val sizes = LocalLayoutSize.current
         val useRail = sizes.isWide
+        val useFloatingBottomNav = !useRail && Platform.current == Platform.IOS
         val defaultTab = if (settings["favs-startup", false]) Tabs.favsTab else Tabs.seriesTab
         settings["episode-list-index"] = 0
         TabNavigator(defaultTab) {
@@ -128,18 +132,27 @@ class MainOverview : Screen {
                     OnlineUsersIcon { nav.pushMediaView(it) }
                     if (!useRail)
                         IconButtonWithTooltip(Icons.Filled.Settings, "Settings") { nav.push(SettingsView()) }
-                }, bottomBarContent = {
-                    if (!useRail)
+                }, bottomBarContent = if (!useRail && !useFloatingBottomNav) {
+                    {
                         BottomNavBar()
-                }
+                    }
+                } else null
             ) {
-                if (useRail) {
-                    Row(Modifier.fillMaxSize(), verticalAlignment = Alignment.Top) {
-                        SideNavRail(nav, sizes.isLandScape)
+                Box(Modifier.fillMaxSize()) {
+                    if (useRail) {
+                        Row(Modifier.fillMaxSize(), verticalAlignment = Alignment.Top) {
+                            SideNavRail(nav, sizes.isLandScape)
+                            CurrentTab()
+                        }
+                    } else {
                         CurrentTab()
                     }
-                } else {
-                    CurrentTab()
+
+                    if (useFloatingBottomNav) {
+                        Box(Modifier.align(Alignment.BottomCenter)) {
+                            BottomNavBar()
+                        }
+                    }
                 }
             }
         }
@@ -147,6 +160,30 @@ class MainOverview : Screen {
 
     @Composable
     fun BottomNavBar() {
+        if (Platform.current == Platform.IOS) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 18.dp, vertical = 10.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                NavigationBar(
+                    modifier = Modifier
+                        .widthIn(max = 460.dp)
+                        .shadow(8.dp, AppShapes.extraLarge)
+                        .clip(AppShapes.extraLarge),
+                    tonalElevation = 8.dp,
+                    containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(3.dp)
+                ) {
+                    TabNavItem(Tabs.seriesTab)
+                    TabNavItem(Tabs.moviesTab)
+                    TabNavItem(Tabs.favsTab)
+                    TabNavItem(Tabs.scheduleTab)
+                }
+            }
+            return
+        }
+
         NavigationBar(tonalElevation = 10.dp) {
             TabNavItem(Tabs.seriesTab)
             TabNavItem(Tabs.moviesTab)

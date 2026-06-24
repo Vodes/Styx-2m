@@ -14,10 +14,12 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.russhwolf.settings.get
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.debounce
+import moe.styx.common.Platform
 import moe.styx.common.compose.components.anime.AnimeCard
 import moe.styx.common.compose.components.anime.AnimeListItem
 import moe.styx.common.compose.components.misc.ScrollToTopContainer
@@ -35,6 +37,7 @@ import moe.styx.common.data.Favourite
 import moe.styx.common.data.Media
 import moe.styx.common.extension.eqI
 import moe.styx.styx2m.misc.pushMediaView
+import moe.styx.styx2m.views.FloatingBottomNavContentPadding
 import moe.styx.styx2m.views.tv.comp.TvMediaBrowser
 
 object Tabs {
@@ -69,7 +72,7 @@ internal fun Tab.barWithListComp(
                 if (!useList)
                     MediaGrid(storage, processedMedia, listPosViewModel, showUnseen, sizes)
                 else
-                    MediaList(storage, processedMedia, listPosViewModel)
+                    MediaList(storage, processedMedia, listPosViewModel, sizes)
             }
         }
     }
@@ -102,6 +105,7 @@ private fun MediaGrid(
 ) {
     val nav = LocalGlobalNavigator.current
     val listState = rememberLazyGridState(listPosViewModel.scrollIndex, listPosViewModel.scrollOffset)
+    val bottomPadding = mainBottomScrollPadding(sizes, 7.dp)
     LaunchedEffect(listState.isScrollInProgress) {
         if (!listState.isScrollInProgress) {
             listPosViewModel.scrollIndex = listState.firstVisibleItemIndex
@@ -112,7 +116,7 @@ private fun MediaGrid(
         if (showUnseen) {
             LazyVerticalGrid(
                 columns = getGridCells(sizes),
-                contentPadding = PaddingValues(10.dp, 7.dp),
+                contentPadding = PaddingValues(start = 10.dp, top = 7.dp, end = 10.dp, bottom = bottomPadding),
                 state = listState
             ) {
                 items(mediaList, key = { it.GUID }) {
@@ -129,7 +133,7 @@ private fun MediaGrid(
         } else {
             LazyVerticalGrid(
                 columns = getGridCells(sizes),
-                contentPadding = PaddingValues(10.dp, 7.dp),
+                contentPadding = PaddingValues(start = 10.dp, top = 7.dp, end = 10.dp, bottom = bottomPadding),
                 state = listState
             ) {
                 items(mediaList, key = { it.GUID }) {
@@ -143,7 +147,12 @@ private fun MediaGrid(
 }
 
 @Composable
-private fun MediaList(storage: MainDataViewModelStorage, mediaList: List<Media>, listPosViewModel: ListPosViewModel) {
+private fun MediaList(
+    storage: MainDataViewModelStorage,
+    mediaList: List<Media>,
+    listPosViewModel: ListPosViewModel,
+    sizes: LayoutSizes
+) {
     val nav = LocalGlobalNavigator.current
     val listState = rememberLazyListState(listPosViewModel.scrollIndex, listPosViewModel.scrollOffset)
     LaunchedEffect(listState.isScrollInProgress) {
@@ -153,7 +162,10 @@ private fun MediaList(storage: MainDataViewModelStorage, mediaList: List<Media>,
         }
     }
     ScrollToTopContainer(Modifier.fillMaxSize(), scrollableState = listState) {
-        LazyColumn(state = listState) {
+        LazyColumn(
+            state = listState,
+            contentPadding = PaddingValues(bottom = mainBottomScrollPadding(sizes))
+        ) {
             items(mediaList, key = { it.GUID }) {
                 Row(Modifier.animateItem().padding(3.dp)) {
                     AnimeListItem(it, storage.imageList.find { img -> img.GUID eqI it.thumbID }) { nav.pushMediaView(it) }
@@ -162,3 +174,6 @@ private fun MediaList(storage: MainDataViewModelStorage, mediaList: List<Media>,
         }
     }
 }
+
+private fun mainBottomScrollPadding(sizes: LayoutSizes, default: Dp = 0.dp) =
+    if (!sizes.isWide && Platform.current == Platform.IOS) FloatingBottomNavContentPadding else default
