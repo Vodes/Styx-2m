@@ -70,7 +70,7 @@ kotlin {
             implementation(compose.materialIconsExtended)
             implementation(compose.components.resources)
             implementation(libs.moko.permissions)
-            implementation("moe.styx:styx-common-compose:0.5.0") {
+            implementation("moe.styx:styx-common-compose:0.5.1") {
                 exclude(group = "com.github.luben")
             }
         }
