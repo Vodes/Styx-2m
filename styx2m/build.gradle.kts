@@ -17,9 +17,9 @@ repositories {
     mavenLocal()
 }
 
-version = "0.2.2-beta3"
+version = "0.2.2-beta4"
 
-val appVersionCode = 12
+val appVersionCode = 13
 val iosMarketingVersion = project.version.toString().substringBefore('-')
 
 val localProperties by lazy {
@@ -34,18 +34,15 @@ val localProperties by lazy {
 }
 
 fun localConfig(name: String): String? =
-    providers.environmentVariable(name)
-        .orElse(providers.gradleProperty(name))
-        .orNull
-        ?: localProperties.getProperty(name)
+    System.getenv(name)?.takeIf { it.isNotBlank() }
+        ?: providers.gradleProperty(name).orNull?.takeIf { it.isNotBlank() }
+        ?: localProperties.getProperty(name)?.takeIf { it.isNotBlank() }
 
 fun requiredLocalConfig(name: String) =
-    providers.environmentVariable(name)
-        .orElse(providers.gradleProperty(name))
-        .orElse(providers.provider {
-            localProperties.getProperty(name)
-                ?: error("Missing $name. Add it to local.properties, ~/.gradle/gradle.properties, -P$name=..., or ORG_GRADLE_PROJECT_$name.")
-        })
+    providers.provider {
+        localConfig(name)
+            ?: error("Missing $name. Add it to local.properties, ~/.gradle/gradle.properties, -P$name=..., or ORG_GRADLE_PROJECT_$name.")
+    }
 
 kotlin {
     jvmToolchain(17)
@@ -73,7 +70,7 @@ kotlin {
             implementation(compose.materialIconsExtended)
             implementation(compose.components.resources)
             implementation(libs.moko.permissions)
-            implementation("moe.styx:styx-common-compose:0.4.1") {
+            implementation("moe.styx:styx-common-compose:0.5.0") {
                 exclude(group = "com.github.luben")
             }
         }
