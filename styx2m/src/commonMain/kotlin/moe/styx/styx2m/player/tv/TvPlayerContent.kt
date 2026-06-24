@@ -101,6 +101,9 @@ internal fun TvPlayerContent(
             else -> ""
         }
     }
+    val loadedPlaybackStatuses = remember {
+        arrayOf(PlaybackStatus.Buffering, PlaybackStatus.Seeking, PlaybackStatus.Paused, PlaybackStatus.Playing)
+    }
 
     var controlsVisible by rememberSaveable { mutableStateOf(false) }
     var showTrackSelect by rememberSaveable { mutableStateOf(false) }
@@ -262,6 +265,15 @@ internal fun TvPlayerContent(
                     Key.DirectionRight -> {
                         if (!controlsVisible) {
                             queueSeek(1)
+                            true
+                        } else {
+                            false
+                        }
+                    }
+
+                    Key.DirectionUp -> {
+                        if (!controlsVisible && playbackStatus in loadedPlaybackStatuses && hasTracks) {
+                            revealControls(trackButtonFocusRequester)
                             true
                         } else {
                             false
