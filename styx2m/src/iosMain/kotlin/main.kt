@@ -1,3 +1,6 @@
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.Density
 import androidx.compose.ui.window.ComposeUIViewController
 import com.multiplatform.lifecycle.LifecycleTracker
 import com.multiplatform.lifecyle.LifecycleComposeUIVCDelegate
@@ -12,6 +15,12 @@ fun MainViewController(): UIViewController {
             delegate = LifecycleComposeUIVCDelegate(LifecycleTracker)
         }
     ) {
-        App()
+        val baseDensity = LocalDensity.current
+        val newDensity = Density(baseDensity.density * 0.955F, baseDensity.fontScale * 0.98F)
+        CompositionLocalProvider(
+            LocalDensity provides newDensity
+        ) {
+            App()
+        }
     }
 }
