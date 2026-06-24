@@ -50,6 +50,10 @@ jobs:
       - name: "Build unsigned iOS IPA"
         env:
           JAVA_HOME: ${{ steps.java.outputs.path }}
+          GRADLE_OPTS: >-
+            -Dorg.gradle.workers.max=1
+            -Dorg.gradle.project.kotlin.native.jvmArgs=-Xmx5120m
+            -Dorg.gradle.project.kotlin.native.parallelThreads=1
           OUTPUT_DIR: ${{ github.workspace }}/build/ios-sideload/${{ inputs.version }}
           DERIVED_DATA_DIR: ${{ github.workspace }}/build/ios-derived-data/${{ inputs.version }}
         run: |
