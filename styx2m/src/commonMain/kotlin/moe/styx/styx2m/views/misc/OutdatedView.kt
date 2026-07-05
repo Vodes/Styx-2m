@@ -2,8 +2,6 @@ package moe.styx.styx2m.views.misc
 
 import Styx2m.styx2m.BuildConfig
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ColumnScope
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
@@ -21,6 +19,7 @@ import moe.styx.common.compose.http.login
 import moe.styx.common.compose.navigation.Screen
 import moe.styx.common.compose.navigation.ScreenKey
 import moe.styx.common.compose.utils.openURI
+import moe.styx.styx2m.views.settings.AppUpdateControls
 
 class OutdatedView(private val requestedVersion: String? = null) : Screen {
     override val key: ScreenKey
@@ -36,7 +35,7 @@ class OutdatedView(private val requestedVersion: String? = null) : Screen {
                     style = MaterialTheme.typography.headlineMedium
                 )
                 if (Platform.current == Platform.ANDROID)
-                    AndroidDownloadButtons()
+                    AppUpdateControls(requestedVersion, Modifier.weight(1f))
                 else {
                     Button({
                         openURI(Endpoints.DOWNLOAD_BUILD_BASE.url() + "/ios" + (if (requestedVersion != null) "/$requestedVersion" else "") + "?token=${login?.accessToken}")
@@ -52,26 +51,6 @@ class OutdatedView(private val requestedVersion: String? = null) : Screen {
                     modifier = Modifier.padding(10.dp)
                 ) {
                     Text("Open ${BuildConfig.SITE}")
-                }
-            }
-        }
-    }
-
-    @Composable
-    fun ColumnScope.AndroidDownloadButtons() {
-        Column(Modifier.weight(1f)) {
-            Text("This has to match what you installed first for a seamless update.", Modifier.padding(8.dp))
-            Row {
-                Button({
-                    openURI(Endpoints.DOWNLOAD_BUILD_BASE.url() + "/android-arm64" + (if (requestedVersion != null) "/$requestedVersion" else "") + "?token=${login?.accessToken}")
-                }, modifier = Modifier.padding(12.dp)) {
-                    Text("ARM-64 APK")
-                }
-
-                Button({
-                    openURI(Endpoints.DOWNLOAD_BUILD_BASE.url() + "/android-universal" + (if (requestedVersion != null) "/$requestedVersion" else "") + "?token=${login?.accessToken}")
-                }, modifier = Modifier.padding(12.dp)) {
-                    Text("Universal APK")
                 }
             }
         }

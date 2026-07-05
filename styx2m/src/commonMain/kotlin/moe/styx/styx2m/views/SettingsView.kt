@@ -34,6 +34,7 @@ import moe.styx.common.compose.utils.LocalGlobalNavigator
 import moe.styx.common.compose.utils.LocalIsTv
 import moe.styx.common.compose.utils.LocalLayoutSize
 import moe.styx.styx2m.views.settings.AppSettings
+import moe.styx.styx2m.views.settings.AppUpdateControls
 import moe.styx.styx2m.views.settings.AppearanceSettings
 import moe.styx.styx2m.views.settings.MpvSettings
 
@@ -102,6 +103,7 @@ private fun TvSettingsContent() {
         item { TvSettingsSection("Appearance Settings") { AppearanceSettings() } }
         item { TvSettingsSection("Metadata Settings") { MetadataSettings() } }
         item { TvSettingsSection("Tracking Settings") { TrackingSettings() } }
+        item { TvSettingsSection("App Update") { AppUpdateControls(null, Modifier.fillMaxWidth()) } }
         item { TvSettingsSection("App Settings") { AppSettings() } }
         item { TvSettingsSection("Player Settings") { MpvSettings() } }
     }
