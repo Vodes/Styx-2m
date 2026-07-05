@@ -12,10 +12,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import moe.styx.common.Platform
 import moe.styx.common.compose.components.layout.MainScaffold
-import moe.styx.common.compose.http.Endpoints
-import moe.styx.common.compose.http.login
 import moe.styx.common.compose.navigation.Screen
 import moe.styx.common.compose.navigation.ScreenKey
 import moe.styx.common.compose.utils.openURI
@@ -34,15 +31,7 @@ class OutdatedView(private val requestedVersion: String? = null) : Screen {
                     Modifier.padding(10.dp).weight(1f),
                     style = MaterialTheme.typography.headlineMedium
                 )
-                if (Platform.current == Platform.ANDROID)
-                    AppUpdateControls(requestedVersion, Modifier.weight(1f))
-                else {
-                    Button({
-                        openURI(Endpoints.DOWNLOAD_BUILD_BASE.url() + "/ios" + (if (requestedVersion != null) "/$requestedVersion" else "") + "?token=${login?.accessToken}")
-                    }, modifier = Modifier.padding(12.dp)) {
-                        Text("IPA")
-                    }
-                }
+                AppUpdateControls(requestedVersion, Modifier.weight(1f))
                 Button(
                     {
                         openURI("${BuildConfig.SITE_URL}/user")
