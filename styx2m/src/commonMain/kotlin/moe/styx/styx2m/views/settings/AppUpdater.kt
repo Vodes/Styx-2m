@@ -5,3 +5,5 @@ import androidx.compose.ui.Modifier
 
 @Composable
 expect fun AppUpdateControls(requestedVersion: String?, modifier: Modifier)
+
+expect fun cleanupDownloadedUpdates()

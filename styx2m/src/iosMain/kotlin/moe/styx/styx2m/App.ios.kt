@@ -6,6 +6,7 @@ import moe.styx.common.compose.AppConfig
 import moe.styx.common.compose.AppContextImpl.appConfig
 import moe.styx.common.http.getHttpClient
 import moe.styx.common.util.Log
+import moe.styx.styx2m.views.settings.cleanupDownloadedUpdates
 import platform.Foundation.NSApplicationSupportDirectory
 import platform.Foundation.NSCachesDirectory
 import platform.Foundation.NSFileManager
@@ -16,6 +17,7 @@ fun setupIosApp() {
     getHttpClient("${BuildConfig.APP_NAME} (iOS) - ${BuildConfig.APP_VERSION}")
     appConfig = { deviceAppConfig }
     Log.debugEnabled = true
+    cleanupDownloadedUpdates()
 }
 
 private val deviceAppConfig: AppConfig by lazy { fetchDeviceAppConfig() }

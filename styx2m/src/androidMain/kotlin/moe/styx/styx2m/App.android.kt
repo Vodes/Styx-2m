@@ -19,6 +19,7 @@ import moe.styx.common.compose.AppContextImpl.appConfig
 import moe.styx.common.compose.settings
 import moe.styx.common.http.getHttpClient
 import moe.styx.common.util.Log
+import moe.styx.styx2m.views.settings.cleanupDownloadedUpdates
 
 class AndroidApp : Application() {
     companion object {
@@ -29,6 +30,7 @@ class AndroidApp : Application() {
         super.onCreate()
         INSTANCE = this
         AppContextImpl.setUp(this)
+        cleanupDownloadedUpdates()
     }
 }
 

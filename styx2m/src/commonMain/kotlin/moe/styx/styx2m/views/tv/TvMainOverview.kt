@@ -7,6 +7,7 @@ import androidx.compose.material.icons.filled.CloudOff
 import androidx.compose.material.icons.filled.NoAccounts
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -24,13 +25,7 @@ import moe.styx.common.compose.components.buttons.IconButtonWithTooltip
 import moe.styx.common.compose.components.layout.MainScaffold
 import moe.styx.common.compose.components.misc.OnlineUsersIcon
 import moe.styx.common.compose.http.login
-import moe.styx.common.compose.navigation.CurrentTab
-import moe.styx.common.compose.navigation.LaunchedEffectWhenCurrentScreen
-import moe.styx.common.compose.navigation.Screen
-import moe.styx.common.compose.navigation.TabNavigator
-import moe.styx.common.compose.navigation.rememberNavigatorScreenModel
-import moe.styx.common.compose.navigation.rememberScreenModel
-import moe.styx.common.compose.navigation.screenModelScope
+import moe.styx.common.compose.navigation.*
 import moe.styx.common.compose.settings
 import moe.styx.common.compose.utils.LocalGlobalNavigator
 import moe.styx.common.compose.utils.LocalToaster
@@ -43,27 +38,26 @@ import moe.styx.styx2m.views.SideNavRail
 import moe.styx.styx2m.views.misc.LoginView
 import moe.styx.styx2m.views.misc.OutdatedView
 import moe.styx.styx2m.views.tabs.Tabs
-import androidx.compose.material3.surfaceColorAtElevation
 
 class TvAnimeOverview : Screen {
 
     @Composable
     override fun Content() {
         val toaster = LocalToaster.current
-        val overviewSm = rememberScreenModel { MobileOverviewModel() }
         val nav = LocalGlobalNavigator.current
+        val overviewSm = nav.rememberNavigatorScreenModel("overview-vm") { MobileOverviewModel() }
 
-        LaunchedEffectWhenCurrentScreen(overviewSm.isOutdated, overviewSm.isLoggedIn, ServerStatus.lastKnown) {
-            if (overviewSm.isOutdated == true) {
+        LaunchedEffectWhenCurrentScreen(overviewSm.versionState, overviewSm.isLoggedIn, ServerStatus.lastKnown) {
+            if (overviewSm.versionState?.shouldForceUpdate() == true) {
                 nav.replaceAll(OutdatedView())
             } else if (overviewSm.isLoggedIn == false && ServerStatus.lastKnown == ServerStatus.UNAUTHORIZED) {
                 nav.replaceAll(LoginView())
             }
         }
 
-        LaunchedEffect(overviewSm.availablePreRelease) {
-            val ver = overviewSm.availablePreRelease
-            if (!ver.isNullOrBlank()) {
+        LaunchedEffect(overviewSm.versionState?.canUpdate()) {
+            val ver = overviewSm.versionState?.latestPreRelease?.toString()
+            if (!ver.isNullOrBlank() && overviewSm.versionState?.toastShown == false && overviewSm.versionState?.shouldForceUpdate() != true) {
                 toaster.show(
                     Toast(
                         "New Pre-Release version available: $ver",
@@ -73,7 +67,7 @@ class TvAnimeOverview : Screen {
                         duration = ToasterDefaults.DurationLong
                     )
                 )
-                overviewSm.availablePreRelease = null
+                overviewSm.versionState!!.toastShown = true
             }
         }
 

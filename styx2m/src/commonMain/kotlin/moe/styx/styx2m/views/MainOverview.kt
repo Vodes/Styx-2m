@@ -28,17 +28,7 @@ import moe.styx.common.compose.components.buttons.IconButtonWithTooltip
 import moe.styx.common.compose.components.layout.MainScaffold
 import moe.styx.common.compose.components.misc.OnlineUsersIcon
 import moe.styx.common.compose.http.login
-import moe.styx.common.compose.navigation.CurrentTab
-import moe.styx.common.compose.navigation.LaunchedEffectWhenCurrentScreen
-import moe.styx.common.compose.navigation.LocalTabNavigator
-import moe.styx.common.compose.navigation.Navigator
-import moe.styx.common.compose.navigation.Screen
-import moe.styx.common.compose.navigation.ScreenKey
-import moe.styx.common.compose.navigation.Tab
-import moe.styx.common.compose.navigation.TabNavigator
-import moe.styx.common.compose.navigation.rememberNavigatorScreenModel
-import moe.styx.common.compose.navigation.rememberScreenModel
-import moe.styx.common.compose.navigation.screenModelScope
+import moe.styx.common.compose.navigation.*
 import moe.styx.common.compose.settings
 import moe.styx.common.compose.utils.LocalGlobalNavigator
 import moe.styx.common.compose.utils.LocalLayoutSize
@@ -61,23 +51,22 @@ class MainOverview : Screen {
 
     @Composable
     override fun Content() {
-
         val toaster = LocalToaster.current
-        val overviewSm = rememberScreenModel { MobileOverviewModel() }
-
         val nav = LocalGlobalNavigator.current
 
-        LaunchedEffectWhenCurrentScreen(overviewSm.isOutdated, overviewSm.isLoggedIn, ServerStatus.lastKnown) {
-            if (overviewSm.isOutdated == true) {
+        val overviewSm = nav.rememberNavigatorScreenModel("overview-vm") { MobileOverviewModel() }
+
+        LaunchedEffectWhenCurrentScreen(overviewSm.versionState, overviewSm.isLoggedIn, ServerStatus.lastKnown) {
+            if (overviewSm.versionState?.shouldForceUpdate() == true) {
                 nav.replaceAll(OutdatedView())
             } else if (overviewSm.isLoggedIn == false && ServerStatus.lastKnown == ServerStatus.UNAUTHORIZED) {
                 nav.replaceAll(LoginView())
             }
         }
 
-        LaunchedEffect(overviewSm.availablePreRelease) {
-            val ver = overviewSm.availablePreRelease
-            if (!ver.isNullOrBlank()) {
+        LaunchedEffect(overviewSm.versionState) {
+            val ver = overviewSm.versionState?.latestPreRelease?.toString()
+            if (!ver.isNullOrBlank() && overviewSm.versionState?.toastShown == false && overviewSm.versionState?.shouldForceUpdate() != true) {
                 toaster.show(
                     Toast(
                         "New Pre-Release version available: $ver",
@@ -87,7 +76,7 @@ class MainOverview : Screen {
                         duration = ToasterDefaults.DurationLong
                     )
                 )
-                overviewSm.availablePreRelease = null
+                overviewSm.versionState!!.toastShown = true
             }
         }
 
@@ -103,9 +92,13 @@ class MainOverview : Screen {
         TabNavigator(defaultTab) {
             MainScaffold(
                 Modifier.fillMaxSize(),
-                title = BuildConfig.APP_NAME, addPopButton = false, addAnimatedTitleBackground = useRail, titleClickable = {
+                title = BuildConfig.APP_NAME,
+                addPopButton = false,
+                addAnimatedTitleBackground = useRail,
+                titleClickable = {
                     nav.push(AboutView())
-                }, actions = {
+                },
+                actions = {
                     if (isLoading) {
                         Row(Modifier.fillMaxHeight(), verticalAlignment = Alignment.CenterVertically) {
                             LinearProgressIndicator(

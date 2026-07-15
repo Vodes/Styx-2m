@@ -1,34 +1,25 @@
 package moe.styx.styx2m.views
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ColumnScope
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Info
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.material3.VerticalDivider
-import androidx.compose.material3.surfaceColorAtElevation
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import moe.styx.common.compose.components.buttons.IconButtonWithTooltip
 import moe.styx.common.compose.components.AppShapes
+import moe.styx.common.compose.components.buttons.IconButtonWithTooltip
 import moe.styx.common.compose.components.layout.MainScaffold
 import moe.styx.common.compose.components.misc.ExpandableSettings
 import moe.styx.common.compose.components.settings.MetadataSettings
 import moe.styx.common.compose.components.settings.TrackingSettings
 import moe.styx.common.compose.navigation.Screen
 import moe.styx.common.compose.navigation.ScreenModel
+import moe.styx.common.compose.navigation.rememberNavigatorScreenModel
 import moe.styx.common.compose.navigation.rememberScreenModel
 import moe.styx.common.compose.utils.LocalGlobalNavigator
 import moe.styx.common.compose.utils.LocalIsTv
@@ -64,20 +55,34 @@ class SettingsView : Screen {
 
             Row {
                 Column(Modifier.padding(8.dp).weight(1f).verticalScroll(rememberScrollState(), true)) {
-                    ExpandableSettings("Appearance Settings", vm!!.appearanceExpanded, { vm.appearanceExpanded = !vm.appearanceExpanded }) {
+                    ExpandableSettings(
+                        "Appearance Settings",
+                        vm!!.appearanceExpanded,
+                        { vm.appearanceExpanded = !vm.appearanceExpanded }) {
                         AppearanceSettings()
                     }
-                    ExpandableSettings("Metadata Settings", vm.metadataExpanded, { vm.metadataExpanded = !vm.metadataExpanded }) {
+                    ExpandableSettings(
+                        "Metadata Settings",
+                        vm.metadataExpanded,
+                        { vm.metadataExpanded = !vm.metadataExpanded }) {
                         MetadataSettings()
                     }
-                    ExpandableSettings("Tracking Settings", vm.trackingExpanded, { vm.trackingExpanded = !vm.trackingExpanded }) {
+                    ExpandableSettings(
+                        "Tracking Settings",
+                        vm.trackingExpanded,
+                        { vm.trackingExpanded = !vm.trackingExpanded }) {
                         TrackingSettings()
                     }
                     ExpandableSettings("App Settings", vm.appExpanded, { vm.appExpanded = !vm.appExpanded; }) {
                         AppSettings()
                     }
                     if (!sizes.isWide) {
-                        ExpandableSettings("Player Settings", vm.playerExpanded, { vm.playerExpanded = !vm.playerExpanded; }, false) {
+                        ExpandableSettings(
+                            "Player Settings",
+                            vm.playerExpanded,
+                            { vm.playerExpanded = !vm.playerExpanded; },
+                            false
+                        ) {
                             MpvSettings()
                         }
                     }
@@ -95,15 +100,26 @@ class SettingsView : Screen {
 
 @Composable
 private fun TvSettingsContent() {
+    val nav = LocalGlobalNavigator.current
+    val overviewSm = nav.rememberNavigatorScreenModel("overview-vm") { MobileOverviewModel() }
     LazyColumn(
         modifier = Modifier.fillMaxWidth(),
         contentPadding = androidx.compose.foundation.layout.PaddingValues(12.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
+        if (overviewSm.versionState?.canUpdate() == true) {
+            item {
+                TvSettingsSection("App Update") {
+                    AppUpdateControls(
+                        overviewSm.versionState!!.availableUpdate,
+                        Modifier.fillMaxWidth()
+                    )
+                }
+            }
+        }
         item { TvSettingsSection("Appearance Settings") { AppearanceSettings() } }
         item { TvSettingsSection("Metadata Settings") { MetadataSettings() } }
         item { TvSettingsSection("Tracking Settings") { TrackingSettings() } }
-        item { TvSettingsSection("App Update") { AppUpdateControls(null, Modifier.fillMaxWidth()) } }
         item { TvSettingsSection("App Settings") { AppSettings() } }
         item { TvSettingsSection("Player Settings") { MpvSettings() } }
     }
@@ -172,5 +188,6 @@ class SettingsViewModel : ScreenModel {
         }
 
 
-    private val allBackingMutables = arrayOf(_metadataExpanded, _appExpanded, _playerExpanded, _appearanceExpanded, _trackingExpanded)
+    private val allBackingMutables =
+        arrayOf(_metadataExpanded, _appExpanded, _playerExpanded, _appearanceExpanded, _trackingExpanded)
 }

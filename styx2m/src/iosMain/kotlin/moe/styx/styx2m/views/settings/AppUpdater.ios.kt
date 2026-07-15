@@ -9,13 +9,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import kotlinx.cinterop.ExperimentalForeignApi
@@ -31,11 +25,7 @@ import moe.styx.common.util.Log
 import moe.styx.common.util.SYSTEMFILES
 import okio.Path
 import okio.Path.Companion.toPath
-import platform.Foundation.NSDocumentDirectory
-import platform.Foundation.NSFileManager
-import platform.Foundation.NSSearchPathForDirectoriesInDomains
-import platform.Foundation.NSURL
-import platform.Foundation.NSUserDomainMask
+import platform.Foundation.*
 import platform.UIKit.UIActivityViewController
 import platform.UIKit.UIApplication
 import platform.UIKit.UIDevice
@@ -51,6 +41,8 @@ actual fun AppUpdateControls(requestedVersion: String?, modifier: Modifier) {
 
     Column(modifier.padding(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Text("Current version: ${BuildConfig.APP_VERSION}", style = MaterialTheme.typography.bodyMedium)
+        if (requestedVersion != null)
+            Text("Available version: $requestedVersion", style = MaterialTheme.typography.bodyMedium)
         Text(
             "Downloads the IPA into Styx2m's Documents folder so it can be selected from Files or shared to a sideloading app.",
             style = MaterialTheme.typography.labelMedium
@@ -78,6 +70,7 @@ actual fun AppUpdateControls(requestedVersion: String?, modifier: Modifier) {
                 )
                 Text("Downloading IPA: $progress%")
             }
+
             is IosUpdateState.Downloaded -> {
                 Text("Downloaded to Files: On My iPhone/iPad > Styx2m > ${current.path.name}")
                 availableSideloadingStores().forEach { store ->
@@ -97,9 +90,21 @@ actual fun AppUpdateControls(requestedVersion: String?, modifier: Modifier) {
                     }
                 }
             }
+
             is IosUpdateState.Message -> Text(current.text, style = MaterialTheme.typography.labelMedium)
             IosUpdateState.Idle -> Unit
         }
+    }
+}
+
+actual fun cleanupDownloadedUpdates() {
+    runCatching {
+        SYSTEMFILES.listOrNull(iosUpdateDirectory())
+            .orEmpty()
+            .filter { it.name.endsWith(".ipa", ignoreCase = true) }
+            .forEach { SYSTEMFILES.delete(it, false) }
+    }.onFailure {
+        Log.e("AppUpdater", it) { "Failed to clean downloaded IPA updates." }
     }
 }
 

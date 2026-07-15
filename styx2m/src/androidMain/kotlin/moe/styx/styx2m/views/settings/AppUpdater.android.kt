@@ -8,24 +8,9 @@ import android.net.Uri
 import android.os.Build
 import android.provider.Settings
 import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.LinearProgressIndicator
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
+import androidx.compose.foundation.layout.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
@@ -37,6 +22,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import moe.styx.common.compose.AppContextImpl
 import moe.styx.common.compose.AppContextImpl.appConfig
 import moe.styx.common.compose.components.AppShapes
 import moe.styx.common.compose.http.Endpoints
@@ -55,7 +41,10 @@ actual fun AppUpdateControls(requestedVersion: String?, modifier: Modifier) {
     val scope = rememberCoroutineScope()
     val isTv = LocalIsTv.current
     val variants = remember(isTv) {
-        if (isTv) listOf(UpdateVariant.Universal, UpdateVariant.Arm64) else listOf(UpdateVariant.Arm64, UpdateVariant.Universal)
+        if (isTv) listOf(UpdateVariant.Universal, UpdateVariant.Arm64) else listOf(
+            UpdateVariant.Arm64,
+            UpdateVariant.Universal
+        )
     }
     var state by remember { mutableStateOf<UpdateState>(UpdateState.Idle) }
     val progressFlow = remember { MutableStateFlow(0) }
@@ -67,6 +56,8 @@ actual fun AppUpdateControls(requestedVersion: String?, modifier: Modifier) {
             "Current version: ${BuildConfig.APP_VERSION}",
             style = MaterialTheme.typography.bodyMedium
         )
+        if (requestedVersion != null)
+            Text("Available version: $requestedVersion", style = MaterialTheme.typography.bodyMedium)
         Text(
             "Use the APK type that matches what is currently installed.",
             style = MaterialTheme.typography.labelMedium
@@ -105,9 +96,22 @@ actual fun AppUpdateControls(requestedVersion: String?, modifier: Modifier) {
                 )
                 Text("Downloading ${current.variant.label}: $progress%")
             }
+
             is UpdateState.Message -> Text(current.text, style = MaterialTheme.typography.labelMedium)
             UpdateState.Idle -> Unit
         }
+    }
+}
+
+actual fun cleanupDownloadedUpdates() {
+    val updateDir = File(AppContextImpl.get().cacheDir, "updates").path.toPath()
+    runCatching {
+        SYSTEMFILES.listOrNull(updateDir)
+            .orEmpty()
+            .filter { it.name.endsWith(".apk", ignoreCase = true) }
+            .forEach { SYSTEMFILES.delete(it, false) }
+    }.onFailure {
+        Log.e("AppUpdater", it) { "Failed to clean downloaded APK updates." }
     }
 }
 
@@ -154,7 +158,11 @@ private fun UpdateButton(
             containerColor = resolvedContainerColor,
             contentColor = if (isTv && !isFocused) contentColor.copy(alpha = 0.92f) else contentColor
         ),
-        elevation = ButtonDefaults.buttonElevation(defaultElevation = 0.dp, focusedElevation = 0.dp, pressedElevation = 0.dp)
+        elevation = ButtonDefaults.buttonElevation(
+            defaultElevation = 0.dp,
+            focusedElevation = 0.dp,
+            pressedElevation = 0.dp
+        )
     ) {
         Text(text, fontWeight = if (isTv && isFocused) FontWeight.SemiBold else FontWeight.Medium)
     }
