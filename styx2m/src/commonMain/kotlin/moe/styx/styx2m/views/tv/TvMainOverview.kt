@@ -57,7 +57,7 @@ class TvAnimeOverview : Screen {
 
         LaunchedEffect(overviewSm.versionState?.canUpdate()) {
             val ver = overviewSm.versionState?.latestPreRelease?.toString()
-            if (!ver.isNullOrBlank() && overviewSm.versionState?.toastShown == false && overviewSm.versionState?.shouldForceUpdate() != true) {
+            if (!ver.isNullOrBlank() && overviewSm.versionState?.shouldShowToast() == true) {
                 toaster.show(
                     Toast(
                         "New Pre-Release version available: $ver",

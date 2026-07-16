@@ -1,10 +1,13 @@
 package moe.styx.styx2m.views.settings
 
 import Styx2m.styx2m.BuildConfig
+import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.Button
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
@@ -38,8 +41,9 @@ actual fun AppUpdateControls(requestedVersion: String?, modifier: Modifier) {
     val progress by progressFlow.collectAsState()
     var state by remember { mutableStateOf<IosUpdateState>(IosUpdateState.Idle) }
     val isBusy = state is IosUpdateState.Downloading
+    val scrollstate = rememberScrollState()
 
-    Column(modifier.padding(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+    Column(modifier.padding(8.dp).scrollable(scrollstate, Orientation.Vertical), verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Text("Current version: ${BuildConfig.APP_VERSION}", style = MaterialTheme.typography.bodyMedium)
         if (requestedVersion != null)
             Text("Available version: $requestedVersion", style = MaterialTheme.typography.bodyMedium)
@@ -119,6 +123,7 @@ private suspend fun downloadIpa(requestedVersion: String?, onProgress: (Int) -> 
 
     val versionPath = requestedVersion?.let { "/$it" }.orEmpty()
     val url = "${Endpoints.DOWNLOAD_BUILD_BASE.url()}/ios$versionPath?token=${login?.accessToken}"
+    Log.d("AppUpdater") { "Downloading: ${url.substringBeforeLast("=")}" }
     val result = downloadFileStream(url, output, onProgress)
     val size = SYSTEMFILES.metadataOrNull(output)?.size ?: 0L
     if (result !is DownloadResult.OK || size <= 0L) {
@@ -133,14 +138,13 @@ private fun iosUpdateDirectory(): Path {
     val documentsPath = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, true)
         .firstOrNull() as? String
         ?: error("Could not resolve iOS Documents directory.")
-    val styxDocuments = "$documentsPath/Styx2m"
     NSFileManager.defaultManager.createDirectoryAtPath(
-        path = styxDocuments,
+        path = documentsPath,
         withIntermediateDirectories = true,
         attributes = null,
         error = null
     )
-    return styxDocuments.toPath()
+    return documentsPath.toPath()
 }
 
 private fun shareIpa(path: Path) {

@@ -2,6 +2,7 @@ package moe.styx.styx2m.views.misc
 
 import Styx2m.styx2m.BuildConfig
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
@@ -28,9 +29,10 @@ class OutdatedView(private val requestedVersion: String? = null) : Screen {
             Column(Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
                 Text(
                     if (requestedVersion == null) "This version of Styx is outdated." else "Download $requestedVersion",
-                    Modifier.padding(10.dp).weight(1f),
+                    Modifier.padding(10.dp),
                     style = MaterialTheme.typography.headlineMedium
                 )
+                Spacer(Modifier.weight(0.3f))
                 AppUpdateControls(requestedVersion, Modifier.weight(1f))
                 Button(
                     {
