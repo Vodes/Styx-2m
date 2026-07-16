@@ -17,9 +17,9 @@ repositories {
     mavenLocal()
 }
 
-version = "0.2.2-beta7"
+version = "0.3.0-rc1"
 
-val appVersionCode = 16
+val appVersionCode = 17
 val iosMarketingVersion = project.version.toString().substringBefore('-')
 
 val localProperties by lazy {
